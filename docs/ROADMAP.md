@@ -100,6 +100,11 @@ Avoid custom PCB work until the transport, policy, and companion model have been
 - [ ] authenticated helper/controller identity
 - [ ] Tailscale/private-network controller binding governed by support policy
 - [ ] live frontend event updates
+- [ ] interactive terminal session (SSH-backed first)
+- [ ] browser terminal UI
+- [ ] Linux screen observe backend (Wayland portal/PipeWire first where available)
+- [ ] Linux screen control backend with separate input grant
+- [ ] browser screen viewer/controller
 - [ ] process/service/log diagnostics
 - [ ] active connectivity tests
 - [ ] workspace proposal approval UI
