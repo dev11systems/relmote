@@ -38,6 +38,7 @@ jobs:
       - name: Smoke test artifact
         run: |
           ./dist/relmote-preview-linux-x86_64 --help
+          ./dist/relmote-preview-linux-x86_64 version
 
       - name: Checksums
         run: |
