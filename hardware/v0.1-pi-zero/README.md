@@ -1,6 +1,6 @@
 # v0.1 — Pi Zero bench prototype
 
-Status: **planned**
+Status: **software ready for bench validation**
 
 ## Success criterion
 
@@ -29,7 +29,7 @@ RelmoteController
       │
  policy/session
       │
- LinuxHIDTransport
+LinuxHIDKeyboardTransport
       │
  /dev/hidg0
       │
@@ -37,6 +37,16 @@ RelmoteController
       │
  target
 ```
+
+The software transport and USB gadget scripts are implemented. Physical validation remains outstanding.
+
+## Pi-side files
+
+- `setup-hid-gadget.sh` — creates the prototype keyboard gadget.
+- `teardown-hid-gadget.sh` — unbinds/removes it.
+- `../../docs/HID-TRANSPORT.md` — transport behavior and safety boundary.
+
+The setup script assumes the SBC is already configured for USB peripheral/OTG mode.
 
 ## Test sequence
 
@@ -65,6 +75,10 @@ Allow a short session to expire and verify output fails closed.
 ### Test F — physical STOP
 
 While a permitted sequence is active, press STOP and verify target output ceases immediately.
+
+### Test G — unsupported character
+
+Attempt a text action containing an unsupported character and verify **zero** prefix characters are emitted.
 
 ## Not in v0.1
 
