@@ -13,6 +13,8 @@ from .session import Session, utcnow
 from .webapp import serve_local
 from .diagnostic_cli import status as diagnostic_status, diagnose as diagnostic_diagnose
 from .ssh_target import SSHTarget
+from .ssh_workspace import SSHWorkspace
+from .workspace import WorkspacePolicy
 from .transports.dry_run import DryRunTransport
 
 
@@ -96,6 +98,44 @@ def build_parser() -> argparse.ArgumentParser:
             print(result.stderr, end="", file=__import__("sys").stderr)
         return 0 if result.ok else result.returncode or 1
     ssh_probe.set_defaults(func=run_ssh_probe)
+
+    workspace_parser = sub.add_parser(
+        "workspace",
+        help="operate inside one explicitly configured remote SSH workspace",
+    )
+    workspace_parser.add_argument("target")
+    workspace_parser.add_argument("root", help="absolute remote workspace root")
+    workspace_sub = workspace_parser.add_subparsers(dest="workspace_command", required=True)
+
+    workspace_list = workspace_sub.add_parser("list")
+    workspace_list.add_argument("path", nargs="?", default=".")
+    workspace_read = workspace_sub.add_parser("read")
+    workspace_read.add_argument("path")
+    workspace_sub.add_parser("git-status")
+    workspace_sub.add_parser("git-diff")
+
+    def run_workspace(args):
+        ws = SSHWorkspace(args.target, WorkspacePolicy.create(args.root))
+        if args.workspace_command == "list":
+            result = ws.list(args.path)
+        elif args.workspace_command == "read":
+            result = ws.read(args.path)
+        elif args.workspace_command == "git-status":
+            result = ws.git_status()
+        elif args.workspace_command == "git-diff":
+            result = ws.git_diff()
+        else:
+            raise ValueError("unknown workspace command")
+        if result.stdout:
+            print(result.stdout, end="")
+        if result.stderr:
+            print(result.stderr, end="", file=__import__("sys").stderr)
+        return 0 if result.ok else result.returncode or 1
+
+    for parser in (workspace_list, workspace_read):
+        parser.set_defaults(func=run_workspace)
+    workspace_sub.choices["git-status"].set_defaults(func=run_workspace)
+    workspace_sub.choices["git-diff"].set_defaults(func=run_workspace)
 
     status_parser = sub.add_parser(
         "status",
