@@ -45,6 +45,15 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 </div>
 
 <section class="card">
+ <h2>Remote support</h2>
+ <div id="supportState">Loading…</div>
+ <button onclick="supportAction('until-disabled')">Enable until I turn it off</button>
+ <button onclick="supportAction('one-hour')">Enable for 1 hour</button>
+ <button class="danger" onclick="supportAction('disable')">Disable support</button>
+ <p class="muted">This controls permission for remote support. It does not configure Tailscale, SSH, or network exposure by itself.</p>
+</section>
+
+<section class="card">
  <h2>Capabilities</h2><div id="caps"></div>
 </section>
 
@@ -100,6 +109,8 @@ async function refresh(){
  node.innerHTML='<strong>'+esc(d.node.name)+'</strong><br><code>'+esc(d.node.fingerprint)+'</code><br><span class="muted">'+esc(d.node.implementation)+'</span>';
  target.innerHTML='<strong>'+esc(d.target.name)+'</strong><br><span class="muted">'+esc(d.target.relationship)+'</span>';
  caps.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(d.capability_labels[x]||x)+'</span>').join('');
+ const remote=d.support||{available:false,mode:'disabled'};
+ supportState.innerHTML='<strong>'+(remote.available?'ON':'OFF')+'</strong><br><span class="muted">'+esc(remote.mode)+'</span>';
  if(!d.session || d.session.revoked){
    session.innerHTML='<strong>Local checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
  }else{
@@ -116,6 +127,10 @@ async function refresh(){
        '<details><summary>Raw observations</summary><pre>'+esc(JSON.stringify(t.observations,null,2))+'</pre></details></div>';
    }).join('');
  }else tasks.textContent='No observations yet.';
+}
+async function supportAction(action){
+ await request('/api/v1/support/'+encodeURIComponent(action),'POST');
+ await refresh();
 }
 async function startSession(){await request('/api/v1/session','POST');await refresh()}
 async function revoke(){await request('/api/v1/session/revoke','POST');await refresh()}
@@ -208,7 +223,20 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 return
             path = urlparse(self.path).path
             try:
-                if path == "/api/v1/session":
+                if path.startswith("/api/v1/support/"):
+                    if not runtime:
+                        raise ValueError("support policy requires shared runtime")
+                    action = path.rsplit("/", 1)[-1]
+                    if action == "until-disabled":
+                        runtime.enable_support_until_disabled()
+                    elif action == "one-hour":
+                        runtime.enable_support_for(3600)
+                    elif action == "disable":
+                        runtime.disable_support()
+                    else:
+                        raise ValueError("unknown support action")
+                    _json(self, HTTPStatus.OK, runtime.snapshot())
+                elif path == "/api/v1/session":
                     if runtime:
                         value = runtime.start_checks()
                         session = value["session"]
