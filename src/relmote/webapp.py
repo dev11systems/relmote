@@ -447,16 +447,21 @@ def serve_local(
     lan: bool = False,
     lifetime_minutes: int = 60,
     runtime: RelmoteRuntime | None = None,
+    explicit_private_bind: bool = False,
+    explicit_lan_bind: bool = False,
 ) -> None:
-    if lan:
+    if lan or explicit_lan_bind:
         host = "0.0.0.0"
         access = TemporaryLANAccess.create(
             lifetime_seconds=lifetime_minutes * 60
         )
     else:
-        if host not in {"127.0.0.1", "::1", "localhost"}:
+        if (
+            host not in {"127.0.0.1", "::1", "localhost"}
+            and not explicit_private_bind
+        ):
             raise ValueError(
-                "non-loopback binding requires explicit --lan preview mode"
+                "non-loopback binding requires an explicit private or LAN exposure mode"
             )
         access = None
 
