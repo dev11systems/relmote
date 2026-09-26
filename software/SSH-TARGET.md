@@ -4,7 +4,7 @@ The first external-target implementation uses the user's existing OpenSSH client
 
 ## Why
 
-For the cousin preview, authorized Tailscale + SSH already provides:
+For an authorized private-network preview, Tailscale + SSH can provide:
 
 - encrypted transport;
 - host authentication;
@@ -30,7 +30,7 @@ Current prototype probes include:
 Example:
 
 ```text
-relmote ssh cousin-host probe hostname
+relmote ssh target-host probe hostname
 ```
 
 The result becomes a Relmote observation.
@@ -65,7 +65,7 @@ A coding-agent bridge will add a workspace-scoped executor with explicit roots.
 Example:
 
 ```yaml
-target: cousin-host
+target: target-host
 roots:
   ~/project:
     read: true
