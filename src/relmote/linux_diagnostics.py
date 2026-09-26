@@ -104,6 +104,30 @@ def linux_full_check(agent: LocalAgent) -> DiagnosticReport:
             )
         )
 
+    high_mounts = [
+        mount
+        for mount in storage.data.get("mounts", [])
+        if mount.get("path") != storage.data.get("path")
+        and mount.get("percent_used") is not None
+        and mount["percent_used"] >= 90
+    ]
+    for mount in sorted(
+        high_mounts,
+        key=lambda value: value["percent_used"],
+        reverse=True,
+    )[:10]:
+        findings.append(
+            DiagnosticFinding(
+                "attention",
+                (
+                    f"Mounted filesystem {mount['path']} is "
+                    f"{mount['percent_used']:.1f}% used."
+                ),
+                ("storage.inspect",),
+                "High utilization can leave little room for new data.",
+            )
+        )
+
     services = native.get("linux.services", {})
     failed_count = services.get("failed_service_count")
     if failed_count is not None:
