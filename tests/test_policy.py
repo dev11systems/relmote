@@ -40,3 +40,17 @@ def test_missing_capability_fails_closed():
         grant,
     )
     assert not decision.allowed
+
+
+def test_unknown_capability_fails_closed():
+    grant = Grant(
+        capabilities=frozenset({"mystery.do-anything"}),
+        target_id="test-host",
+        mode=Mode.OPERATE,
+    )
+    decision = evaluate(
+        Action("unknown", {}, ("mystery.do-anything",)),
+        grant,
+    )
+    assert not decision.allowed
+    assert "unknown capabilities" in decision.reason
