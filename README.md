@@ -53,6 +53,7 @@ See:
 - [Preview UX checklist](docs/PREVIEW-UX-CHECKLIST.md)
 - [MVP / build sequence](docs/MVP.md)
 - [Linux Software Preview](docs/LINUX-PREVIEW.md)
+- [CLI installation](docs/CLI-INSTALL.md)
 - [Platform support](docs/PLATFORM-SUPPORT.md)
 - [Identity & ownership](docs/IDENTITY.md)
 - [Recovery](docs/RECOVERY.md)
