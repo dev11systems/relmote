@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from relmote.model import Action
 
-from .base import Transport, TransportCapabilities
+from .base import ExecutionContext, Transport, TransportCapabilities
 
 
 class DryRunTransport(Transport):
@@ -17,11 +17,13 @@ class DryRunTransport(Transport):
             works_before_os=False,
         )
 
-    def execute(self, action: Action) -> object:
+    def execute(self, action: Action, context: ExecutionContext) -> object:
         return {
             "transport": "dry-run",
             "simulated": True,
-            "would_execute": True,
+            "would_execute": not context.should_stop(),
+            "session_id": context.session_id,
+            "target_id": context.target_id,
             "action": {
                 "action_id": action.action_id,
                 "kind": action.kind,
