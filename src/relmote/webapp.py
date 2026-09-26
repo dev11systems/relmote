@@ -6,6 +6,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 from .software_node import SoftwareNode
+from .report import export_support_report
+import tempfile
 
 
 INDEX = """<!doctype html>
@@ -47,7 +49,14 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
  <button onclick="runTask('network-overview')">Network overview</button>
  <button onclick="runTask('diagnose-network')">Diagnose network</button>
  <button onclick="runTask('storage-overview')">Storage overview</button>
+ <button onclick="selfCheck()">Self-check</button>
  <p class="muted">Tasks require an active Observe session. S2 exposes no write capabilities.</p>
+</section>
+
+<section class="card">
+ <h2>Preview tools</h2>
+ <button onclick="exportReport()">Export support report</button>
+ <p id="previewStatus" class="muted"></p>
 </section>
 
 <section class="card">
@@ -93,6 +102,18 @@ async function runTask(name){
  try{await request('/api/v1/tasks/'+encodeURIComponent(name),'POST');await refresh()}
  catch(e){alert(e.message)}
 }
+async function selfCheck(){
+ try{
+   const d=await request('/api/v1/self-check');
+   previewStatus.textContent='Self-check: '+d.status+' · '+JSON.stringify(d.checks);
+ }catch(e){alert(e.message)}
+}
+async function exportReport(){
+ try{
+   const d=await request('/api/v1/export','POST');
+   previewStatus.textContent='Report written to: '+d.path+' — inspect before sharing.';
+ }catch(e){alert(e.message)}
+}
 refresh();
 </script>
 </body></html>
@@ -125,6 +146,8 @@ def make_handler(node: SoftwareNode):
                 _json(self, HTTPStatus.OK, node.snapshot())
             elif path == "/api/v1/health":
                 _json(self, HTTPStatus.OK, {"status": "ok"})
+            elif path == "/api/v1/self-check":
+                _json(self, HTTPStatus.OK, node.self_check())
             else:
                 _json(self, HTTPStatus.NOT_FOUND, {"error": "not found"})
 
@@ -140,6 +163,13 @@ def make_handler(node: SoftwareNode):
                 elif path == "/api/v1/session/revoke":
                     node.revoke_session()
                     _json(self, HTTPStatus.OK, {"revoked": True})
+                elif path == "/api/v1/export":
+                    destination = (
+                        __import__("pathlib").Path(tempfile.gettempdir())
+                        / "relmote-support-report.json"
+                    )
+                    written = export_support_report(node, destination)
+                    _json(self, HTTPStatus.CREATED, {"path": str(written)})
                 elif path.startswith("/api/v1/tasks/"):
                     task_type = path.rsplit("/", 1)[-1]
                     task = node.run_task(task_type)
