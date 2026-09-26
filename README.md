@@ -54,6 +54,7 @@ See:
 - [Trust and permissions](docs/TRUST.md)
 - [Protocol](docs/PROTOCOL.md)
 - [Scenarios](docs/SCENARIOS.md)
+- [Hardware strategy](docs/HARDWARE.md)
 - [Roadmap](docs/ROADMAP.md)
 
 ## Current software proof
