@@ -83,3 +83,25 @@ Success criterion: an approved text action is emitted exactly once, and revoking
 ## Hardware direction
 
 Avoid custom PCB work until the transport, policy, and companion model have been validated on development hardware.
+
+
+## Near-term software preview
+
+- [x] Linux reference adapter
+- [x] CLI/TUI/web frontends
+- [x] shared in-process runtime
+- [x] plain-language help
+- [x] Full Check + deterministic network diagnosis
+- [x] repo install/update workflow
+- [x] remote-support availability policy
+- [x] TUI/web support-policy controls
+- [ ] local IPC/runtime socket
+- [ ] persistent optional Agent service
+- [ ] authenticated helper/controller identity
+- [ ] Tailscale/private-network controller binding governed by support policy
+- [ ] live frontend event updates
+- [ ] process/service/log diagnostics
+- [ ] active connectivity tests
+- [ ] workspace proposal approval UI
+- [ ] external planner bridge MVP
+
