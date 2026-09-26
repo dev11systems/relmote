@@ -49,14 +49,39 @@ See:
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Transport model](docs/TRANSPORTS.md)
+- [Capabilities](docs/CAPABILITIES.md)
+- [Sessions](docs/SESSIONS.md)
 - [Trust and permissions](docs/TRUST.md)
 - [Protocol](docs/PROTOCOL.md)
 - [Scenarios](docs/SCENARIOS.md)
 - [Roadmap](docs/ROADMAP.md)
 
+## Current software proof
+
+The repository now contains a transport-neutral execution boundary with:
+
+- bounded target-specific grants;
+- Observe / Teach / Assist / Operate modes;
+- explicit capability checking;
+- expiring and revocable sessions;
+- exact-action approval in Assist mode;
+- one-time action IDs to reject replay;
+- privacy-conscious audit metadata;
+- a no-side-effect dry-run transport.
+
+Try the safe simulation after installing locally:
+
+```bash
+python -m pip install -e ".[test]"
+relmote demo --mode assist --approve --text "hello from Relmote"
+pytest -q
+```
+
+The dry-run transport reports what **would** have been dispatched but cannot emit real target input.
+
 ## Initial implementation path
 
-1. Policy engine + dry-run transport.
+1. Policy/session engine + dry-run transport. **← current**
 2. USB HID proof-of-concept with explicit approval and immediate stop.
 3. Bidirectional text feedback over USB serial.
 4. BLE companion/control path and Bluetooth HID.
@@ -68,7 +93,7 @@ See:
 
 ## Status
 
-**In formation / early prototype.** The architecture is being defined before committing to custom hardware so that the project does not become accidentally shaped around one development board or one transport.
+**Early prototype.** Core authorization semantics are now executable; target-side hardware output is intentionally not implemented yet. The architecture is being validated before committing to custom hardware so that the project does not become accidentally shaped around one development board or one transport.
 
 ## Name
 
