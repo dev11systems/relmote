@@ -1,72 +1,151 @@
 # Relmote MVP and build sequence
 
-The platform architecture is broad. The MVP proves the central abstractions without implementing the entire atlas.
+Relmote's **first deployable implementation is software-first**.
 
-## MVP success criteria
+The hardware track remains important, but Pocket should prove why physical Relmote is useful rather than be required before anyone can use the platform.
 
-The first meaningful prototype should prove:
+## Software MVP success criteria
 
-1. one controller can pair with one node;
-2. node identity survives transport changes;
-3. target identity is explicit;
-4. a bounded task becomes a proposal;
-5. approval and physical authorization are distinct;
-6. real target output passes through the safety boundary;
-7. observations remain distinct from interpretation;
-8. the same task can upgrade to a richer system path;
-9. STOP/revoke works;
-10. no cloud service is required.
+A user can:
 
-## MVP-0 — current software model
+1. download/install or temporarily run Relmote on a computer;
+2. open a local browser controller;
+3. see node and target identity/capabilities;
+4. create a bounded local support session;
+5. run read-only diagnostics with real observations;
+6. explicitly approve state-changing actions;
+7. revoke the session;
+8. operate entirely without a Dev11 cloud service.
 
-Substantially implemented: policy, grants, sessions, replay guard, dry-run and HID transports, safety gate, task lifecycle, observations/evidence, route selection, module descriptors, power budget, and semantic API models.
+## S0 — current platform model
 
-## MVP-1 — physical HID bench
+**Substantially implemented**
 
-Pi Zero 2 W-class prototype, physical AUTHORIZE/STOP, LEDs, USB HID target, local CLI/TUI controller.
+- policy/grants/sessions;
+- tasks and observations;
+- route selection;
+- semantic API models;
+- identity scaffolding;
+- remote-access/pairing architecture;
+- hardware/HID prototype code.
 
-Demonstrate: propose text → approve → physically authorize → type once → STOP.
+## S1 — ephemeral local Agent ← CURRENT PRIMARY MILESTONE
 
-## MVP-2 — bidirectional native path
+Run:
 
-Add one text-feedback path such as SSH or USB serial/helper.
+```text
+relmote serve
+```
 
-Demonstrate blind HID → richer path appears → same task re-routes → actual observation returned.
+Relmote starts a localhost service and browser UI.
 
-## MVP-3 — local controller UI
+Initial capabilities should be deliberately narrow and useful:
 
-Build a responsive web/PWA controller first. It is cross-platform, validates the semantic API, and avoids app-store dependency. Native BLE discovery can follow.
+- system identity;
+- OS/platform information;
+- hostname;
+- CPU/memory summary;
+- network-interface inspection;
+- disk/filesystem summary;
+- process/service summary where portable;
+- read-only diagnostics.
 
-## MVP-4 — Agent
+No arbitrary remote shell is required for S1.
 
-Run relmoted directly on Linux and demonstrate software-only Relmote with pairing, identity, read-only diagnostics, optional shell, and the same controller UI.
+### Deployment forms
 
-## MVP-5 — hybrid
+Support, in order:
 
-Pocket discovers Agent on the target. Demonstrate physical path → native upgrade → Agent disappears → physical fallback remains.
+1. Python package/development install;
+2. single command / ephemeral environment;
+3. packaged standalone executable;
+4. OS-native packages/services later.
 
-## MVP-6 — first module
+## S2 — local web/PWA controller
 
-Serial/console is likely the best first module: useful, bidirectional, technically tractable, and simpler than KVM.
+Responsive controller for phone/tablet/desktop browser.
 
-## MVP-7 — KVM
+Show:
 
-Video capture + pointer/keyboard. This creates the strongest visual “IT support in a pocket” demonstration.
+- node;
+- target;
+- capabilities;
+- session/mode;
+- observations;
+- proposed actions;
+- revoke.
 
-## MVP-8 — native remote access
+Default binding remains localhost until authentication/pairing is implemented.
 
-Implement native rendezvous/direct/relay only after local identity/pairing/session semantics stabilize. Existing VPN paths can provide remote testing earlier.
+## S3 — pairing + LAN access
 
-## MVP-9 — constrained link
+Add reviewed controller/node key agreement and explicit local pairing.
 
-Mesh/LoRa/store-and-forward proof.
+Then permit authenticated LAN access.
 
-## Not MVP
+No unauthenticated `0.0.0.0` support UI.
 
-Do not block early prototypes on custom Pocket PCB, final magnetic connector, cellular, custom cloud infrastructure, local large model, native iOS+Android apps, production enclosure, certification, or every module family.
+## S4 — state-changing native actions
+
+Add a small capability-gated action set.
+
+Examples:
+
+- controlled service restart;
+- network configuration change;
+- bounded file write.
+
+Avoid exposing a universal shell merely because it is easy.
+
+## S5 — installed Agent
+
+Persistent `relmoted` service with:
+
+- stable node identity;
+- owner/controller trust;
+- OS service integration;
+- conservative updates;
+- local-first operation.
+
+## S6 — temporary support invitation
+
+Create an expiring one-time support relationship.
+
+Existing VPN/direct IP can provide reachability initially.
+
+## S7 — native remote access
+
+Direct P2P/rendezvous/encrypted relay after pairing/session semantics are stable.
+
+## S8 — Relmote Live
+
+Bootable recovery environment implementing the same node/API model.
+
+## Hardware track H1 — physical HID bench
+
+In parallel when hardware is available:
+
+- Pi Zero 2 W-class prototype;
+- AUTHORIZE;
+- STOP;
+- USB HID.
+
+The code and bring-up plan already exist.
+
+## Hardware track H2 — hybrid
+
+Hardware node discovers software Agent on the target and upgrades the same task from physical HID/KVM to native capabilities.
+
+## Later
+
+- serial module;
+- KVM;
+- Pocket custom hardware;
+- mesh/store-and-forward;
+- additional native management plugins.
 
 ## Immediate milestone
 
-**MVP-1: real USB HID with physical AUTHORIZE/STOP on a sacrificial target.**
+> **S1: run Relmote temporarily on an ordinary computer and use it locally from a browser without installing target-specific remote-control software or requiring a cloud account.**
 
-Architecture work should support—not indefinitely postpone—that test.
+Hardware work continues as a parallel track rather than the gate to first deployment.
