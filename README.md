@@ -55,9 +55,28 @@ See:
 - [Protocol](docs/PROTOCOL.md)
 - [Scenarios](docs/SCENARIOS.md)
 - [Hardware strategy](docs/HARDWARE.md)
+- [Modularity](docs/MODULARITY.md)
+- [Power architecture](docs/POWER.md)
+- [Hardware concepts](hardware/concepts/README.md)
+- [Open specifications](spec/README.md)
 - [USB HID transport](docs/HID-TRANSPORT.md)
 - [Safety interlock](docs/SAFETY-INTERLOCK.md)
 - [Roadmap](docs/ROADMAP.md)
+
+## Platform forms
+
+Relmote is intentionally not one fixed enclosure.
+
+Reference forms currently include:
+
+- **Mini** — minimal MCU-class node;
+- **Pocket** — phone-sized everyday-carry reference design;
+- **All-in-One** — power-bank-sized integrated field design;
+- **DIY/custom** — any compatible implementation that follows the protocol and authorization model.
+
+The optional snap-module system is designed around an open magnetic/keyed attachment with a service/contact layer for ordinary modules and a separate optional high-speed layer for demanding modules. USB-C remains a first-class universal expansion path; the snap ecosystem is never mandatory.
+
+Module descriptors are machine-readable and publish hardware/resource capabilities, power requirements, links, and pass-through behavior. Module capabilities do **not** become authorization grants automatically.
 
 ## Current prototype
 
