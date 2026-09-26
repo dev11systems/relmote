@@ -57,7 +57,7 @@ def linux_full_check(agent: LocalAgent) -> DiagnosticReport:
 
     cpu = next(x for x in observations if x.capability == "hardware.cpu")
     cpu_name = cpu.data.get("model") or cpu.data.get("processor")
-    cpu_count = cpu.data.get("logical_cpu_count") or cpu.data.get("count")
+    cpu_count = cpu.data.get("logical_count")
     if cpu_name or cpu_count:
         detail = cpu_name or "Processor"
         if cpu_count:
@@ -71,7 +71,7 @@ def linux_full_check(agent: LocalAgent) -> DiagnosticReport:
         )
 
     uptime = next(x for x in observations if x.capability == "system.uptime")
-    seconds = uptime.data.get("uptime_seconds")
+    seconds = uptime.data.get("seconds")
     if seconds is not None:
         days = seconds / 86400
         findings.append(
