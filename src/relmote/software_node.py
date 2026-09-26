@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from .agent import AgentObservation, LocalAgent
 from .diagnostics import DiagnosticFinding, diagnose_network
+from .linux_diagnostics import linux_full_check
 from pathlib import Path
 
 
@@ -90,8 +91,12 @@ class SoftwareNode:
     def run_task(self, task_type: str) -> DiagnosticTask:
         if not self.session or self.session.revoked:
             raise PermissionError("an active Observe session is required")
-        if task_type == "diagnose-network":
-            report = diagnose_network(self.agent)
+        if task_type in {"diagnose-network", "full-check"}:
+            report = (
+                diagnose_network(self.agent)
+                if task_type == "diagnose-network"
+                else linux_full_check(self.agent)
+            )
             task = DiagnosticTask(
                 task_id=str(uuid4()),
                 task_type=task_type,
