@@ -45,12 +45,17 @@ It should **not** feel like:
 ## Current drawings/specs
 
 - [Pocket envelope v0.1](pocket-envelope-v0.1.md)
+- [Pocket internal layout v0.1](pocket-internal-layout-v0.1.md)
+- [Pocket power/runtime study v0.1](pocket-power-budget-v0.1.md)
+- [Pocket RF/antenna study v0.1](pocket-antennas-v0.1.md)
+- [Pocket serviceability v0.1](pocket-serviceability-v0.1.md)
 - [All-in-One envelope v0.1](all-in-one-envelope-v0.1.md)
 - [Module geometry v0.1](module-geometry-v0.1.md)
 - [Design language](design-language.md)
 - [Pocket front SVG](pocket-front-v0.1.svg)
 - [Pocket rear SVG](pocket-rear-v0.1.svg)
 - [Pocket side SVG](pocket-side-v0.1.svg)
+- [Pocket internal SVG](pocket-internal-v0.1.svg)
 
 ## CAD
 
