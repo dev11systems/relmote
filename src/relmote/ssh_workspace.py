@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 import subprocess
 from dataclasses import dataclass
 from pathlib import PurePosixPath
@@ -24,7 +23,8 @@ class WorkspaceResult:
 class SSHWorkspace:
     """Read-only workspace executor over an existing OpenSSH path.
 
-    This preview does not accept arbitrary shell strings.
+    File operations resolve the target-side canonical path before access so a
+    symlink inside the configured root cannot silently escape it.
     """
 
     def __init__(
@@ -66,16 +66,42 @@ class SSHWorkspace:
             stderr=completed.stderr,
         )
 
+    def _canonical_remote(self, relative: str) -> PurePosixPath:
+        lexical = self.policy.resolve_relative(relative)
+        result = self._run(
+            "resolve-path",
+            ["realpath", "-e", "--", str(lexical)],
+        )
+        if not result.ok:
+            raise FileNotFoundError(
+                result.stderr.strip() or f"cannot resolve remote path: {relative}"
+            )
+        canonical = PurePosixPath(result.stdout.strip())
+        root_result = self._run(
+            "resolve-root",
+            ["realpath", "-e", "--", str(self.policy.root)],
+        )
+        if not root_result.ok:
+            raise FileNotFoundError("cannot resolve remote workspace root")
+        canonical_root = PurePosixPath(root_result.stdout.strip())
+
+        try:
+            canonical.relative_to(canonical_root)
+        except ValueError as exc:
+            raise PermissionError(
+                f"remote path escapes workspace through symlink: {relative}"
+            ) from exc
+        return canonical
+
     def list(self, relative: str = ".") -> WorkspaceResult:
-        path = self.policy.resolve_relative(relative)
-        # find is invoked directly through SSH argv, not through a local shell.
+        path = self._canonical_remote(relative)
         return self._run(
             "list",
             ["find", str(path), "-maxdepth", "1", "-mindepth", "1", "-printf", "%f\n"],
         )
 
     def read(self, relative: str) -> WorkspaceResult:
-        path = self.policy.resolve_relative(relative)
+        path = self._canonical_remote(relative)
         return self._run("read", ["cat", "--", str(path)])
 
     def git_status(self) -> WorkspaceResult:
@@ -96,7 +122,6 @@ class SSHWorkspace:
         self.policy.require_tool(tool)
         if tool == "git":
             raise ValueError("use explicit git_status/git_diff operations in preview")
-        # Tool name comes from policy; args are passed as argv, never shell-concatenated.
         return self._run(
             f"tool:{tool}",
             [tool, *args],
