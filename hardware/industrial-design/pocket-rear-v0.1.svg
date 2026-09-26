@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="900" viewBox="0 0 520 900">
+  <rect width="520" height="900" fill="white"/>
+  <g stroke="#111" fill="none" stroke-width="3">
+    <rect x="120" y="90" width="288" height="600" rx="32"/>
+    <rect x="128" y="105" width="272" height="272" rx="22"/>
+    <rect x="128" y="393" width="272" height="272" rx="22"/>
+    <rect x="224" y="335" width="80" height="24" rx="4"/>
+    <rect x="224" y="623" width="80" height="24" rx="4"/>
+    <circle cx="152" cy="129" r="9"/>
+    <circle cx="376" cy="129" r="9"/>
+    <circle cx="152" cy="353" r="9"/>
+    <circle cx="376" cy="353" r="9"/>
+    <circle cx="152" cy="417" r="9"/>
+    <circle cx="376" cy="417" r="9"/>
+    <circle cx="152" cy="641" r="9"/>
+    <circle cx="376" cy="641" r="9"/>
+  </g>
+  <g fill="#111" font-family="sans-serif">
+    <text x="216" y="238" font-size="22" font-weight="700">S-ZONE A</text>
+    <text x="218" y="262" font-size="16">68 × 68 mm</text>
+    <text x="216" y="526" font-size="22" font-weight="700">S-ZONE B</text>
+    <text x="218" y="550" font-size="16">68 × 68 mm</text>
+    <text x="199" y="329" font-size="14">service contacts</text>
+    <text x="199" y="617" font-size="14">service contacts</text>
+    <text x="188" y="385" font-size="14">4 mm logical seam</text>
+    <text x="110" y="746" font-size="18" font-weight="700">Rear active area: 68 × 140 mm</text>
+    <text x="116" y="835" font-size="18" font-weight="700">Relmote Pocket rear — v0.1</text>
+    <text x="96" y="860" font-size="14">Illustrative magnet/contact positions; exact pattern remains open</text>
+  </g>
+</svg>
