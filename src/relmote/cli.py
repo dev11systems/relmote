@@ -134,11 +134,19 @@ def build_parser() -> argparse.ArgumentParser:
         "version",
         help="show Relmote version/build information",
     )
-    version_parser.set_defaults(
-        func=lambda args: (print(
-            "Relmote {version} ({channel}, {commit})".format(**build_info())
-        ) or 0)
+    version_parser.add_argument(
+        "--full",
+        action="store_true",
+        help="show the full source commit identifier",
     )
+    def run_version(args):
+        info = build_info()
+        build = info["commit"] if args.full else info["short_commit"]
+        print(f'Relmote {info["version"]}')
+        print(f'Channel: {info["channel"]}')
+        print(f'Build: {build}')
+        return 0
+    version_parser.set_defaults(func=run_version)
 
     ssh_parser = sub.add_parser(
         "ssh",
