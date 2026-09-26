@@ -10,6 +10,7 @@ from .runtime import RelmoteRuntime
 from .report import export_support_report
 from .lan_auth import TemporaryLANAccess
 from .presentation import capability_label
+from .help import render_help
 import tempfile
 import socket
 
@@ -59,6 +60,15 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
  <button onclick="selfCheck()">Relmote self-check</button>
  </details>
  <p class="muted">These checks only view information. They do not change this computer.</p>
+</section>
+
+<section class="card">
+ <h2>Help</h2>
+ <button onclick="showHelp('getting-started')">Getting started</button>
+ <button onclick="showHelp('support')">Support</button>
+ <button onclick="showHelp('remote')">Remote access</button>
+ <button onclick="showHelp('privacy')">Privacy</button>
+ <pre id="helpText" class="muted"></pre>
 </section>
 
 <section class="card">
@@ -119,6 +129,12 @@ async function selfCheck(){
    previewStatus.textContent='Self-check: '+d.status+' · '+JSON.stringify(d.checks);
  }catch(e){alert(e.message)}
 }
+async function showHelp(topic){
+ try{
+   const d=await request('/api/v1/help/'+encodeURIComponent(topic));
+   helpText.textContent=d.text;
+ }catch(e){alert(e.message)}
+}
 async function exportReport(){
  try{
    const d=await request('/api/v1/export','POST');
@@ -175,6 +191,14 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 _json(self, HTTPStatus.OK, {"status": "ok"})
             elif path == "/api/v1/self-check":
                 _json(self, HTTPStatus.OK, node.self_check())
+            elif path.startswith("/api/v1/help/"):
+                topic = path.rsplit("/", 1)[-1]
+                try:
+                    text_value = render_help(topic)
+                except ValueError as exc:
+                    _json(self, HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                else:
+                    _json(self, HTTPStatus.OK, {"topic": topic, "text": text_value})
             else:
                 _json(self, HTTPStatus.NOT_FOUND, {"error": "not found"})
 
