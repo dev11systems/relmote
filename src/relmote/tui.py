@@ -3,7 +3,12 @@ from __future__ import annotations
 from .runtime import RelmoteRuntime
 
 
-def render_home(runtime: RelmoteRuntime) -> str:
+def render_home(
+    runtime: RelmoteRuntime,
+    *,
+    web_url: str = "http://127.0.0.1:8787",
+    web_ready: bool = False,
+) -> str:
     value = runtime.snapshot()
     session = value.get("session")
     support = (
@@ -21,6 +26,9 @@ def render_home(runtime: RelmoteRuntime) -> str:
             "1  Check this computer",
             "2  Network diagnosis",
             "3  Storage overview",
+            f"Web interface: {'Ready' if web_ready else 'Unavailable'}",
+            f"  {web_url}" if web_ready else "",
+            "",
             "4  Open web interface",
             "q  Quit",
         ]
@@ -31,6 +39,7 @@ def run_simple_tui(
     runtime: RelmoteRuntime,
     *,
     web_url: str = "http://127.0.0.1:8787",
+    web_ready: bool = False,
 ) -> int:
     """Dependency-free preview TUI.
 
@@ -39,13 +48,18 @@ def run_simple_tui(
     """
     while True:
         print("\033[2J\033[H", end="")
-        print(render_home(runtime))
+        print(render_home(runtime, web_url=web_url, web_ready=web_ready))
         choice = input("\n> ").strip().lower()
 
         if choice == "q":
             return 0
         if choice == "4":
-            input(f"\nWeb interface: {web_url}\nPress Enter to continue.")
+            message = (
+                f"Web interface: {web_url}"
+                if web_ready
+                else "Web interface is unavailable. Try relmote doctor."
+            )
+            input(f"\n{message}\nPress Enter to continue.")
             continue
 
         snapshot = runtime.snapshot()
