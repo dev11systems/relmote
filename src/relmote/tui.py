@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .runtime import RelmoteRuntime
+from .help import render_help
 
 
 def render_home(
@@ -30,6 +31,7 @@ def render_home(
             f"  {web_url}" if web_ready else "",
             "",
             "4  Open web interface",
+            "h  Help",
             "q  Quit",
         ]
     )
@@ -60,6 +62,9 @@ def run_simple_tui(
                 else "Web interface is unavailable. Try relmote doctor."
             )
             input(f"\n{message}\nPress Enter to continue.")
+            continue
+        if choice == "h":
+            input("\n" + render_help() + "\nPress Enter to continue.")
             continue
 
         snapshot = runtime.snapshot()
