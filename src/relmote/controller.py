@@ -4,7 +4,7 @@ from .audit import AuditLog
 from .model import Action, Decision, ExecutionOutcome
 from .policy import evaluate
 from .session import Session
-from .transports.base import Transport
+from .transports.base import ExecutionContext, Transport
 
 
 class RelmoteController:
@@ -105,7 +105,18 @@ class RelmoteController:
             )
             return outcome
 
-        result = self.transport.execute(action)
+        context = ExecutionContext(
+            session_id=session.session_id,
+            target_id=session.grant.target_id,
+            should_stop=lambda: not session.is_active(),
+        )
+
+        result = self.transport.execute(action, context)
+
+        # A dispatch attempt consumes its action ID even when the transport
+        # reports interruption or uncertainty. Automatic replay after a
+        # partially emitted target-side action is more dangerous than requiring
+        # a fresh proposal.
         session.mark_executed(action.action_id)
 
         self.audit.append(
