@@ -47,7 +47,8 @@ nav a:hover{background:#222}
 .finding{border-left:3px solid #666;padding:.4rem .7rem;margin:.6rem 0}
 .finding.attention{border-left-width:5px}
 pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y}
-#terminalOutput{max-height:50vh;overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+#terminalOutput{max-height:50vh;overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch;white-space:pre-wrap;word-break:break-word}
+.term-bold{font-weight:700}.term-fg-30{color:#777}.term-fg-31{color:#d88}.term-fg-32{color:#8d8}.term-fg-33{color:#dd8}.term-fg-34{color:#8ad}.term-fg-35{color:#d8d}.term-fg-36{color:#8dd}.term-fg-37{color:#ddd}
 @media(max-width:600px){body{margin:1rem auto}.card{padding:.85rem}.grid{grid-template-columns:1fr}button{min-height:44px}}
 </style>
 </head>
@@ -171,6 +172,45 @@ const tasksEl=document.getElementById('tasks');
 const helpTextEl=document.getElementById('helpText');
 const previewStatusEl=document.getElementById('previewStatus');
 const startupErrorEl=document.getElementById('startupError');
+const ansiState={fg:null,bold:false};
+function terminalHtml(text){
+ let out='';
+ let i=0;
+ while(i<text.length){
+   if(text.charCodeAt(i)===27){
+     if(text[i+1]==='['){
+       const end=text.indexOf('m',i+2);
+       if(end!==-1){
+         const codes=text.slice(i+2,end).split(';').filter(Boolean).map(Number);
+         if(!codes.length) codes.push(0);
+         for(const code of codes){
+           if(code===0){ansiState.fg=null;ansiState.bold=false}
+           else if(code===1){ansiState.bold=true}
+           else if(code>=30&&code<=37){ansiState.fg=code}
+           else if(code===39){ansiState.fg=null}
+         }
+         i=end+1; continue;
+       }
+       const match=text.slice(i).match(/^\x1b\[[0-9;?]*[A-Za-z]/);
+       if(match){i+=match[0].length;continue}
+     }else if(text[i+1]===']'){
+       let end=text.indexOf('\x07',i+2);
+       let width=1;
+       const st=text.indexOf('\x1b\\',i+2);
+       if(st!==-1&&(end===-1||st<end)){end=st;width=2}
+       if(end!==-1){i=end+width;continue}
+     }
+     i++; continue;
+   }
+   let j=i;
+   while(j<text.length&&text.charCodeAt(j)!==27)j++;
+   const chunk=esc(text.slice(i,j));
+   const cls=(ansiState.bold?' term-bold':'')+(ansiState.fg?' term-fg-'+ansiState.fg:'');
+   out+='<span class="'+cls.trim()+'">'+chunk+'</span>';
+   i=j;
+ }
+ return out;
+}
 const aboutInfoEl=document.getElementById('aboutInfo');
 const changelogTextEl=document.getElementById('changelogText');
 const actionStatusEl=document.getElementById('actionStatus');
@@ -260,7 +300,8 @@ async function pollTerminal(){
    const d=await request('/api/v1/terminal/'+encodeURIComponent(activeTerminalId)+'/read');
    if(d.data){
      const bytes=Uint8Array.from(atob(d.data),c=>c.charCodeAt(0));
-     terminalOutputEl.textContent+=new TextDecoder().decode(bytes);
+     const decoded=new TextDecoder().decode(bytes);
+     terminalOutputEl.insertAdjacentHTML('beforeend',terminalHtml(decoded));
      terminalOutputEl.scrollTop=terminalOutputEl.scrollHeight;
    }
  }catch(e){
