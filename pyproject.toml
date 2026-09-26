@@ -9,6 +9,15 @@ description = "Portable, user-controlled intelligent interface node"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+relmote = "relmote.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/relmote"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
