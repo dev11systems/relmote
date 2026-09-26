@@ -111,9 +111,20 @@ class RelmoteRuntime:
     def approve_terminal(self, session_id: str) -> TerminalSession:
         with self._lock:
             session = self.terminal_sessions[session_id]
-            session.approve()
             if session.target == "this-computer":
-                self.terminal_manager.attach(session)
+                # Attach transactionally: do not leave the permission model
+                # claiming ACTIVE if the PTY/shell failed to start.
+                session.approve()
+                try:
+                    self.terminal_manager.attach(session)
+                except Exception:
+                    session.revoke()
+                    self.emit("terminal.failed", {
+                        "terminal_session_id": session_id,
+                    })
+                    raise
+            else:
+                session.approve()
             self.emit("terminal.approved", {
                 "terminal_session_id": session_id,
             })
