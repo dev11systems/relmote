@@ -54,6 +54,11 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 </section>
 
 <section class="card">
+ <h2>Remote tools</h2>
+ <div id="remoteTools">Loading…</div>
+</section>
+
+<section class="card">
  <h2>Capabilities</h2><div id="caps"></div>
 </section>
 
@@ -111,6 +116,17 @@ async function refresh(){
  caps.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(d.capability_labels[x]||x)+'</span>').join('');
  const remote=d.support||{available:false,mode:'disabled'};
  supportState.innerHTML='<strong>'+(remote.available?'ON':'OFF')+'</strong><br><span class="muted">'+esc(remote.mode)+'</span>';
+ const features=d.features||{};
+ const screen=features.screen||{};
+ const terminal=features.terminal||{};
+ remoteTools.innerHTML=
+   '<p><strong>Screen</strong><br>'+
+   (screen.available?'Available':'Not available yet')+
+   '<br><span class="muted">'+esc(screen.note||'')+'</span></p>'+
+   '<p><strong>Terminal</strong><br>'+
+   (terminal.interactive_web_implemented?'Available':
+     (terminal.available?'Transport detected · web terminal coming next':'Unavailable'))+
+   '<br><span class="muted">'+esc(terminal.note||'')+'</span></p>';
  if(!d.session || d.session.revoked){
    session.innerHTML='<strong>Local checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
  }else{
