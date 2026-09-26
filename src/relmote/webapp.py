@@ -56,6 +56,7 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 <section class="card">
  <h2>Remote tools</h2>
  <div id="remoteTools">Loading…</div>
+ <div id="terminalSessions"></div>
 </section>
 
 <section class="card">
@@ -127,6 +128,18 @@ async function refresh(){
    (terminal.interactive_web_implemented?'Available':
      (terminal.available?'Transport detected · web terminal coming next':'Unavailable'))+
    '<br><span class="muted">'+esc(terminal.note||'')+'</span></p>';
+ const terminalItems=d.terminal_sessions||[];
+ terminalSessions.innerHTML=terminalItems.length ? terminalItems.map(t=>{
+   let actions='';
+   if(t.state==='requested'){
+     actions='<button onclick="terminalAction(\'approve\',\''+esc(t.session_id)+'\')">Allow terminal</button>'+
+             '<button onclick="terminalAction(\'deny\',\''+esc(t.session_id)+'\')">Deny</button>';
+   }else if(t.state==='active'){
+     actions='<button class="danger" onclick="terminalAction(\'end\',\''+esc(t.session_id)+'\')">End terminal</button>';
+   }
+   return '<div class="card"><strong>Terminal · '+esc(t.state)+'</strong><br>'+
+     'Controller: '+esc(t.controller)+'<br>Authority: '+esc(t.authority)+'<br>'+actions+'</div>';
+ }).join('') : '';
  if(!d.session || d.session.revoked){
    session.innerHTML='<strong>Local checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
  }else{
@@ -143,6 +156,10 @@ async function refresh(){
        '<details><summary>Raw observations</summary><pre>'+esc(JSON.stringify(t.observations,null,2))+'</pre></details></div>';
    }).join('');
  }else tasks.textContent='No observations yet.';
+}
+async function terminalAction(action,id){
+ await request('/api/v1/terminal/'+encodeURIComponent(id)+'/'+encodeURIComponent(action),'POST');
+ await refresh();
 }
 async function supportAction(action){
  await request('/api/v1/support/'+encodeURIComponent(action),'POST');
@@ -239,7 +256,23 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 return
             path = urlparse(self.path).path
             try:
-                if path.startswith("/api/v1/support/"):
+                if path.startswith("/api/v1/terminal/"):
+                    if not runtime:
+                        raise ValueError("terminal lifecycle requires shared runtime")
+                    parts = path.strip("/").split("/")
+                    if len(parts) != 5:
+                        raise ValueError("invalid terminal action path")
+                    session_id, action = parts[3], parts[4]
+                    if action == "approve":
+                        runtime.approve_terminal(session_id)
+                    elif action == "deny":
+                        runtime.deny_terminal(session_id)
+                    elif action == "end":
+                        runtime.end_terminal(session_id)
+                    else:
+                        raise ValueError("unknown terminal action")
+                    _json(self, HTTPStatus.OK, runtime.snapshot())
+                elif path.startswith("/api/v1/support/"):
                     if not runtime:
                         raise ValueError("support policy requires shared runtime")
                     action = path.rsplit("/", 1)[-1]
