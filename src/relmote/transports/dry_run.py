@@ -6,7 +6,7 @@ from .base import Transport, TransportCapabilities
 
 
 class DryRunTransport(Transport):
-    """Transport used for development before hardware output exists."""
+    """Development transport with no target-side effects."""
 
     @property
     def capabilities(self) -> TransportCapabilities:
@@ -20,8 +20,10 @@ class DryRunTransport(Transport):
     def execute(self, action: Action) -> object:
         return {
             "transport": "dry-run",
-            "executed": False,
+            "simulated": True,
+            "would_execute": True,
             "action": {
+                "action_id": action.action_id,
                 "kind": action.kind,
                 "payload": action.payload,
                 "capabilities": list(action.capabilities),
