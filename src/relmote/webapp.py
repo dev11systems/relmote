@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 from .software_node import SoftwareNode
+from .runtime import RelmoteRuntime
 from .report import export_support_report
 from .lan_auth import TemporaryLANAccess
 from .presentation import capability_label
@@ -140,7 +141,7 @@ def _json(handler: BaseHTTPRequestHandler, status: HTTPStatus, value: dict) -> N
     handler.wfile.write(body)
 
 
-def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = None):
+def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = None, runtime: RelmoteRuntime | None = None):
     def authorized(handler: BaseHTTPRequestHandler) -> bool:
         if lan_access is None:
             return True
@@ -165,7 +166,7 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 self.end_headers()
                 self.wfile.write(body)
             elif path == "/api/v1/snapshot":
-                value = node.snapshot()
+                value = runtime.snapshot() if runtime else node.snapshot()
                 value["capability_labels"] = {
                     cap: capability_label(cap) for cap in value["capabilities"]
                 }
@@ -184,13 +185,24 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
             path = urlparse(self.path).path
             try:
                 if path == "/api/v1/session":
-                    session = node.start_observe_session()
-                    _json(self, HTTPStatus.CREATED, {
-                        "session_id": session.session_id,
-                        "mode": "observe",
-                    })
+                    if runtime:
+                        value = runtime.start_checks()
+                        session = value["session"]
+                        _json(self, HTTPStatus.CREATED, {
+                            "session_id": session["session_id"],
+                            "mode": "observe",
+                        })
+                    else:
+                        session = node.start_observe_session()
+                        _json(self, HTTPStatus.CREATED, {
+                            "session_id": session.session_id,
+                            "mode": "observe",
+                        })
                 elif path == "/api/v1/session/revoke":
-                    node.revoke_session()
+                    if runtime:
+                        runtime.stop_checks()
+                    else:
+                        node.revoke_session()
                     _json(self, HTTPStatus.OK, {"revoked": True})
                 elif path == "/api/v1/export":
                     destination = (
@@ -201,11 +213,19 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                     _json(self, HTTPStatus.CREATED, {"path": str(written)})
                 elif path.startswith("/api/v1/tasks/"):
                     task_type = path.rsplit("/", 1)[-1]
-                    task = node.run_task(task_type)
-                    _json(self, HTTPStatus.CREATED, {
-                        "task_id": task.task_id,
-                        "task_type": task.task_type,
-                    })
+                    if runtime:
+                        value = runtime.run_task(task_type)
+                        task = value["tasks"][-1]
+                        _json(self, HTTPStatus.CREATED, {
+                            "task_id": task["task_id"],
+                            "task_type": task["task_type"],
+                        })
+                    else:
+                        task = node.run_task(task_type)
+                        _json(self, HTTPStatus.CREATED, {
+                            "task_id": task.task_id,
+                            "task_type": task.task_type,
+                        })
                 else:
                     _json(self, HTTPStatus.NOT_FOUND, {"error": "not found"})
             except PermissionError as exc:
@@ -236,6 +256,7 @@ def serve_local(
     *,
     lan: bool = False,
     lifetime_minutes: int = 60,
+    runtime: RelmoteRuntime | None = None,
 ) -> None:
     if lan:
         host = "0.0.0.0"
@@ -249,8 +270,12 @@ def serve_local(
             )
         access = None
 
-    node = SoftwareNode()
-    server = ThreadingHTTPServer((host, port), make_handler(node, access))
+    runtime = runtime or RelmoteRuntime()
+    node = runtime.node
+    server = ThreadingHTTPServer(
+        (host, port),
+        make_handler(node, access, runtime),
+    )
     if access:
         address = _best_lan_address()
         print("Relmote LAN PREVIEW (trusted private LAN only)")
