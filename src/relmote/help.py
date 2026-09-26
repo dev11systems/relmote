@@ -71,8 +71,9 @@ Examples:
 
 Relmote does not automatically enable SSH or Tailscale.
 
-Remote browser access is being developed around explicit support availability
-and authenticated/private-network paths.
+The software preview can expose its web controller on a connected Tailscale
+IPv4 interface while keeping localhost as the fallback. Non-local preview
+access uses a per-run token. Full controller pairing is still under development.
 """,
     "workspace": """RELMOTE — WORKSPACES
 
