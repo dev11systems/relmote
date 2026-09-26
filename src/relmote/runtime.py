@@ -10,6 +10,7 @@ from .access_policy import AccessPolicy
 from .feature_status import remote_feature_status
 from .terminal import TerminalAuthority, TerminalSession, TerminalState
 from .terminal_manager import TerminalManager
+from .screen_session import ScreenSession
 
 
 def utcnow_iso() -> str:
@@ -32,6 +33,7 @@ class RelmoteRuntime:
     support_access: AccessPolicy = field(default_factory=AccessPolicy)
     terminal_sessions: dict[str, TerminalSession] = field(default_factory=dict)
     terminal_manager: TerminalManager = field(default_factory=TerminalManager)
+    screen_sessions: dict[str, ScreenSession] = field(default_factory=dict)
     _events: list[RuntimeEvent] = field(default_factory=list)
     _lock: RLock = field(default_factory=RLock)
 
@@ -81,8 +83,56 @@ class RelmoteRuntime:
             self.terminal_manager.close_all()
             for terminal in self.terminal_sessions.values():
                 terminal.revoke()
+            for screen in self.screen_sessions.values():
+                screen.revoke()
             self.emit("support.disabled")
             return self.snapshot()
+
+
+    def request_screen(self, *, controller: str = "remote-controller") -> ScreenSession:
+        with self._lock:
+            if not self.support_access.available():
+                raise PermissionError("remote support is off")
+            screen = remote_feature_status().get("screen", {})
+            if screen.get("session_type") != "wayland":
+                raise RuntimeError("screen observe preview currently requires Wayland")
+            if not screen.get("portal_ready"):
+                raise RuntimeError(
+                    screen.get("portal_note") or "Wayland ScreenCast portal is unavailable"
+                )
+            session = ScreenSession(controller=controller)
+            self.screen_sessions[session.session_id] = session
+            self.emit("screen.requested", {
+                "screen_session_id": session.session_id,
+                "controller": controller,
+                "authority": session.authority.value,
+            })
+            return session
+
+    def approve_screen(self, session_id: str) -> ScreenSession:
+        with self._lock:
+            session = self.screen_sessions[session_id]
+            session.approve()
+            session.awaiting_os_consent()
+            self.emit("screen.approved", {
+                "screen_session_id": session_id,
+                "next": "os-consent",
+            })
+            return session
+
+    def deny_screen(self, session_id: str) -> ScreenSession:
+        with self._lock:
+            session = self.screen_sessions[session_id]
+            session.revoke()
+            self.emit("screen.denied", {"screen_session_id": session_id})
+            return session
+
+    def end_screen(self, session_id: str) -> ScreenSession:
+        with self._lock:
+            session = self.screen_sessions[session_id]
+            session.revoke()
+            self.emit("screen.ended", {"screen_session_id": session_id})
+            return session
 
     def request_terminal(
         self,
@@ -201,6 +251,16 @@ class RelmoteRuntime:
                 "mode": self.support_access.mode.value,
             }
             value["features"] = remote_feature_status()
+            value["screen_sessions"] = [
+                {
+                    "session_id": session.session_id,
+                    "controller": session.controller,
+                    "authority": session.authority.value,
+                    "state": session.state.value,
+                    "error": session.error,
+                }
+                for session in self.screen_sessions.values()
+            ]
             value["terminal_sessions"] = [
                 {
                     "session_id": session.session_id,
