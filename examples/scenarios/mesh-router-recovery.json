@@ -1,0 +1,36 @@
+{
+  "name": "Constrained mesh router recovery",
+  "controller": {
+    "distance": "constrained-mesh",
+    "paths": [
+      "ble",
+      "meshcore",
+      "lora"
+    ],
+    "client": "android"
+  },
+  "target": {
+    "state": "degraded-os",
+    "paths": [
+      "uart"
+    ],
+    "feedback": [
+      "text"
+    ]
+  },
+  "authority": {
+    "mode": "assist",
+    "capabilities": [
+      "observe.console",
+      "input.keyboard"
+    ]
+  },
+  "intelligence": "remote-plus-edge-summary",
+  "persistence": "temporary",
+  "requirements": [
+    "store-and-forward",
+    "semantic-compression",
+    "expiry",
+    "no-action-replay"
+  ]
+}
