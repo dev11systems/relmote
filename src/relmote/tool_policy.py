@@ -5,8 +5,10 @@ from enum import Enum
 
 
 class ToolEffect(str, Enum):
-    READ_ONLY = "read-only"
+    OBSERVATION = "observation"
+    WORKSPACE_EXECUTION = "workspace-execution"
     WORKSPACE_MUTATING = "workspace-mutating"
+    SYSTEM_MUTATING = "system-mutating"
 
 
 @dataclass(frozen=True)
@@ -17,9 +19,11 @@ class ToolRule:
 
 
 DEFAULT_TOOL_RULES = {
-    "pytest": ToolRule("pytest", ToolEffect.READ_ONLY),
-    "git-status": ToolRule("git-status", ToolEffect.READ_ONLY),
-    "git-diff": ToolRule("git-diff", ToolEffect.READ_ONLY),
+    "git-status": ToolRule("git-status", ToolEffect.OBSERVATION),
+    "git-diff": ToolRule("git-diff", ToolEffect.OBSERVATION),
+    # Tests/build tools may have side effects inside a workspace and may use
+    # network/resources. They are not described as read-only.
+    "pytest": ToolRule("pytest", ToolEffect.WORKSPACE_EXECUTION),
     "git": ToolRule(
         "git",
         ToolEffect.WORKSPACE_MUTATING,
