@@ -7,21 +7,23 @@ Relmote should grow by validating one architectural layer at a time.
 - [x] Define controller vs system transports.
 - [x] Define policy as a mandatory execution boundary.
 - [x] Define task semantics above transport.
-- [ ] Define initial capability vocabulary.
-- [ ] Define session and audit-log formats.
+- [x] Define initial capability vocabulary.
+- [x] Define session and audit-log formats.
 - [ ] Decide initial software/firmware/hardware licenses.
 
 ## Phase 1 — safe local prototype
 
 Goal: prove that authorized structured intent can reach a target as USB HID input.
 
-- [ ] Dry-run transport.
-- [ ] Policy engine.
-- [ ] Structured proposals.
-- [ ] Explicit approval.
-- [ ] Immediate revoke/stop behavior.
+- [x] Dry-run transport.
+- [x] Policy engine.
+- [x] Structured action objects.
+- [x] Exact-action approval in Assist mode.
+- [x] Software session revoke/expiry behavior.
+- [x] Replay protection for dispatched action IDs.
+- [x] Metadata-only action audit log.
+- [ ] Physical stop/revoke input.
 - [ ] USB HID adapter.
-- [ ] Action log.
 - [ ] Test on sacrificial machine.
 
 Success criterion: an approved text action is emitted exactly once, and revoking authorization prevents further output.
