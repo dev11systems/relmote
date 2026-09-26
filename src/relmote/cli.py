@@ -211,6 +211,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
+    if args.command is None:
+        return run_app()
     return args.func(args)
 
 
