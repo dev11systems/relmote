@@ -1,8 +1,10 @@
 # Relmote software
 
-Relmote software is a **headless core plus interchangeable controllers**.
+Relmote software is a **deployable form of the Relmote platform**, built around a headless core plus interchangeable controllers.
 
-The product is not one phone app.
+It can stand alone: a target can run Relmote software without any Relmote hardware attached. It can also act as the controller, policy/runtime layer, or target-side agent for a physical Relmote node.
+
+The product is not one phone app, and the software is not merely configuration software for hardware.
 
 ```text
  iOS/iPadOS     Android/GrapheneOS     Web/PWA      CLI/TUI
@@ -142,3 +144,24 @@ Remote/cloud features are additive.
 Controller APIs should expose **semantic objects**, not internal Python classes or raw hardware handles.
 
 This keeps clients portable and lets the daemon evolve independently.
+
+
+## Current Linux preview
+
+The active software-first preview currently validates the shared Relmote model on ordinary Linux machines.
+
+Implemented/tested foundations include:
+
+- repository install and self-update;
+- passive local diagnostics and evidence;
+- shared TUI/web runtime;
+- automatic Tailscale-only web binding with localhost fallback;
+- per-run preview access token for non-local web access;
+- explicit remote-support availability;
+- browser terminal request/approval lifecycle;
+- normal-user local PTY command execution;
+- Wayland graphical-session detection, including when launched over SSH;
+- ScreenCast portal-readiness probing;
+- SSH and confined-workspace foundations.
+
+This software work is intended to de-risk and define semantics later reused by hardware implementations: session authority, capability grants, STOP/revoke, observations/evidence, controller UX, and transport selection.
