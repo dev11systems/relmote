@@ -76,6 +76,8 @@ class RelmoteRuntime:
         with self._lock:
             self.support_access.disable()
             self.node.revoke_session()
+            for terminal in self.terminal_sessions.values():
+                terminal.revoke()
             self.emit("support.disabled")
             return self.snapshot()
 
