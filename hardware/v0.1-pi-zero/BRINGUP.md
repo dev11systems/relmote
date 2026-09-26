@@ -87,7 +87,7 @@ Approve it in Assist mode.
 
 Press AUTHORIZE.
 
-Execute once.
+Execute once. The MVP-1 bench harness consumes/disarms the physical lease after that dispatch, even if time remains.
 
 Expected:
 
