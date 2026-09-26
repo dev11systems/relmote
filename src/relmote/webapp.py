@@ -12,6 +12,8 @@ from .report import export_support_report
 from .lan_auth import TemporaryLANAccess
 from .presentation import capability_label
 from .help import render_help
+from .project_info import PROJECT_URL, ISSUES_URL, CHANGELOG_URL, bundled_changelog
+from .version import build_info
 import tempfile
 import socket
 import secrets
@@ -58,6 +60,7 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
 <a href="#terminal">Terminal</a>
 <a href="#help">Help</a>
 <a href="#activity">Activity</a>
+<a href="#about">About</a>
 </nav>
 <div id="actionStatus" class="card" style="display:none"></div>
 <div id="startupError" class="card" style="display:none;border-color:#aaa"></div>
@@ -125,6 +128,19 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
  <pre id="helpText" class="muted"></pre>
 </section>
 
+<section id="about" class="card">
+ <h2>About Relmote</h2>
+ <div id="aboutInfo" class="muted">Loading…</div>
+ <p>
+  <a href="https://github.com/dev11systems/relmote" target="_blank" rel="noopener">GitHub source</a> ·
+  <a href="https://github.com/dev11systems/relmote/issues" target="_blank" rel="noopener">Report an issue</a> ·
+  <a href="https://github.com/dev11systems/relmote/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Full changelog</a>
+ </p>
+ <details><summary>What's changed in this snapshot</summary>
+  <pre id="changelogText" class="raw"></pre>
+ </details>
+</section>
+
 <section class="card">
  <h2>Preview tools</h2>
  <button onclick="exportReport()">Export support report</button>
@@ -155,6 +171,8 @@ const tasksEl=document.getElementById('tasks');
 const helpTextEl=document.getElementById('helpText');
 const previewStatusEl=document.getElementById('previewStatus');
 const startupErrorEl=document.getElementById('startupError');
+const aboutInfoEl=document.getElementById('aboutInfo');
+const changelogTextEl=document.getElementById('changelogText');
 const actionStatusEl=document.getElementById('actionStatus');
 function showStatus(message,isError=false){
  actionStatusEl.style.display='block';
@@ -304,6 +322,10 @@ async function exportReport(){
    previewStatusEl.textContent='Report written to: '+d.path+' — inspect before sharing.';
  }catch(e){alert(e.message)}
 }
+request('/api/v1/project').then(p=>{
+ aboutInfoEl.textContent=p.build.display_version+' · build '+p.build.short_commit;
+ changelogTextEl.textContent=p.changelog;
+}).catch(()=>{});
 refresh().catch(e=>{
  startupErrorEl.style.display='block';
  startupErrorEl.textContent='Relmote could not load runtime data: '+e.message;
@@ -368,6 +390,15 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                     _json(self, HTTPStatus.OK, {
                         "data": base64.b64encode(data).decode("ascii"),
                     })
+            elif path == "/api/v1/project":
+                info = build_info()
+                _json(self, HTTPStatus.OK, {
+                    "build": info,
+                    "project_url": PROJECT_URL,
+                    "issues_url": ISSUES_URL,
+                    "changelog_url": CHANGELOG_URL,
+                    "changelog": bundled_changelog(),
+                })
             elif path == "/api/v1/self-check":
                 _json(self, HTTPStatus.OK, node.self_check())
             elif path.startswith("/api/v1/help/"):
