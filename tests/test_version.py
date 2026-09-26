@@ -44,7 +44,7 @@ def test_repository_display_version_is_unique():
 
     assert (
         display_version(
-            "0.1.0.dev0",
+            "0.1.0.dev4",
             "1234567890abcdef",
             "repository",
         )
@@ -56,3 +56,17 @@ def test_release_display_version_stays_semantic():
     from relmote.version import display_version
 
     assert display_version("0.1.0", "12345678", "stable") == "0.1.0"
+
+
+def test_package_metadata_matches_development_revision():
+    import re
+    from pathlib import Path
+    from relmote.dev_revision import DEV_REVISION
+
+    pyproject = (
+        Path(__file__).resolve().parents[1] / "pyproject.toml"
+    ).read_text()
+    match = re.search(r'^version = "0\.1\.0\.dev(\d+)"$', pyproject, re.MULTILINE)
+
+    assert match is not None
+    assert int(match.group(1)) == DEV_REVISION
