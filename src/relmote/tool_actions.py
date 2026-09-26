@@ -28,7 +28,7 @@ class ToolAction:
 
     @property
     def requires_approval(self) -> bool:
-        return self.effect is ToolEffect.WORKSPACE_MUTATING
+        return self.effect in {ToolEffect.WORKSPACE_EXECUTION, ToolEffect.WORKSPACE_MUTATING, ToolEffect.SYSTEM_MUTATING}
 
     def approve(self) -> None:
         if self.state is not ToolActionState.PROPOSED:
