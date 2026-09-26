@@ -38,3 +38,18 @@ def test_revocation_stops_new_tasks():
 
     with pytest.raises(PermissionError):
         node.run_task("storage-overview")
+
+
+def test_network_diagnosis_contains_findings_and_evidence():
+    node = SoftwareNode()
+    node.start_observe_session()
+    task = node.run_task("diagnose-network")
+
+    assert task.findings
+    assert {o.capability for o in task.observations} == {
+        "network.inspect",
+        "network.dns",
+    }
+    assert any(
+        finding.status == "not-tested" for finding in task.findings
+    )
