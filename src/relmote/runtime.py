@@ -6,6 +6,7 @@ from threading import RLock
 from uuid import uuid4
 
 from .software_node import SoftwareNode
+from .access_policy import AccessPolicy
 
 
 def utcnow_iso() -> str:
@@ -25,6 +26,7 @@ class RelmoteRuntime:
     """Authoritative in-process state shared by all frontends."""
 
     node: SoftwareNode = field(default_factory=SoftwareNode)
+    support_access: AccessPolicy = field(default_factory=AccessPolicy)
     _events: list[RuntimeEvent] = field(default_factory=list)
     _lock: RLock = field(default_factory=RLock)
 
@@ -53,6 +55,25 @@ class RelmoteRuntime:
         with self._lock:
             self.node.revoke_session()
             self.emit("session.revoked")
+            return self.snapshot()
+
+    def enable_support_until_disabled(self) -> dict:
+        with self._lock:
+            self.support_access.enable_until_disabled()
+            self.emit("support.enabled", {"mode": "until-disabled"})
+            return self.snapshot()
+
+    def enable_support_for(self, seconds: float) -> dict:
+        with self._lock:
+            self.support_access.enable_for(seconds)
+            self.emit("support.enabled", {"mode": "timed", "seconds": seconds})
+            return self.snapshot()
+
+    def disable_support(self) -> dict:
+        with self._lock:
+            self.support_access.disable()
+            self.node.revoke_session()
+            self.emit("support.disabled")
             return self.snapshot()
 
     def run_task(self, task_type: str) -> dict:
@@ -86,5 +107,9 @@ class RelmoteRuntime:
             value["runtime"] = {
                 "event_count": len(self._events),
                 "frontends": ["cli", "tui-preview", "web"],
+            }
+            value["support"] = {
+                "available": self.support_access.available(),
+                "mode": self.support_access.mode.value,
             }
             return value
