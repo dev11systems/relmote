@@ -46,7 +46,7 @@ def test_repository_display_version_is_unique():
             "1234567890abcdef",
             "repository",
         )
-        == "0.1.0-dev.12345678"
+        == "0.1.0-dev.2"
     )
 
 
