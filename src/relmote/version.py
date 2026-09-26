@@ -9,7 +9,7 @@ def package_version() -> str:
     try:
         return version("relmote")
     except PackageNotFoundError:
-        return "0.0.1-dev"
+        return "0.1.0.dev0"
 
 
 def installed_vcs_commit() -> str | None:
@@ -45,5 +45,6 @@ def build_info() -> dict[str, str]:
     return {
         "version": package_version(),
         "commit": commit,
+        "short_commit": commit[:8] if commit != "unknown" else "unknown",
         "channel": channel,
     }
