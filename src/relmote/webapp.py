@@ -14,6 +14,7 @@ from .presentation import capability_label
 from .help import render_help
 import tempfile
 import socket
+import secrets
 
 
 INDEX = """<!doctype html>
@@ -449,6 +450,7 @@ def serve_local(
     runtime: RelmoteRuntime | None = None,
     explicit_private_bind: bool = False,
     explicit_lan_bind: bool = False,
+    access_token: str | None = None,
 ) -> None:
     if lan or explicit_lan_bind:
         host = "0.0.0.0"
@@ -464,6 +466,13 @@ def serve_local(
                 "non-loopback binding requires an explicit private or LAN exposure mode"
             )
         access = None
+
+    if access_token:
+        class FixedAccess:
+            token = access_token
+            def valid(self, candidate):
+                return bool(candidate) and secrets.compare_digest(candidate, self.token)
+        access = FixedAccess()
 
     runtime = runtime or RelmoteRuntime()
     node = runtime.node
