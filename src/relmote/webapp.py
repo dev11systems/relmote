@@ -39,6 +39,7 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 <body>
 <h1>RELMOTE</h1>
 <div class="muted">Help and diagnostics for this computer</div>
+<div id="actionStatus" class="card" style="display:none"></div>
 <div id="startupError" class="card" style="display:none;border-color:#aaa"></div>
 
 <div class="grid">
@@ -128,6 +129,13 @@ const tasksEl=document.getElementById('tasks');
 const helpTextEl=document.getElementById('helpText');
 const previewStatusEl=document.getElementById('previewStatus');
 const startupErrorEl=document.getElementById('startupError');
+const actionStatusEl=document.getElementById('actionStatus');
+function showStatus(message,isError=false){
+ actionStatusEl.style.display='block';
+ actionStatusEl.textContent=message;
+ actionStatusEl.style.borderColor=isError?'#aaa':'#666';
+}
+function clearStatus(){actionStatusEl.style.display='none';}
 async function request(path, method='GET'){
  const headers={};
  if(relmoteToken) headers['X-Relmote-Token']=relmoteToken;
@@ -233,8 +241,14 @@ async function requestBody(path,method,body){
  return data;
 }
 async function terminalAction(action,id){
- await request('/api/v1/terminal/'+encodeURIComponent(id)+'/'+encodeURIComponent(action),'POST');
- await refresh();
+ try{
+   showStatus(action==='approve'?'Starting terminal…':'Updating terminal request…');
+   await request('/api/v1/terminal/'+encodeURIComponent(id)+'/'+encodeURIComponent(action),'POST');
+   await refresh();
+   showStatus(action==='approve'?'Terminal approved. Choose Open terminal.':'Terminal request updated.');
+ }catch(e){
+   showStatus('Terminal action failed: '+e.message,true);
+ }
 }
 async function supportAction(action){
  await request('/api/v1/support/'+encodeURIComponent(action),'POST');
@@ -441,6 +455,10 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 _json(self, HTTPStatus.FORBIDDEN, {"error": str(exc)})
             except ValueError as exc:
                 _json(self, HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+            except (OSError, RuntimeError, KeyError) as exc:
+                _json(self, HTTPStatus.INTERNAL_SERVER_ERROR, {
+                    "error": f"{type(exc).__name__}: {exc}",
+                })
 
         def log_message(self, format, *args):
             return
