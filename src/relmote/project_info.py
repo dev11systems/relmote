@@ -5,7 +5,22 @@ PROJECT_URL = "https://github.com/dev11systems/relmote"
 ISSUES_URL = "https://github.com/dev11systems/relmote/issues"
 CHANGELOG_URL = "https://github.com/dev11systems/relmote/blob/main/CHANGELOG.md"
 
-SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.3
+SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.4
+
+Terminal
+- Browser PTY command execution works end-to-end.
+- Added first-pass ANSI rendering for readable command output.
+- Continued terminal control-sequence cleanup.
+
+Diagnostics
+- Full Check includes CPU and uptime.
+- Mounted filesystem utilization is inspected and high utilization is flagged.
+
+Web/UX
+- Continued mobile/iPad usability improvements.
+- About, changelog, source, and issue links are built in.
+
+Previous snapshot: 0.1.0-dev.3
 
 Web/UX
 - Reworked navigation and mobile/iPad usability.
