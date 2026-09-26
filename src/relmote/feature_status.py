@@ -26,12 +26,12 @@ def remote_feature_status() -> dict[str, dict]:
         },
         "terminal": {
             "available": ssh,
-            "interactive_web_implemented": False,
+            "interactive_web_implemented": True,
             "transport": "ssh" if ssh else None,
             "note": (
-                "SSH transport is available; interactive browser terminal is not implemented yet."
+                "Interactive normal-user browser terminal is available."
                 if ssh
-                else "SSH client not found."
+                else "Local browser terminal is available; SSH target transport is not installed."
             ),
         },
     }
