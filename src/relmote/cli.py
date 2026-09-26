@@ -21,6 +21,8 @@ from .updater import update_repo_preview
 from .doctor import print_doctor
 from .check_cli import run_check
 from .help import print_help_topic, topic_names
+from .wayland_portal import portal_environment, portal_screen_cast_available
+from .screen_backend import detect_linux_screen_backend
 from .project_info import (
     PROJECT_URL,
     ISSUES_URL,
@@ -177,6 +179,31 @@ def build_parser() -> argparse.ArgumentParser:
         print(f'Changelog: {CHANGELOG_URL}')
         return 0
     version_parser.set_defaults(func=run_version)
+
+    screen_parser = sub.add_parser(
+        "screen",
+        help="inspect or prepare screen-support capabilities",
+    )
+    screen_sub = screen_parser.add_subparsers(dest="screen_command", required=True)
+    screen_probe = screen_sub.add_parser(
+        "probe",
+        help="check graphical session and ScreenCast portal readiness",
+    )
+    def run_screen_probe(args):
+        screen = detect_linux_screen_backend()
+        print("RELMOTE SCREEN PROBE\n")
+        print(f"Session: {screen.session_type}")
+        print(screen.note)
+        if screen.session_type == "wayland":
+            env = portal_environment()
+            ok, message = portal_screen_cast_available()
+            print(f"Runtime: {env.runtime_dir}")
+            print(f"Session bus: {env.bus_address}")
+            print(f"ScreenCast portal: {'ready' if ok else 'not ready'}")
+            print(message)
+            return 0 if ok else 1
+        return 0 if screen.session_type == "x11" else 1
+    screen_probe.set_defaults(func=run_screen_probe)
 
     ssh_parser = sub.add_parser(
         "ssh",
