@@ -136,6 +136,29 @@ The real HID transport exists in software but has **not yet been validated on ph
 9. KVM/video module.
 10. Constrained mesh/store-and-forward operation.
 
+## Try the Linux preview
+
+During active development, the easiest repository install is with `pipx`:
+
+```bash
+pipx install 'git+https://github.com/dev11systems/relmote.git'
+relmote
+```
+
+Upgrade:
+
+```bash
+pipx upgrade relmote
+```
+
+Uninstall:
+
+```bash
+pipx uninstall relmote
+```
+
+See [Install from the repository](docs/INSTALL-FROM-REPO.md) for distro setup, pinning a commit/tag, and contributor options.
+
 ## Status
 
 **Early prototype.** The software authorization boundary and first target transport are executable and covered by CI. The next milestone is hardware validation on a sacrificial machine with physical authorization and STOP controls.
