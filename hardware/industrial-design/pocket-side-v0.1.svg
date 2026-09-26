@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="420" viewBox="0 0 700 420">
+  <rect width="700" height="420" fill="white"/>
+  <g stroke="#111" fill="none" stroke-width="3">
+    <rect x="100" y="110" width="450" height="54" rx="18"/>
+    <rect x="100" y="180" width="450" height="18" rx="7" stroke-dasharray="8 5"/>
+    <rect x="100" y="214" width="450" height="30" rx="10" stroke-dasharray="8 5"/>
+    <line x1="590" y1="110" x2="590" y2="164"/>
+    <line x1="578" y1="110" x2="602" y2="110"/>
+    <line x1="578" y1="164" x2="602" y2="164"/>
+    <line x1="625" y1="110" x2="625" y2="244"/>
+    <line x1="613" y1="110" x2="637" y2="110"/>
+    <line x1="613" y1="244" x2="637" y2="244"/>
+  </g>
+  <g fill="#111" font-family="sans-serif">
+    <text x="118" y="142" font-size="18" font-weight="700">Pocket core</text>
+    <text x="118" y="195" font-size="15">example S module (+6 mm)</text>
+    <text x="118" y="235" font-size="15">example battery module (+10 mm)</text>
+    <text x="603" y="142" font-size="16">18 mm</text>
+    <text x="642" y="181" font-size="16" transform="rotate(90 642 181)">34 mm field stack</text>
+    <text x="100" y="300" font-size="17">Core thickness is intentional: repairability, replaceable battery, ports, thermal headroom.</text>
+    <text x="100" y="356" font-size="18" font-weight="700">Relmote Pocket side / stack — v0.1</text>
+  </g>
+</svg>
