@@ -1,0 +1,32 @@
+{
+  "module": {
+    "id": "example.power.battery.v1",
+    "vendor": "example",
+    "product": "battery-pack",
+    "hardware_revision": 1,
+    "firmware_revision": 1,
+    "serial": null
+  },
+  "protocol": {
+    "descriptor_version": 1
+  },
+  "capabilities": [
+    "power.battery",
+    "power.telemetry"
+  ],
+  "links": [
+    "control"
+  ],
+  "power": {
+    "typical_mw": 50,
+    "peak_mw": 200,
+    "can_source": true,
+    "source_peak_mw": 15000
+  },
+  "passthrough": {
+    "power": true,
+    "control": true,
+    "usb2": true,
+    "high_speed": false
+  }
+}
