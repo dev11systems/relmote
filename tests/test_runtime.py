@@ -27,3 +27,28 @@ def test_runtime_has_shared_event_stream():
         "session.started",
         "task.completed",
     ]
+
+
+def test_remote_support_is_off_by_default_and_separate_from_local_checks():
+    runtime = RelmoteRuntime()
+
+    runtime.start_checks()
+    snapshot = runtime.snapshot()
+
+    assert snapshot["session"]["mode"] == "observe"
+    assert snapshot["support"]["available"] is False
+    assert snapshot["support"]["mode"] == "disabled"
+
+
+def test_remote_support_can_be_enabled_and_disabled():
+    runtime = RelmoteRuntime()
+
+    runtime.enable_support_until_disabled()
+    assert runtime.snapshot()["support"] == {
+        "available": True,
+        "mode": "until-disabled",
+    }
+
+    runtime.disable_support()
+    assert runtime.snapshot()["support"]["available"] is False
+    assert runtime.snapshot()["support"]["mode"] == "disabled"
