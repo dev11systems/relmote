@@ -55,6 +55,7 @@ See:
 - [Protocol](docs/PROTOCOL.md)
 - [Scenarios](docs/SCENARIOS.md)
 - [Hardware strategy](docs/HARDWARE.md)
+- [Hardware architecture](hardware/architecture/README.md)
 - [Modularity](docs/MODULARITY.md)
 - [Power architecture](docs/POWER.md)
 - [Compute architecture](docs/COMPUTE.md)
