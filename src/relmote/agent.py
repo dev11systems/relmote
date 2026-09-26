@@ -8,6 +8,8 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from .platforms import current_platform_adapter
+
 
 @dataclass(frozen=True)
 class AgentObservation:
@@ -32,6 +34,7 @@ class LocalAgent:
             "storage.inspect",
             "network.inspect",
             "network.dns",
+            "platform.native",
         }
     )
 
@@ -48,6 +51,7 @@ class LocalAgent:
             "storage.inspect": self._storage,
             "network.inspect": self._network,
             "network.dns": self._dns,
+            "platform.native": self._native,
         }
         return AgentObservation(capability, handlers[capability]())
 
@@ -158,6 +162,13 @@ class LocalAgent:
                 "S2 does not yet enumerate every interface/route portably",
                 "no external connectivity probe was performed",
             ],
+        }
+
+    def _native(self) -> dict:
+        adapter = current_platform_adapter()
+        return {
+            "observations": adapter.observations(),
+            "evidence": "platform-adapter",
         }
 
     def _dns(self) -> dict:
