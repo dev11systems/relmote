@@ -4,10 +4,10 @@ from relmote.tool_actions import ToolAction
 from relmote.tool_policy import ToolEffect
 
 
-def test_pytest_is_read_only_in_preview_policy():
+def test_pytest_is_workspace_execution_and_requires_approval():
     action = ToolAction.create("pytest", ("-q",))
-    assert action.effect is ToolEffect.READ_ONLY
-    assert not action.requires_approval
+    assert action.effect is ToolEffect.WORKSPACE_EXECUTION
+    assert action.requires_approval
 
 
 def test_mutating_git_action_requires_approval():
