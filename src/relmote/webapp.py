@@ -8,6 +8,7 @@ from urllib.parse import parse_qs, urlparse
 from .software_node import SoftwareNode
 from .report import export_support_report
 from .lan_auth import TemporaryLANAccess
+from .presentation import capability_label
 import tempfile
 import socket
 
@@ -33,7 +34,7 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 </head>
 <body>
 <h1>RELMOTE</h1>
-<div class="muted">Software node · local-only preview</div>
+<div class="muted">Help and diagnostics for this computer</div>
 
 <div class="grid">
  <section class="card"><h2>Node</h2><div id="node">Loading…</div></section>
@@ -46,13 +47,13 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 </section>
 
 <section class="card">
- <h2>Read-only diagnostic tasks</h2>
+ <h2>Check this computer</h2>
  <button onclick="runTask('system-overview')">System overview</button>
  <button onclick="runTask('network-overview')">Network overview</button>
  <button onclick="runTask('diagnose-network')">Diagnose network</button>
  <button onclick="runTask('storage-overview')">Storage overview</button>
  <button onclick="selfCheck()">Self-check</button>
- <p class="muted">Tasks require an active Observe session. S2 exposes no write capabilities.</p>
+ <p class="muted">These checks only view information. They do not change this computer.</p>
 </section>
 
 <section class="card">
@@ -83,7 +84,7 @@ async function refresh(){
  const d=await request('/api/v1/snapshot');
  node.innerHTML='<strong>'+esc(d.node.name)+'</strong><br><code>'+esc(d.node.fingerprint)+'</code><br><span class="muted">'+esc(d.node.implementation)+'</span>';
  target.innerHTML='<strong>'+esc(d.target.name)+'</strong><br><span class="muted">'+esc(d.target.relationship)+'</span>';
- caps.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(x)+'</span>').join('');
+ caps.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(d.capability_labels[x]||x)+'</span>').join('');
  if(!d.session || d.session.revoked){
    session.innerHTML='<strong>INACTIVE</strong><br><button onclick="startSession()">Start Observe session</button>';
  }else{
@@ -160,7 +161,11 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 self.end_headers()
                 self.wfile.write(body)
             elif path == "/api/v1/snapshot":
-                _json(self, HTTPStatus.OK, node.snapshot())
+                value = node.snapshot()
+                value["capability_labels"] = {
+                    cap: capability_label(cap) for cap in value["capabilities"]
+                }
+                _json(self, HTTPStatus.OK, value)
             elif path == "/api/v1/health":
                 _json(self, HTTPStatus.OK, {"status": "ok"})
             elif path == "/api/v1/self-check":
