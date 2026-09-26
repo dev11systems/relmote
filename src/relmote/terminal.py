@@ -44,3 +44,7 @@ class TerminalSession:
         if self.state is not TerminalState.ACTIVE:
             raise ValueError("only an active terminal can be ended")
         self.state = TerminalState.ENDED
+
+    def revoke(self) -> None:
+        if self.state in {TerminalState.REQUESTED, TerminalState.ACTIVE}:
+            self.state = TerminalState.ENDED
