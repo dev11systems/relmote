@@ -93,3 +93,30 @@ def test_stop_support_revokes_terminal_authority():
 
     assert terminal.state.value == "ended"
     assert runtime.snapshot()["support"]["available"] is False
+
+
+def test_terminal_io_routes_through_manager():
+    class FakeManager:
+        def __init__(self):
+            self.data = b"prompt$ "
+            self.written = b""
+        def attach(self, session):
+            pass
+        def read(self, session_id):
+            value, self.data = self.data, b""
+            return value
+        def write(self, session_id, data):
+            self.written += data
+        def close(self, session_id):
+            pass
+        def close_all(self):
+            pass
+
+    runtime = RelmoteRuntime(terminal_manager=FakeManager())
+    runtime.enable_support_until_disabled()
+    terminal = runtime.request_terminal("this-computer")
+    runtime.approve_terminal(terminal.session_id)
+
+    assert runtime.read_terminal(terminal.session_id) == b"prompt$ "
+    runtime.write_terminal(terminal.session_id, b"echo hi\n")
+    assert runtime.terminal_manager.written == b"echo hi\n"
