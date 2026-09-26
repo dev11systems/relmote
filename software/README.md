@@ -29,6 +29,7 @@ The product is not one phone app.
 See also:
 
 - [Software-first MVP](SOFTWARE-MVP.md)
+- [Deployment](DEPLOYMENT.md)
 - [Node implementations](NODE-IMPLEMENTATIONS.md)
 - [Relmote Agent](AGENT.md)
 - [Relmote Live](LIVE.md)
