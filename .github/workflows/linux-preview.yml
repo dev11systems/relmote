@@ -33,21 +33,21 @@ jobs:
 
       - name: Build standalone preview
         run: |
-          pyinstaller             --onefile             --name relmote-preview-linux-x86_64             --collect-submodules relmote             src/relmote/__main__.py
+          pyinstaller             --onefile             --name relmote-linux-x86_64             --collect-submodules relmote             src/relmote/__main__.py
 
       - name: Smoke test artifact
         run: |
-          ./dist/relmote-preview-linux-x86_64 --help
-          ./dist/relmote-preview-linux-x86_64 version
+          ./dist/relmote-linux-x86_64 --help
+          ./dist/relmote-linux-x86_64 version
 
       - name: Checksums
         run: |
           cd dist
-          sha256sum relmote-preview-linux-x86_64 > SHA256SUMS
+          sha256sum relmote-linux-x86_64 > SHA256SUMS
 
       - uses: actions/upload-artifact@v4
         with:
-          name: relmote-preview-linux-x86_64
+          name: relmote-linux-x86_64
           path: |
-            dist/relmote-preview-linux-x86_64
+            dist/relmote-linux-x86_64
             dist/SHA256SUMS
