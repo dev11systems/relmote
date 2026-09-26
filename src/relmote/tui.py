@@ -35,7 +35,7 @@ def render_home(
             f"  {web_url}" if web_ready else "",
             f"  {web_exposure}" if web_ready else "",
             "",
-            "4  Open web interface",
+            "4  Web interface",
             "5  Remote support settings",
             "h  Help",
             "q  Quit",
@@ -68,12 +68,16 @@ def run_simple_tui(
         if choice == "q":
             return 0
         if choice == "4":
-            message = (
-                f"Web interface: {web_url}"
-                if web_ready
-                else "Web interface is unavailable. Try relmote doctor."
-            )
-            input(f"\n{message}\nPress Enter to continue.")
+            if web_ready:
+                print("\nWEB INTERFACE\n")
+                print(web_url)
+                print(f"\nConnection: {web_exposure}")
+                print("\nOpen this address in a browser on an authorized device.")
+                print("Relmote must keep running while you use the web interface.")
+            else:
+                print("\nWeb interface is unavailable.")
+                print("Try: relmote doctor")
+            input("\nPress Enter to return to Relmote.")
             continue
         if choice == "h":
             input("\n" + render_help() + "\nPress Enter to continue.")
