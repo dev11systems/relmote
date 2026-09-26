@@ -17,6 +17,7 @@ from .ssh_workspace import SSHWorkspace
 from .workspace import WorkspacePolicy
 from .app import run_app
 from .version import build_info
+from .updater import update_repo_preview
 from .transports.dry_run import DryRunTransport
 
 
@@ -79,6 +80,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    update_parser = sub.add_parser(
+        "update",
+        help="update a repository-installed Relmote development preview",
+    )
+    update_parser.add_argument(
+        "--check",
+        action="store_true",
+        help="show the preview update action without changing anything",
+    )
+    update_parser.set_defaults(
+        func=lambda args: update_repo_preview(dry_run=args.check)
+    )
 
     version_parser = sub.add_parser(
         "version",
