@@ -83,9 +83,38 @@ See:
 - [Safety interlock](docs/SAFETY-INTERLOCK.md)
 - [Roadmap](docs/ROADMAP.md)
 
+## One platform, software and hardware
+
+Relmote is both a **software system** and a **hardware platform**. Neither form is secondary.
+
+A software-only Relmote can be installed on an existing computer, launched temporarily in a recovery environment, run in a VM/container, or exposed through an authorized private network. It can provide diagnostics, terminal access, files/workspaces, screen support, planners, and other capabilities without requiring a separate physical device.
+
+A hardware Relmote carries the same authority/session/capability model outside the target computer. Hardware can add pre-boot access, USB HID, serial, KVM/video, isolated safety controls, portable networking, battery power, modular I/O, and access to systems where installing software is undesirable or impossible.
+
+Hybrid use is first-class: software and hardware nodes can cooperate rather than compete.
+
+```text
+                     RELMOTE PLATFORM
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+       RELMOTE SOFTWARE            RELMOTE HARDWARE
+              │                           │
+      installed / temporary       Pocket / All-in-One
+      recovery / VM / agent       Mini / modular / DIY
+              │                           │
+              └─────────────┬─────────────┘
+                            │
+                shared identity / policy
+               sessions / capabilities
+                 transports / evidence
+```
+
+See [Software architecture](software/README.md) and [Hardware architecture](hardware/architecture/README.md).
+
 ## Platform forms
 
-Relmote is intentionally not one fixed enclosure.
+Relmote is intentionally not one fixed enclosure or deployment form.
 
 Reference forms currently include:
 
@@ -167,7 +196,18 @@ See [Install from the repository](docs/INSTALL-FROM-REPO.md) for distro setup, p
 
 ## Status
 
-**Early prototype.** The software authorization boundary and first target transport are executable and covered by CI. The next milestone is hardware validation on a sacrificial machine with physical authorization and STOP controls.
+**Active early prototype — software-first validation, hardware track retained.**
+
+The Linux software preview is now usable for real-machine testing and includes repository install/update, passive diagnostics, a TUI and private Tailscale web controller, explicit remote-support availability, a working normal-user browser PTY/terminal path, and graphical-session/Wayland discovery. Screen streaming, controller pairing, richer files/workspaces, planner bridges, and cross-platform adapters remain in development.
+
+The hardware track remains first-class. Existing Pi Zero, HID, modularity, power, compute, enclosure, module, and safety-plane work is retained. Hardware validation should reuse the same session/capability/authorization semantics proven in software rather than becoming a separate product.
+
+Near-term development therefore proceeds on two linked tracks:
+
+1. **Software:** mature remote support (terminal → screen observe → files → pairing → controlled input), diagnostics, packaging, and Linux-first real-world testing.
+2. **Hardware:** validate USB HID and physical AUTHORIZE/STOP, then add serial, USB networking, KVM/video, modular I/O, portable power, and integrated Pocket/All-in-One prototypes.
+
+A capability should live in the shared core whenever possible; software/hardware-specific code belongs in adapters, transports, drivers, and physical modules.
 
 ## Name
 
