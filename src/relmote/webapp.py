@@ -260,9 +260,9 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                     if not runtime:
                         raise ValueError("terminal lifecycle requires shared runtime")
                     parts = path.strip("/").split("/")
-                    if len(parts) != 5:
+                    if len(parts) != 6:
                         raise ValueError("invalid terminal action path")
-                    session_id, action = parts[3], parts[4]
+                    session_id, action = parts[4], parts[5]
                     if action == "approve":
                         runtime.approve_terminal(session_id)
                     elif action == "deny":
