@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from .agent import AgentObservation, LocalAgent
 from .diagnostics import DiagnosticFinding, diagnose_network
+from pathlib import Path
 
 
 def utcnow_iso() -> str:
@@ -110,6 +111,27 @@ class SoftwareNode:
             )
         self.tasks.append(task)
         return task
+
+    def self_check(self) -> dict:
+        checks = {
+            "observe_session": bool(self.session and not self.session.revoked),
+            "capability_count": len(self.agent.capabilities),
+            "python_runtime": self.agent.observe("system.platform").data.get("python"),
+            "hostname_available": bool(
+                self.agent.observe("system.identify").data.get("hostname")
+            ),
+            "storage_observation": (
+                self.agent.observe("storage.inspect").data.get("total_bytes", 0) > 0
+            ),
+        }
+        return {
+            "status": "ok" if all(
+                value for key, value in checks.items()
+                if key != "observe_session"
+            ) else "attention",
+            "checks": checks,
+            "note": "Observe session is expected to be false before the user starts one.",
+        }
 
     def snapshot(self) -> dict:
         session = None
