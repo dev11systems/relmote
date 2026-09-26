@@ -53,3 +53,12 @@ def test_network_diagnosis_contains_findings_and_evidence():
     assert any(
         finding.status == "not-tested" for finding in task.findings
     )
+
+
+def test_self_check_reports_runtime_health_without_session():
+    node = SoftwareNode()
+    result = node.self_check()
+
+    assert result["status"] == "ok"
+    assert result["checks"]["observe_session"] is False
+    assert result["checks"]["hostname_available"] is True
