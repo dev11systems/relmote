@@ -4,6 +4,8 @@ import json
 import os
 from importlib.metadata import PackageNotFoundError, distribution, version
 
+from .dev_revision import DEV_REVISION
+
 
 def package_version() -> str:
     try:
@@ -36,7 +38,7 @@ def display_version(base_version: str, commit: str, channel: str) -> str:
     """Human-facing version that identifies development snapshots."""
     if channel == "repository" and commit != "unknown":
         normalized = base_version.replace(".dev0", "")
-        return f"{normalized}-dev.{commit[:8]}"
+        return f"{normalized}-dev.{DEV_REVISION}"
     return base_version
 
 
