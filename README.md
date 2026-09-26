@@ -57,6 +57,7 @@ See:
 - [Hardware strategy](docs/HARDWARE.md)
 - [Modularity](docs/MODULARITY.md)
 - [Power architecture](docs/POWER.md)
+- [Compute architecture](docs/COMPUTE.md)
 - [Hardware concepts](hardware/concepts/README.md)
 - [Industrial design](hardware/industrial-design/README.md)
 - [Open specifications](spec/README.md)
