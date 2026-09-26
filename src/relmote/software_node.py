@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from .agent import AgentObservation, LocalAgent
+from .diagnostics import DiagnosticFinding, diagnose_network
 
 
 def utcnow_iso() -> str:
@@ -45,6 +46,7 @@ class DiagnosticTask:
     task_type: str
     created_at: str
     observations: tuple[AgentObservation, ...]
+    findings: tuple[DiagnosticFinding, ...] = ()
 
 
 class SoftwareNode:
@@ -87,15 +89,25 @@ class SoftwareNode:
     def run_task(self, task_type: str) -> DiagnosticTask:
         if not self.session or self.session.revoked:
             raise PermissionError("an active Observe session is required")
-        capabilities = self.TASKS.get(task_type)
-        if capabilities is None:
-            raise ValueError(f"unknown diagnostic task: {task_type}")
-        task = DiagnosticTask(
-            task_id=str(uuid4()),
-            task_type=task_type,
-            created_at=utcnow_iso(),
-            observations=tuple(self.agent.observe(cap) for cap in capabilities),
-        )
+        if task_type == "diagnose-network":
+            report = diagnose_network(self.agent)
+            task = DiagnosticTask(
+                task_id=str(uuid4()),
+                task_type=task_type,
+                created_at=utcnow_iso(),
+                observations=report.observations,
+                findings=report.findings,
+            )
+        else:
+            capabilities = self.TASKS.get(task_type)
+            if capabilities is None:
+                raise ValueError(f"unknown diagnostic task: {task_type}")
+            task = DiagnosticTask(
+                task_id=str(uuid4()),
+                task_type=task_type,
+                created_at=utcnow_iso(),
+                observations=tuple(self.agent.observe(cap) for cap in capabilities),
+            )
         self.tasks.append(task)
         return task
 
@@ -127,6 +139,15 @@ class SoftwareNode:
                     "task_id": task.task_id,
                     "task_type": task.task_type,
                     "created_at": task.created_at,
+                    "findings": [
+                        {
+                            "status": finding.status,
+                            "statement": finding.statement,
+                            "evidence": list(finding.evidence),
+                            "uncertainty": finding.uncertainty,
+                        }
+                        for finding in task.findings
+                    ],
                     "observations": [
                         {"capability": obs.capability, "data": obs.data}
                         for obs in task.observations
