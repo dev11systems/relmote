@@ -16,6 +16,26 @@ The preview should let someone:
 8. revoke the session;
 9. quit Relmote and leave no background service.
 
+## Rae/cousin remote test
+
+Because the machine already has authorized Tailscale access, the preferred remote preview is:
+
+```text
+Relmote localhost
+→ Tailscale Serve or explicit Tailscale-only binding
+→ Rae's controller
+```
+
+Relmote may remain installed between support sessions.
+
+Availability can be:
+
+- disabled/dormant;
+- enabled for a chosen duration;
+- enabled until manually disabled.
+
+This is separate from capability grants.
+
 ## Security boundary
 
 Preview defaults:
