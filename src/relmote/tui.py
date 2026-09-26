@@ -12,17 +12,20 @@ def render_home(
 ) -> str:
     value = runtime.snapshot()
     session = value.get("session")
-    support = (
-        "Checks enabled"
+    checks = (
+        "ON"
         if session and not session.get("revoked")
-        else "Checks off"
+        else "OFF"
     )
+    remote = value.get("support", {})
+    support = "ON" if remote.get("available") else "OFF"
     return "\n".join(
         [
             "RELMOTE",
             "",
             value["target"]["name"],
-            f"Local checks: {support}",
+            f"Local checks:   {checks}",
+            f"Remote support: {support}",
             "",
             "1  Check this computer",
             "2  Network diagnosis",
@@ -31,6 +34,7 @@ def render_home(
             f"  {web_url}" if web_ready else "",
             "",
             "4  Open web interface",
+            "5  Remote support settings",
             "h  Help",
             "q  Quit",
         ]
@@ -65,6 +69,24 @@ def run_simple_tui(
             continue
         if choice == "h":
             input("\n" + render_help() + "\nPress Enter to continue.")
+            continue
+        if choice == "5":
+            current = runtime.snapshot()["support"]
+            print("\nREMOTE SUPPORT\n")
+            print("This controls whether remote support is permitted.")
+            print("It does not configure Tailscale/SSH/network exposure by itself.\n")
+            print(f"Current: {'ON' if current['available'] else 'OFF'} ({current['mode']})")
+            print("\n1  Enable until I turn it off")
+            print("2  Enable for 1 hour")
+            print("3  Disable support")
+            print("b  Back")
+            support_choice = input("\n> ").strip().lower()
+            if support_choice == "1":
+                runtime.enable_support_until_disabled()
+            elif support_choice == "2":
+                runtime.enable_support_for(3600)
+            elif support_choice == "3":
+                runtime.disable_support()
             continue
 
         snapshot = runtime.snapshot()
