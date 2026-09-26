@@ -108,11 +108,64 @@ class SoftwareNode:
             capabilities = self.TASKS.get(task_type)
             if capabilities is None:
                 raise ValueError(f"unknown diagnostic task: {task_type}")
+            task_observations = tuple(
+                self.agent.observe(cap) for cap in capabilities
+            )
+            findings: list[DiagnosticFinding] = []
+
+            if task_type == "system-overview":
+                identity = next(
+                    (o for o in task_observations if o.capability == "system.identify"),
+                    None,
+                )
+                memory = next(
+                    (o for o in task_observations if o.capability == "system.memory"),
+                    None,
+                )
+                if identity:
+                    findings.append(DiagnosticFinding(
+                        "observed",
+                        f"Computer name: {identity.data.get('hostname', 'unknown')}.",
+                        ("system.identify",),
+                    ))
+                if memory and memory.data.get("physical_bytes"):
+                    gib = memory.data["physical_bytes"] / (1024 ** 3)
+                    findings.append(DiagnosticFinding(
+                        "observed",
+                        f"Physical memory: {gib:.1f} GiB.",
+                        ("system.memory",),
+                    ))
+
+            elif task_type == "network-overview":
+                network = next(
+                    (o for o in task_observations if o.capability == "network.inspect"),
+                    None,
+                )
+                if network:
+                    addresses = network.data.get("non_loopback_addresses", [])
+                    findings.append(DiagnosticFinding(
+                        "observed",
+                        f"{len(addresses)} non-loopback configured address(es) observed.",
+                        ("network.inspect",),
+                        "Configured addresses do not by themselves prove Internet reachability.",
+                    ))
+
+            elif task_type == "storage-overview":
+                storage = task_observations[0] if task_observations else None
+                if storage and storage.data.get("percent_used") is not None:
+                    percent = storage.data["percent_used"]
+                    findings.append(DiagnosticFinding(
+                        "attention" if percent >= 90 else "observed",
+                        f"Primary filesystem is {percent:.1f}% used.",
+                        ("storage.inspect",),
+                    ))
+
             task = DiagnosticTask(
                 task_id=str(uuid4()),
                 task_type=task_type,
                 created_at=utcnow_iso(),
-                observations=tuple(self.agent.observe(cap) for cap in capabilities),
+                observations=task_observations,
+                findings=tuple(findings),
             )
         self.tasks.append(task)
         return task
