@@ -39,6 +39,7 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 <body>
 <h1>RELMOTE</h1>
 <div class="muted">Help and diagnostics for this computer</div>
+<div id="startupError" class="card" style="display:none;border-color:#aaa"></div>
 
 <div class="grid">
  <section class="card"><h2>Node</h2><div id="node">Loading…</div></section>
@@ -113,6 +114,20 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 
 <script>
 const relmoteToken=new URLSearchParams(location.search).get('token');
+const nodeEl=document.getElementById('node');
+const targetEl=document.getElementById('target');
+const sessionEl=document.getElementById('session');
+const supportStateEl=document.getElementById('supportState');
+const remoteToolsEl=document.getElementById('remoteTools');
+const terminalSessionsEl=document.getElementById('terminalSessions');
+const terminalPanelEl=document.getElementById('terminalPanel');
+const terminalOutputEl=document.getElementById('terminalOutput');
+const terminalInputEl=document.getElementById('terminalInput');
+const capsEl=document.getElementById('caps');
+const tasksEl=document.getElementById('tasks');
+const helpTextEl=document.getElementById('helpText');
+const previewStatusEl=document.getElementById('previewStatus');
+const startupErrorEl=document.getElementById('startupError');
 async function request(path, method='GET'){
  const headers={};
  if(relmoteToken) headers['X-Relmote-Token']=relmoteToken;
@@ -124,15 +139,15 @@ async function request(path, method='GET'){
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function refresh(){
  const d=await request('/api/v1/snapshot');
- node.innerHTML='<strong>'+esc(d.node.name)+'</strong><br><code>'+esc(d.node.fingerprint)+'</code><br><span class="muted">'+esc(d.node.implementation)+'</span>';
- target.innerHTML='<strong>'+esc(d.target.name)+'</strong><br><span class="muted">'+esc(d.target.relationship)+'</span>';
- caps.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(d.capability_labels[x]||x)+'</span>').join('');
+ nodeEl.innerHTML='<strong>'+esc(d.node.name)+'</strong><br><code>'+esc(d.node.fingerprint)+'</code><br><span class="muted">'+esc(d.node.implementation)+'</span>';
+ targetEl.innerHTML='<strong>'+esc(d.target.name)+'</strong><br><span class="muted">'+esc(d.target.relationship)+'</span>';
+ capsEl.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(d.capability_labels[x]||x)+'</span>').join('');
  const remote=d.support||{available:false,mode:'disabled'};
- supportState.innerHTML='<strong>'+(remote.available?'ON':'OFF')+'</strong><br><span class="muted">'+esc(remote.mode)+'</span>';
+ supportStateEl.innerHTML='<strong>'+(remote.available?'ON':'OFF')+'</strong><br><span class="muted">'+esc(remote.mode)+'</span>';
  const features=d.features||{};
  const screen=features.screen||{};
  const terminal=features.terminal||{};
- remoteTools.innerHTML=
+ remoteToolsEl.innerHTML=
    '<p><strong>Screen</strong><br>'+
    (screen.available?'Available':'Not available yet')+
    '<br><span class="muted">'+esc(screen.note||'')+'</span></p>'+
@@ -141,7 +156,7 @@ async function refresh(){
      (terminal.available?'Transport detected · web terminal coming next':'Unavailable'))+
    '<br><span class="muted">'+esc(terminal.note||'')+'</span></p>';
  const terminalItems=d.terminal_sessions||[];
- terminalSessions.innerHTML=terminalItems.length ? terminalItems.map(t=>{
+ terminalSessionsEl.innerHTML=terminalItems.length ? terminalItems.map(t=>{
    let actions='';
    if(t.state==='requested'){
      actions='<button onclick="terminalAction(\'approve\',\''+esc(t.session_id)+'\')">Allow terminal</button>'+
@@ -154,12 +169,12 @@ async function refresh(){
      'Controller: '+esc(t.controller)+'<br>Authority: '+esc(t.authority)+'<br>'+actions+'</div>';
  }).join('') : '';
  if(!d.session || d.session.revoked){
-   session.innerHTML='<strong>Local checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
+   sessionEl.innerHTML='<strong>Local checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
  }else{
-   session.innerHTML='<span class="good">Local checks enabled</span><br><span class="muted">View information only</span><br><button class="danger" onclick="revoke()">Stop checks</button>';
+   sessionEl.innerHTML='<span class="good">Local checks enabled</span><br><span class="muted">View information only</span><br><button class="danger" onclick="revoke()">Stop checks</button>';
  }
  if(d.tasks.length){
-   tasks.innerHTML=d.tasks.slice().reverse().map(t=>{
+   tasksEl.innerHTML=d.tasks.slice().reverse().map(t=>{
      const findings=(t.findings||[]).map(f =>
        '<p><strong>['+esc(f.status)+']</strong> '+esc(f.statement)+
        (f.uncertainty?'<br><span class="muted">'+esc(f.uncertainty)+'</span>':'')+'</p>'
@@ -168,7 +183,7 @@ async function refresh(){
        findings+
        '<details><summary>Raw observations</summary><pre>'+esc(JSON.stringify(t.observations,null,2))+'</pre></details></div>';
    }).join('');
- }else tasks.textContent='No observations yet.';
+ }else tasksEl.textContent='No observations yet.';
 }
 let activeTerminalId=null;
 let terminalPoll=null;
@@ -180,12 +195,12 @@ async function requestTerminal(){
 }
 async function openTerminal(id){
  activeTerminalId=id;
- terminalPanel.style.display='block';
- terminalOutput.textContent='';
+ terminalPanelEl.style.display='block';
+ terminalOutputEl.textContent='';
  if(terminalPoll) clearInterval(terminalPoll);
  await pollTerminal();
  terminalPoll=setInterval(pollTerminal,300);
- terminalInput.focus();
+ terminalInputEl.focus();
 }
 async function pollTerminal(){
  if(!activeTerminalId) return;
@@ -193,8 +208,8 @@ async function pollTerminal(){
    const d=await request('/api/v1/terminal/'+encodeURIComponent(activeTerminalId)+'/read');
    if(d.data){
      const bytes=Uint8Array.from(atob(d.data),c=>c.charCodeAt(0));
-     terminalOutput.textContent+=new TextDecoder().decode(bytes);
-     terminalOutput.scrollTop=terminalOutput.scrollHeight;
+     terminalOutputEl.textContent+=new TextDecoder().decode(bytes);
+     terminalOutputEl.scrollTop=terminalOutputEl.scrollHeight;
    }
  }catch(e){
    if(terminalPoll) clearInterval(terminalPoll);
@@ -203,8 +218,8 @@ async function pollTerminal(){
 async function sendTerminal(event){
  event.preventDefault();
  if(!activeTerminalId) return;
- const value=terminalInput.value+'\n';
- terminalInput.value='';
+ const value=terminalInputEl.value+'\n';
+ terminalInputEl.value='';
  const bytes=new TextEncoder().encode(value);
  let binary=''; bytes.forEach(b=>binary+=String.fromCharCode(b));
  await requestBody('/api/v1/terminal/'+encodeURIComponent(activeTerminalId)+'/write','POST',{data:btoa(binary)});
@@ -234,22 +249,25 @@ async function runTask(name){
 async function selfCheck(){
  try{
    const d=await request('/api/v1/self-check');
-   previewStatus.textContent='Self-check: '+d.status+' · '+JSON.stringify(d.checks);
+   previewStatusEl.textContent='Self-check: '+d.status+' · '+JSON.stringify(d.checks);
  }catch(e){alert(e.message)}
 }
 async function showHelp(topic){
  try{
    const d=await request('/api/v1/help/'+encodeURIComponent(topic));
-   helpText.textContent=d.text;
+   helpTextEl.textContent=d.text;
  }catch(e){alert(e.message)}
 }
 async function exportReport(){
  try{
    const d=await request('/api/v1/export','POST');
-   previewStatus.textContent='Report written to: '+d.path+' — inspect before sharing.';
+   previewStatusEl.textContent='Report written to: '+d.path+' — inspect before sharing.';
  }catch(e){alert(e.message)}
 }
-refresh();
+refresh().catch(e=>{
+ startupErrorEl.style.display='block';
+ startupErrorEl.textContent='Relmote could not load runtime data: '+e.message;
+});
 </script>
 </body></html>
 """
