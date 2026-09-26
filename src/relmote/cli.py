@@ -96,8 +96,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     serve_parser.add_argument("--host", default="127.0.0.1")
     serve_parser.add_argument("--port", type=int, default=8787)
+    serve_parser.add_argument(
+        "--lan",
+        action="store_true",
+        help="explicit temporary read-only LAN preview with bearer token",
+    )
+    serve_parser.add_argument(
+        "--lifetime-minutes",
+        type=int,
+        default=60,
+        help="temporary LAN token lifetime",
+    )
     serve_parser.set_defaults(
-        func=lambda args: serve_local(host=args.host, port=args.port)
+        func=lambda args: serve_local(
+            host=args.host,
+            port=args.port,
+            lan=args.lan,
+            lifetime_minutes=args.lifetime_minutes,
+        )
     )
 
     bench_parser = sub.add_parser(
