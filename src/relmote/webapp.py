@@ -3,11 +3,13 @@ from __future__ import annotations
 import json
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from .software_node import SoftwareNode
 from .report import export_support_report
+from .lan_auth import TemporaryLANAccess
 import tempfile
+import socket
 
 
 INDEX = """<!doctype html>
@@ -130,9 +132,21 @@ def _json(handler: BaseHTTPRequestHandler, status: HTTPStatus, value: dict) -> N
     handler.wfile.write(body)
 
 
-def make_handler(node: SoftwareNode):
+def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = None):
+    def authorized(handler: BaseHTTPRequestHandler) -> bool:
+        if lan_access is None:
+            return True
+        parsed = urlparse(handler.path)
+        token = parse_qs(parsed.query).get("token", [None])[0]
+        if token is None:
+            token = handler.headers.get("X-Relmote-Token")
+        return lan_access.valid(token)
+
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
+            if not authorized(self):
+                _json(self, HTTPStatus.UNAUTHORIZED, {"error": "temporary LAN token required"})
+                return
             path = urlparse(self.path).path
             if path == "/":
                 body = INDEX.encode()
@@ -152,6 +166,9 @@ def make_handler(node: SoftwareNode):
                 _json(self, HTTPStatus.NOT_FOUND, {"error": "not found"})
 
         def do_POST(self):
+            if not authorized(self):
+                _json(self, HTTPStatus.UNAUTHORIZED, {"error": "temporary LAN token required"})
+                return
             path = urlparse(self.path).path
             try:
                 if path == "/api/v1/session":
@@ -190,16 +207,47 @@ def make_handler(node: SoftwareNode):
     return Handler
 
 
-def serve_local(host: str = "127.0.0.1", port: int = 8787) -> None:
-    if host not in {"127.0.0.1", "::1", "localhost"}:
-        raise ValueError(
-            "S1/S2 only permits localhost binding; LAN access requires pairing/authentication"
+def _best_lan_address() -> str:
+    probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        probe.connect(("192.0.2.1", 9))
+        return probe.getsockname()[0]
+    except OSError:
+        return socket.gethostbyname(socket.gethostname())
+    finally:
+        probe.close()
+
+
+def serve_local(
+    host: str = "127.0.0.1",
+    port: int = 8787,
+    *,
+    lan: bool = False,
+    lifetime_minutes: int = 60,
+) -> None:
+    if lan:
+        host = "0.0.0.0"
+        access = TemporaryLANAccess.create(
+            lifetime_seconds=lifetime_minutes * 60
         )
+    else:
+        if host not in {"127.0.0.1", "::1", "localhost"}:
+            raise ValueError(
+                "non-loopback binding requires explicit --lan preview mode"
+            )
+        access = None
+
     node = SoftwareNode()
-    server = ThreadingHTTPServer((host, port), make_handler(node))
-    print(f"Relmote: http://{host}:{port}")
+    server = ThreadingHTTPServer((host, port), make_handler(node, access))
+    if access:
+        address = _best_lan_address()
+        print("Relmote LAN PREVIEW (trusted private LAN only)")
+        print(f"http://{address}:{port}/?token={access.token}")
+        print(f"expires in {lifetime_minutes} minutes")
+    else:
+        print(f"Relmote: http://{host}:{port}")
     print(f"Node fingerprint: {node.identity.fingerprint}")
-    print("Local-only read-only software node. Ctrl-C to stop.")
+    print("Read-only software node. Ctrl-C to stop.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
