@@ -176,3 +176,35 @@ def test_live_session_cancellation_interrupts_between_characters():
     assert result["stopped_by"] == "session"
     assert result["characters_sent"] == 1
     assert len(sink.getvalue()) == 24
+
+
+def test_activity_callback_wraps_real_device_output():
+    sink = BytesIO()
+    states = []
+    transport = LinuxHIDKeyboardTransport(
+        armed_gate(),
+        device=sink,
+        key_delay=0,
+        activity_changed=states.append,
+    )
+
+    result = transport.execute(action("a"), context())
+
+    assert result["completed"] is True
+    assert states == [True, False]
+
+
+def test_disarmed_transport_never_sets_activity():
+    sink = BytesIO()
+    states = []
+    gate = SafetyGate(clock=lambda: 100.0)
+    transport = LinuxHIDKeyboardTransport(
+        gate,
+        device=sink,
+        key_delay=0,
+        activity_changed=states.append,
+    )
+
+    transport.execute(action("a"), context())
+
+    assert states == []
