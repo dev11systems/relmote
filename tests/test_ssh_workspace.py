@@ -61,3 +61,37 @@ def test_git_status_is_explicit_operation(mock_run):
     argv = mock_run.call_args.args[0]
     assert argv[-5:] == ["git", "-C", "/home/user/project", "status", "--short"]
     assert result.ok
+
+
+@patch("relmote.ssh_workspace.subprocess.run")
+def test_write_is_denied_by_default(mock_run):
+    workspace = SSHWorkspace(
+        "cousin-host",
+        WorkspacePolicy.create("/home/user/project"),
+    )
+
+    with pytest.raises(PermissionError, match="read-only"):
+        workspace.write_text("notes.txt", "hello")
+
+    mock_run.assert_not_called()
+
+
+@patch("relmote.ssh_workspace.subprocess.run")
+def test_write_resolves_parent_and_sends_content_on_stdin(mock_run):
+    mock_run.side_effect = [
+        completed(stdout="/home/user/project/src\n"),
+        completed(stdout="/home/user/project\n"),
+        completed(),
+    ]
+    workspace = SSHWorkspace(
+        "cousin-host",
+        WorkspacePolicy.create("/home/user/project", writable=True),
+    )
+
+    result = workspace.write_text("src/new.txt", "hello from Relmote")
+
+    final = mock_run.call_args_list[-1]
+    argv = final.args[0]
+    assert argv[-1] == "/home/user/project/src/new.txt"
+    assert final.kwargs["input"] == "hello from Relmote"
+    assert result.ok
