@@ -1,0 +1,33 @@
+{
+  "module": {
+    "id": "example.mesh.lora.v1",
+    "vendor": "example",
+    "product": "mesh-lora",
+    "hardware_revision": 1,
+    "firmware_revision": 1,
+    "serial": null
+  },
+  "protocol": {
+    "descriptor_version": 1
+  },
+  "capabilities": [
+    "radio.lora",
+    "mesh.meshcore",
+    "mesh.meshtastic"
+  ],
+  "links": [
+    "control",
+    "usb2"
+  ],
+  "power": {
+    "typical_mw": 450,
+    "peak_mw": 1800,
+    "can_source": false
+  },
+  "passthrough": {
+    "power": true,
+    "control": true,
+    "usb2": false,
+    "high_speed": false
+  }
+}
