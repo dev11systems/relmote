@@ -16,6 +16,7 @@ from .ssh_target import SSHTarget
 from .ssh_workspace import SSHWorkspace
 from .workspace import WorkspacePolicy
 from .app import run_app
+from .version import build_info
 from .transports.dry_run import DryRunTransport
 
 
@@ -78,6 +79,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    version_parser = sub.add_parser(
+        "version",
+        help="show Relmote version/build information",
+    )
+    version_parser.set_defaults(
+        func=lambda args: (print(
+            "Relmote {version} ({channel}, {commit})".format(**build_info())
+        ) or 0)
+    )
 
     ssh_parser = sub.add_parser(
         "ssh",
