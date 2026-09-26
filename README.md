@@ -55,6 +55,7 @@ See:
 - [Trust and permissions](docs/TRUST.md)
 - [Protocol](docs/PROTOCOL.md)
 - [Scenarios](docs/SCENARIOS.md)
+- [Use-case atlas](docs/USE-CASES.md)
 - [Hardware strategy](docs/HARDWARE.md)
 - [Hardware architecture](hardware/architecture/README.md)
 - [Modularity](docs/MODULARITY.md)
