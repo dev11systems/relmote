@@ -81,7 +81,7 @@ Support: OFF
 [ Enable Support ]
 
 Who can help:
-  Rae
+  Trusted helper
 
 When support is enabled:
   ✓ system diagnostics
@@ -109,7 +109,7 @@ system.identify
 Prefer:
 
 ```text
-"Rae wants to edit README.md"
+"A helper wants to edit README.md"
 ```
 
 over:
@@ -134,7 +134,7 @@ A prompt must answer:
 Example:
 
 ```text
-Rae wants to edit one file
+A helper wants to edit one file
 
 Project:
   Test Website
@@ -242,7 +242,7 @@ An optional account may provide convenience such as controller sync, but must no
 The helper should also get a coherent view:
 
 ```text
-Cousin's Computer
+Remote Computer
 Connected privately
 
 You can:
