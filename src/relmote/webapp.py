@@ -345,6 +345,14 @@ def _json(handler: BaseHTTPRequestHandler, status: HTTPStatus, value: dict) -> N
     handler.wfile.write(body)
 
 
+def _parse_terminal_path(path: str) -> tuple[str, str] | None:
+    parts = path.strip("/").split("/")
+    # /api/v1/terminal/<session-id>/<action>
+    if len(parts) != 5 or parts[:3] != ["api", "v1", "terminal"]:
+        return None
+    return parts[3], parts[4]
+
+
 def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = None, runtime: RelmoteRuntime | None = None):
     def authorized(handler: BaseHTTPRequestHandler) -> bool:
         if lan_access is None:
@@ -381,11 +389,14 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 if not runtime:
                     _json(self, HTTPStatus.BAD_REQUEST, {"error": "terminal runtime unavailable"})
                 else:
-                    parts = path.strip("/").split("/")
-                    if len(parts) != 6:
+                    parsed_terminal = _parse_terminal_path(path)
+                    if parsed_terminal is None:
                         _json(self, HTTPStatus.BAD_REQUEST, {"error": "invalid terminal read path"})
                         return
-                    session_id = parts[4]
+                    session_id, action = parsed_terminal
+                    if action != "read":
+                        _json(self, HTTPStatus.BAD_REQUEST, {"error": "invalid terminal read action"})
+                        return
                     data = runtime.read_terminal(session_id)
                     _json(self, HTTPStatus.OK, {
                         "data": base64.b64encode(data).decode("ascii"),
@@ -432,10 +443,10 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 elif path.startswith("/api/v1/terminal/"):
                     if not runtime:
                         raise ValueError("terminal lifecycle requires shared runtime")
-                    parts = path.strip("/").split("/")
-                    if len(parts) != 6:
+                    parsed_terminal = _parse_terminal_path(path)
+                    if parsed_terminal is None:
                         raise ValueError("invalid terminal action path")
-                    session_id, action = parts[4], parts[5]
+                    session_id, action = parsed_terminal
                     if action == "write":
                         length = int(self.headers.get("Content-Length", "0"))
                         payload = json.loads(self.rfile.read(length) or b"{}")
