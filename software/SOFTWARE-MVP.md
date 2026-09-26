@@ -48,6 +48,17 @@ S1 proves:
 
 ## S2
 
+**In progress / first implementation present**
+
+The localhost controller now has:
+
+- ephemeral node identity/fingerprint;
+- explicit Observe session;
+- revoke;
+- capability display;
+- read-only diagnostic task buttons;
+- observation history.
+
 Next:
 
 - real node identity;
