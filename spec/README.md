@@ -10,6 +10,7 @@ This directory contains draft/open specifications that are intended to outlive a
 - [Internal safety protocol v0.1](internal-safety-protocol-v0.1.md)
 - [Controller API v0.1](controller-api-v0.1.md)
 - [Pairing v0.1](pairing-v0.1.md)
+- [Trust model v0.1](trust-model-v0.1.md)
 - [Constrained envelope v0.1](constrained-envelope-v0.1.md)
 
 ## Specification philosophy
