@@ -35,6 +35,8 @@ See also:
 - [Controller UX](CONTROLLER-UX.md)
 - [Client forms](CLIENTS.md)
 - [Discovery](DISCOVERY.md)
+- [Remote access](REMOTE-ACCESS.md)
+- [Access modes](ACCESS-MODES.md)
 - [Planner architecture](PLANNERS.md)
 - [Task lifecycle](TASK-LIFECYCLE.md)
 - [Observations/evidence](OBSERVATIONS.md)
