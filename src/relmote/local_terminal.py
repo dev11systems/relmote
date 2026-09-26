@@ -5,6 +5,9 @@ import pty
 import pwd
 import select
 import signal
+import fcntl
+import struct
+import termios
 from dataclasses import dataclass
 
 from .terminal import TerminalAuthority, TerminalSession, TerminalState
@@ -29,6 +32,12 @@ class LocalTerminalProcess:
         if self.session.state is not TerminalState.ACTIVE:
             raise PermissionError("terminal session is not active")
         return os.write(self.fd, data)
+
+    def resize(self, rows: int, cols: int) -> None:
+        if rows < 1 or cols < 1:
+            raise ValueError("terminal dimensions must be positive")
+        packed = struct.pack("HHHH", rows, cols, 0, 0)
+        fcntl.ioctl(self.fd, termios.TIOCSWINSZ, packed)
 
     def close(self) -> None:
         if self.session.state is TerminalState.ACTIVE:
