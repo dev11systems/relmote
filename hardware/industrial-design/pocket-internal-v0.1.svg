@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="980" viewBox="0 0 620 980">
+  <rect width="620" height="980" fill="white"/>
+  <g stroke="#111" stroke-width="3">
+    <rect x="150" y="90" width="288" height="600" rx="32" fill="none"/>
+    <rect x="165" y="110" width="258" height="70" rx="10" fill="#eee"/>
+    <rect x="165" y="195" width="155" height="150" rx="8" fill="#f7f7f7"/>
+    <rect x="330" y="195" width="93" height="150" rx="8" fill="#ddd"/>
+    <rect x="165" y="360" width="258" height="220" rx="12" fill="#f3f3f3"/>
+    <rect x="165" y="595" width="258" height="70" rx="8" fill="#e5e5e5"/>
+  </g>
+  <g fill="#111" font-family="sans-serif">
+    <text x="223" y="150" font-size="18" font-weight="700">RF / ANTENNA KEEP-OUT</text>
+    <text x="194" y="262" font-size="20" font-weight="700">DISPLAY /</text>
+    <text x="204" y="288" font-size="20" font-weight="700">CONTROLS</text>
+    <text x="343" y="255" font-size="17" font-weight="700">COMPUTE</text>
+    <text x="345" y="280" font-size="17" font-weight="700">+ SAFETY</text>
+    <text x="248" y="475" font-size="28" font-weight="700">BATTERY</text>
+    <text x="207" y="635" font-size="18" font-weight="700">REPLACEABLE I/O BOARD</text>
+    <text x="183" y="716" font-size="16">Conceptual planar zoning — not PCB placement</text>
+    <text x="145" y="800" font-size="20" font-weight="700">Why planar?</text>
+    <text x="145" y="833" font-size="16">Different regions use different portions of the 18 mm Z budget.</text>
+    <text x="145" y="858" font-size="16">Battery and electronics do not need to be stacked over one another.</text>
+    <text x="145" y="915" font-size="18" font-weight="700">Relmote Pocket internal packaging study — v0.1</text>
+  </g>
+</svg>
