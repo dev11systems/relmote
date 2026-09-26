@@ -144,8 +144,8 @@ def build_parser() -> argparse.ArgumentParser:
             print(result.stderr, end="", file=__import__("sys").stderr)
         return 0 if result.ok else result.returncode or 1
 
-    for parser in (workspace_list, workspace_read):
-        parser.set_defaults(func=run_workspace)
+    for workspace_command_parser in (workspace_list, workspace_read):
+        workspace_command_parser.set_defaults(func=run_workspace)
     workspace_sub.choices["git-status"].set_defaults(func=run_workspace)
     workspace_sub.choices["git-diff"].set_defaults(func=run_workspace)
 
