@@ -17,7 +17,7 @@ import socket
 import secrets
 
 
-INDEX = """<!doctype html>
+INDEX = r"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
