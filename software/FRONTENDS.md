@@ -9,7 +9,7 @@ A terminal-launched Relmote can serve the web GUI simultaneously.
 Example:
 
 ```text
-cousin computer
+target computer
 │
 ├─ relmote runtime
 │   ├─ TUI on local terminal
@@ -18,10 +18,10 @@ cousin computer
 └─ Tailscale Serve
        │
        ▼
-    Rae's iPad
+ remote browser
 ```
 
-The cousin may watch/control support locally in the TUI while Rae uses the browser remotely.
+A local user may watch/control support in the TUI while an authorized helper uses the browser remotely.
 
 This is a particularly useful support pattern.
 
@@ -46,7 +46,7 @@ A remote request might appear simultaneously:
 ### TUI
 
 ```text
-Rae wants to edit README.md
+A helper wants to edit README.md
 [Review] [Deny]
 ```
 
