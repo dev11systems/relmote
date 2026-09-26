@@ -1,0 +1,39 @@
+{
+  "name": "Homelab console",
+  "controller": {
+    "distance": "remote",
+    "paths": [
+      "internet",
+      "lan"
+    ],
+    "client": "phone"
+  },
+  "target": {
+    "state": "healthy-os",
+    "paths": [
+      "ssh",
+      "kvm",
+      "redfish"
+    ],
+    "feedback": [
+      "text",
+      "screen",
+      "structured"
+    ]
+  },
+  "authority": {
+    "mode": "operate",
+    "capabilities": [
+      "shell.read",
+      "observe.screen",
+      "power.read"
+    ]
+  },
+  "intelligence": "self-hosted",
+  "persistence": "docked",
+  "requirements": [
+    "native-path-preference",
+    "bounded-grant",
+    "audit"
+  ]
+}
