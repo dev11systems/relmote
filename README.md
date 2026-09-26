@@ -55,11 +55,12 @@ See:
 - [Protocol](docs/PROTOCOL.md)
 - [Scenarios](docs/SCENARIOS.md)
 - [Hardware strategy](docs/HARDWARE.md)
+- [USB HID transport](docs/HID-TRANSPORT.md)
 - [Roadmap](docs/ROADMAP.md)
 
-## Current software proof
+## Current prototype
 
-The repository now contains a transport-neutral execution boundary with:
+The repository now contains:
 
 - bounded target-specific grants;
 - Observe / Teach / Assist / Operate modes;
@@ -68,7 +69,9 @@ The repository now contains a transport-neutral execution boundary with:
 - exact-action approval in Assist mode;
 - one-time action IDs to reject replay;
 - privacy-conscious audit metadata;
-- a no-side-effect dry-run transport.
+- a no-side-effect dry-run transport;
+- a narrow Linux USB HID text transport with no raw-report interface;
+- Raspberry Pi Zero-class USB gadget setup/teardown scripts.
 
 Try the safe simulation after installing locally:
 
@@ -78,23 +81,24 @@ relmote demo --mode assist --approve --text "hello from Relmote"
 pytest -q
 ```
 
-The dry-run transport reports what **would** have been dispatched but cannot emit real target input.
+The real HID transport exists in software but has **not yet been validated on physical target hardware**.
 
 ## Initial implementation path
 
-1. Policy/session engine + dry-run transport. **← current**
-2. USB HID proof-of-concept with explicit approval and immediate stop.
-3. Bidirectional text feedback over USB serial.
-4. BLE companion/control path and Bluetooth HID.
-5. USB networking + local API/web UI.
-6. SSH transport + capability-based path selection.
-7. Physical serial console module.
-8. KVM/video module.
-9. Constrained mesh/store-and-forward operation.
+1. Policy/session engine + dry-run transport. **complete**
+2. USB HID software transport + Pi gadget configuration. **implemented; physical validation next**
+3. Physical AUTHORIZE/STOP controls and sacrificial-target test.
+4. Bidirectional text feedback over USB serial.
+5. BLE companion/control path and Bluetooth HID.
+6. USB networking + local API/web UI.
+7. SSH transport + capability-based path selection.
+8. Physical serial console module.
+9. KVM/video module.
+10. Constrained mesh/store-and-forward operation.
 
 ## Status
 
-**Early prototype.** Core authorization semantics are now executable; target-side hardware output is intentionally not implemented yet. The architecture is being validated before committing to custom hardware so that the project does not become accidentally shaped around one development board or one transport.
+**Early prototype.** The software authorization boundary and first target transport are executable and covered by CI. The next milestone is hardware validation on a sacrificial machine with physical authorization and STOP controls.
 
 ## Name
 
