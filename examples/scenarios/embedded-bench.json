@@ -1,0 +1,36 @@
+{
+  "name": "Embedded development bench",
+  "controller": {
+    "distance": "nearby",
+    "paths": [
+      "usb",
+      "wifi"
+    ],
+    "client": "laptop"
+  },
+  "target": {
+    "state": "firmware",
+    "paths": [
+      "uart",
+      "swd"
+    ],
+    "feedback": [
+      "text",
+      "structured"
+    ]
+  },
+  "authority": {
+    "mode": "operate",
+    "capabilities": [
+      "observe.console",
+      "firmware.read"
+    ]
+  },
+  "intelligence": "human-only",
+  "persistence": "bench",
+  "requirements": [
+    "explicit-debug-capability",
+    "open-module",
+    "local-only"
+  ]
+}
