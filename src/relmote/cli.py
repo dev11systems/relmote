@@ -19,6 +19,7 @@ from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
 from .doctor import print_doctor
+from .check_cli import run_check
 from .transports.dry_run import DryRunTransport
 
 
@@ -81,6 +82,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    check_parser = sub.add_parser(
+        "check",
+        help="run the plain-language full system check",
+    )
+    check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="emit structured findings and observations",
+    )
+    check_parser.set_defaults(func=lambda args: run_check(as_json=args.json))
 
     doctor_parser = sub.add_parser(
         "doctor",
