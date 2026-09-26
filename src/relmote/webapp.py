@@ -301,7 +301,10 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                     _json(self, HTTPStatus.BAD_REQUEST, {"error": "terminal runtime unavailable"})
                 else:
                     parts = path.strip("/").split("/")
-                    session_id = parts[3]
+                    if len(parts) != 6:
+                        _json(self, HTTPStatus.BAD_REQUEST, {"error": "invalid terminal read path"})
+                        return
+                    session_id = parts[4]
                     data = runtime.read_terminal(session_id)
                     _json(self, HTTPStatus.OK, {
                         "data": base64.b64encode(data).decode("ascii"),
