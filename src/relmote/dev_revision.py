@@ -4,5 +4,5 @@ Increment this for each testable development snapshot in the current release
 series. It is intentionally not the raw Git commit count.
 """
 
-# Snapshot 3: web UX, richer diagnostics, and terminal approval repair.
-DEV_REVISION = 3
+# Snapshot 4: usable browser terminal rendering/input and continued UX refinement.
+DEV_REVISION = 4
