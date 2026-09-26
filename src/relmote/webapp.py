@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import base64
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
@@ -56,7 +57,17 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 <section class="card">
  <h2>Remote tools</h2>
  <div id="remoteTools">Loading…</div>
+ <button id="requestTerminalButton" onclick="requestTerminal()">Request terminal on this computer</button>
  <div id="terminalSessions"></div>
+ <div id="terminalPanel" style="display:none">
+   <h3>Terminal</h3>
+   <pre id="terminalOutput" style="min-height:240px;max-height:420px;overflow:auto"></pre>
+   <form onsubmit="sendTerminal(event)">
+     <label for="terminalInput">Input</label>
+     <input id="terminalInput" autocomplete="off" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
+   </form>
+   <p class="muted">Preview terminal uses a normal-user local shell. Administrative terminal is not implemented.</p>
+ </div>
 </section>
 
 <section class="card">
@@ -135,7 +146,8 @@ async function refresh(){
      actions='<button onclick="terminalAction(\'approve\',\''+esc(t.session_id)+'\')">Allow terminal</button>'+
              '<button onclick="terminalAction(\'deny\',\''+esc(t.session_id)+'\')">Deny</button>';
    }else if(t.state==='active'){
-     actions='<button class="danger" onclick="terminalAction(\'end\',\''+esc(t.session_id)+'\')">End terminal</button>';
+     actions='<button onclick="openTerminal(\''+esc(t.session_id)+'\')">Open terminal</button>'+
+             '<button class="danger" onclick="terminalAction(\'end\',\''+esc(t.session_id)+'\')">End terminal</button>';
    }
    return '<div class="card"><strong>Terminal · '+esc(t.state)+'</strong><br>'+
      'Controller: '+esc(t.controller)+'<br>Authority: '+esc(t.authority)+'<br>'+actions+'</div>';
@@ -156,6 +168,53 @@ async function refresh(){
        '<details><summary>Raw observations</summary><pre>'+esc(JSON.stringify(t.observations,null,2))+'</pre></details></div>';
    }).join('');
  }else tasks.textContent='No observations yet.';
+}
+let activeTerminalId=null;
+let terminalPoll=null;
+async function requestTerminal(){
+ try{
+   await request('/api/v1/terminal/request-local','POST');
+   await refresh();
+ }catch(e){alert(e.message)}
+}
+async function openTerminal(id){
+ activeTerminalId=id;
+ terminalPanel.style.display='block';
+ terminalOutput.textContent='';
+ if(terminalPoll) clearInterval(terminalPoll);
+ await pollTerminal();
+ terminalPoll=setInterval(pollTerminal,300);
+ terminalInput.focus();
+}
+async function pollTerminal(){
+ if(!activeTerminalId) return;
+ try{
+   const d=await request('/api/v1/terminal/'+encodeURIComponent(activeTerminalId)+'/read');
+   if(d.data){
+     const bytes=Uint8Array.from(atob(d.data),c=>c.charCodeAt(0));
+     terminalOutput.textContent+=new TextDecoder().decode(bytes);
+     terminalOutput.scrollTop=terminalOutput.scrollHeight;
+   }
+ }catch(e){
+   if(terminalPoll) clearInterval(terminalPoll);
+ }
+}
+async function sendTerminal(event){
+ event.preventDefault();
+ if(!activeTerminalId) return;
+ const value=terminalInput.value+'\n';
+ terminalInput.value='';
+ const bytes=new TextEncoder().encode(value);
+ let binary=''; bytes.forEach(b=>binary+=String.fromCharCode(b));
+ await requestBody('/api/v1/terminal/'+encodeURIComponent(activeTerminalId)+'/write','POST',{data:btoa(binary)});
+}
+async function requestBody(path,method,body){
+ const headers={'Content-Type':'application/json'};
+ if(relmoteToken) headers['X-Relmote-Token']=relmoteToken;
+ const r=await fetch(path,{method,headers,body:JSON.stringify(body)});
+ const data=await r.json();
+ if(!r.ok) throw new Error(data.error||r.statusText);
+ return data;
 }
 async function terminalAction(action,id){
  await request('/api/v1/terminal/'+encodeURIComponent(id)+'/'+encodeURIComponent(action),'POST');
@@ -237,6 +296,16 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 _json(self, HTTPStatus.OK, value)
             elif path == "/api/v1/health":
                 _json(self, HTTPStatus.OK, {"status": "ok"})
+            elif path.startswith("/api/v1/terminal/") and path.endswith("/read"):
+                if not runtime:
+                    _json(self, HTTPStatus.BAD_REQUEST, {"error": "terminal runtime unavailable"})
+                else:
+                    parts = path.strip("/").split("/")
+                    session_id = parts[3]
+                    data = runtime.read_terminal(session_id)
+                    _json(self, HTTPStatus.OK, {
+                        "data": base64.b64encode(data).decode("ascii"),
+                    })
             elif path == "/api/v1/self-check":
                 _json(self, HTTPStatus.OK, node.self_check())
             elif path.startswith("/api/v1/help/"):
@@ -256,14 +325,31 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 return
             path = urlparse(self.path).path
             try:
-                if path.startswith("/api/v1/terminal/"):
+                if path == "/api/v1/terminal/request-local":
+                    if not runtime:
+                        raise ValueError("terminal lifecycle requires shared runtime")
+                    session = runtime.request_terminal(
+                        "this-computer",
+                        controller="web-controller",
+                    )
+                    _json(self, HTTPStatus.CREATED, {
+                        "session_id": session.session_id,
+                        "state": session.state.value,
+                    })
+                elif path.startswith("/api/v1/terminal/"):
                     if not runtime:
                         raise ValueError("terminal lifecycle requires shared runtime")
                     parts = path.strip("/").split("/")
                     if len(parts) != 6:
                         raise ValueError("invalid terminal action path")
                     session_id, action = parts[4], parts[5]
-                    if action == "approve":
+                    if action == "write":
+                        length = int(self.headers.get("Content-Length", "0"))
+                        payload = json.loads(self.rfile.read(length) or b"{}")
+                        raw = base64.b64decode(payload.get("data", ""), validate=True)
+                        runtime.write_terminal(session_id, raw)
+                        _json(self, HTTPStatus.OK, {"written": len(raw)})
+                    elif action == "approve":
                         runtime.approve_terminal(session_id)
                     elif action == "deny":
                         runtime.deny_terminal(session_id)
