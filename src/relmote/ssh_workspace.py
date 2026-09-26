@@ -104,6 +104,49 @@ class SSHWorkspace:
         path = self._canonical_remote(relative)
         return self._run("read", ["cat", "--", str(path)])
 
+    def write_text(self, relative: str, content: str) -> WorkspaceResult:
+        self.policy.require_write()
+        lexical = self.policy.resolve_relative(relative)
+        parent_relative = str(PurePosixPath(relative).parent)
+        parent = self._canonical_remote(parent_relative)
+        destination = parent / lexical.name
+
+        # Transfer content on stdin to a tiny fixed remote program. The remote
+        # argv contains the validated destination; content is never shell code.
+        command = [
+            self.ssh_binary,
+            "-o", "BatchMode=yes",
+            "-o", f"ConnectTimeout={self.connect_timeout}",
+            *self.extra_options,
+            self.target,
+            "--",
+            "python3",
+            "-c",
+            (
+                "import os,pathlib,sys,tempfile;"
+                "p=pathlib.Path(sys.argv[1]);"
+                "fd,tmp=tempfile.mkstemp(prefix='.relmote-',dir=str(p.parent));"
+                "f=os.fdopen(fd,'w');"
+                "f.write(sys.stdin.read());f.flush();os.fsync(f.fileno());f.close();"
+                "os.replace(tmp,p)"
+            ),
+            str(destination),
+        ]
+        completed = subprocess.run(
+            command,
+            input=content,
+            capture_output=True,
+            text=True,
+            timeout=self.connect_timeout + 30,
+            check=False,
+        )
+        return WorkspaceResult(
+            operation="write-text",
+            returncode=completed.returncode,
+            stdout=completed.stdout,
+            stderr=completed.stderr,
+        )
+
     def git_status(self) -> WorkspaceResult:
         self.policy.require_tool("git")
         return self._run(
