@@ -142,9 +142,8 @@ def build_parser() -> argparse.ArgumentParser:
     def run_version(args):
         info = build_info()
         build = info["commit"] if args.full else info["short_commit"]
-        print(f'Relmote {info["display_version"]}')
+        print(f'Relmote {info["display_version"]} (build {build})')
         print(f'Channel: {info["channel"]}')
-        print(f'Build: {build}')
         return 0
     version_parser.set_defaults(func=run_version)
 
