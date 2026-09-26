@@ -19,3 +19,19 @@ def test_vcs_commit_can_be_read_from_direct_url(monkeypatch):
 
     monkeypatch.setattr(version_module, "distribution", lambda name: FakeDistribution())
     assert version_module.installed_vcs_commit() == "abc123"
+
+
+def test_build_info_has_short_commit(monkeypatch):
+    import relmote.version as version_module
+
+    monkeypatch.setattr(
+        version_module,
+        "installed_vcs_commit",
+        lambda: "1234567890abcdef",
+    )
+    monkeypatch.delenv("RELMOTE_BUILD_COMMIT", raising=False)
+    monkeypatch.delenv("RELMOTE_BUILD_CHANNEL", raising=False)
+
+    value = version_module.build_info()
+
+    assert value["short_commit"] == "12345678"
