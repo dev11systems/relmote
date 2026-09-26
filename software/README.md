@@ -33,6 +33,10 @@ See also:
 - [Client forms](CLIENTS.md)
 - [Discovery](DISCOVERY.md)
 - [Planner architecture](PLANNERS.md)
+- [Task lifecycle](TASK-LIFECYCLE.md)
+- [Observations/evidence](OBSERVATIONS.md)
+- [Store-and-forward](STORE-AND-FORWARD.md)
+- [Constrained links](CONSTRAINED-LINKS.md)
 - [Controller API draft](../spec/controller-api-v0.1.md)
 
 ## Components
