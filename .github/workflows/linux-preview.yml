@@ -3,8 +3,8 @@ name: Linux Preview Artifact
 on:
   workflow_dispatch:
   push:
-    tags:
-      - "preview-*"
+    branches:
+      - main
     paths:
       - "src/relmote/**"
       - "pyproject.toml"
