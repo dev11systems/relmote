@@ -49,6 +49,8 @@ See:
 
 - [Platform model](docs/PLATFORM-MODEL.md)
 - [Architecture decisions](docs/DECISIONS.md)
+- [UX principles](docs/UX-PRINCIPLES.md)
+- [Preview UX checklist](docs/PREVIEW-UX-CHECKLIST.md)
 - [MVP / build sequence](docs/MVP.md)
 - [Identity & ownership](docs/IDENTITY.md)
 - [Recovery](docs/RECOVERY.md)
