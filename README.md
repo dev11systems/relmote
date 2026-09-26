@@ -48,6 +48,10 @@ Controller transports and system transports are independent. A phone can control
 See:
 
 - [Platform model](docs/PLATFORM-MODEL.md)
+- [Architecture decisions](docs/DECISIONS.md)
+- [MVP / build sequence](docs/MVP.md)
+- [Identity & ownership](docs/IDENTITY.md)
+- [Recovery](docs/RECOVERY.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Software architecture](software/README.md)
 - [Transport model](docs/TRANSPORTS.md)
