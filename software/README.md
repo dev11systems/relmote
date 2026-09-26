@@ -26,6 +26,15 @@ The product is not one phone app.
                                       cloud
 ```
 
+See also:
+
+- [Daemon](DAEMON.md)
+- [Controller UX](CONTROLLER-UX.md)
+- [Client forms](CLIENTS.md)
+- [Discovery](DISCOVERY.md)
+- [Planner architecture](PLANNERS.md)
+- [Controller API draft](../spec/controller-api-v0.1.md)
+
 ## Components
 
 ### `relmoted`
