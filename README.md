@@ -56,6 +56,7 @@ See:
 - [Scenarios](docs/SCENARIOS.md)
 - [Hardware strategy](docs/HARDWARE.md)
 - [USB HID transport](docs/HID-TRANSPORT.md)
+- [Safety interlock](docs/SAFETY-INTERLOCK.md)
 - [Roadmap](docs/ROADMAP.md)
 
 ## Current prototype
