@@ -37,6 +37,8 @@ See also:
 - [Controller UX](CONTROLLER-UX.md)
 - [Client forms](CLIENTS.md)
 - [Discovery](DISCOVERY.md)
+- [LAN Preview](LAN-PREVIEW.md)
+- [SSH Preview](SSH-PREVIEW.md)
 - [Remote access](REMOTE-ACCESS.md)
 - [Pairing UX](PAIRING-UX.md)
 - [Access modes](ACCESS-MODES.md)
