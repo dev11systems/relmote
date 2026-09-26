@@ -42,6 +42,8 @@ The software transport and USB gadget scripts are implemented. Physical validati
 
 ## Pi-side files
 
+- `BRINGUP.md` — complete MVP-1 bench sequence.
+- `GPIO.md` — GPIO backend strategy.
 - `setup-hid-gadget.sh` — creates the prototype keyboard gadget.
 - `teardown-hid-gadget.sh` — unbinds/removes it.
 - `../../docs/HID-TRANSPORT.md` — transport behavior and safety boundary.
