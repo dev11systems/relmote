@@ -1,6 +1,6 @@
 import pytest
 
-from relmote.webapp import INDEX, serve_local
+from relmote.webapp import INDEX, _parse_terminal_path, serve_local
 
 
 def test_non_loopback_requires_explicit_lan_mode():
@@ -17,3 +17,15 @@ def test_rendered_web_ui_preserves_javascript_escapes():
     assert "terminalInputEl.value+'\\n'" in INDEX
     assert "terminalAction(\\'approve\\'" in INDEX
     assert "terminalAction(\\'deny\\'" in INDEX
+
+
+def test_terminal_routes_have_one_consistent_shape():
+    session_id = "abc-123"
+
+    for action in ("approve", "deny", "end", "read", "write"):
+        assert _parse_terminal_path(
+            f"/api/v1/terminal/{session_id}/{action}"
+        ) == (session_id, action)
+
+    assert _parse_terminal_path("/api/v1/terminal/request-local") is None
+    assert _parse_terminal_path("/api/v1/terminal/abc-123") is None
