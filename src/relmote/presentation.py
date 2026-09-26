@@ -15,6 +15,10 @@ CAPABILITY_LABELS = {
     "file.write": "Edit files",
     "input.keyboard": "Type on this computer",
     "observe.screen": "View this computer's screen",
+    "input.pointer": "Control the pointer",
+    "terminal.open": "Open a terminal",
+    "terminal.workspace": "Use a project terminal",
+    "terminal.admin": "Open an administrative terminal",
 }
 
 
