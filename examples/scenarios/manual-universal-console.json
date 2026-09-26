@@ -1,0 +1,33 @@
+{
+  "name": "Manual universal console",
+  "controller": {
+    "distance": "nearby",
+    "paths": [
+      "ble"
+    ],
+    "client": "phone"
+  },
+  "target": {
+    "state": "recovery",
+    "paths": [
+      "usb.hid",
+      "kvm"
+    ],
+    "feedback": [
+      "screen"
+    ]
+  },
+  "authority": {
+    "mode": "teach",
+    "capabilities": [
+      "observe.screen"
+    ]
+  },
+  "intelligence": "none",
+  "persistence": "temporary",
+  "requirements": [
+    "no-ai-required",
+    "physical-stop",
+    "offline"
+  ]
+}
