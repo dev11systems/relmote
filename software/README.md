@@ -36,6 +36,7 @@ See also:
 - [Client forms](CLIENTS.md)
 - [Discovery](DISCOVERY.md)
 - [Remote access](REMOTE-ACCESS.md)
+- [Pairing UX](PAIRING-UX.md)
 - [Access modes](ACCESS-MODES.md)
 - [Planner architecture](PLANNERS.md)
 - [Task lifecycle](TASK-LIFECYCLE.md)
