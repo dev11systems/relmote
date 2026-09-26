@@ -33,3 +33,13 @@ Goals:
 - later composite USB functions.
 
 No custom PCB should be designed until these stages expose the actual requirements.
+
+
+## Architecture and design
+
+- [Hardware architecture](architecture/README.md)
+- [Component studies](component-studies/README.md)
+- [Industrial design](industrial-design/README.md)
+- [Reference concepts](concepts/README.md)
+
+The Pi Zero build is a prototype implementation, not the definition of Relmote hardware.
