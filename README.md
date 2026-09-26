@@ -48,6 +48,7 @@ Controller transports and system transports are independent. A phone can control
 See:
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Software architecture](software/README.md)
 - [Transport model](docs/TRANSPORTS.md)
 - [Capabilities](docs/CAPABILITIES.md)
 - [Sessions](docs/SESSIONS.md)
