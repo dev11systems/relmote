@@ -1,0 +1,48 @@
+name: Linux Preview Artifact
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "preview-*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux-x86_64:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install . pytest pyinstaller
+
+      - name: Test
+        run: pytest -q
+
+      - name: Build standalone preview
+        run: |
+          pyinstaller             --onefile             --name relmote-preview-linux-x86_64             --collect-submodules relmote             src/relmote/__main__.py
+
+      - name: Smoke test artifact
+        run: |
+          ./dist/relmote-preview-linux-x86_64 --help
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum relmote-preview-linux-x86_64 > SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: relmote-preview-linux-x86_64
+          path: |
+            dist/relmote-preview-linux-x86_64
+            dist/SHA256SUMS
