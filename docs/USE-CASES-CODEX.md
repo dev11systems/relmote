@@ -4,20 +4,20 @@
 
 Scenario:
 
-- target belongs to a consenting family member;
+- target is an authorized computer;
 - target is already reachable through Tailscale;
 - SSH is available;
-- Rae wants Codex or another planner to run elsewhere.
+- an authorized user wants Codex or another planner to run elsewhere.
 
 ```text
-Rae / Codex host
+Controller / Codex host
        │
        │ Tailscale
        ▼
 Relmote SSH adapter
        │
        ▼
-cousin target
+remote target
 ```
 
 The target can remain free of Codex itself.
