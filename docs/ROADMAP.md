@@ -1,0 +1,79 @@
+# Roadmap
+
+Relmote should grow by validating one architectural layer at a time.
+
+## Phase 0 — architecture
+
+- [x] Define controller vs system transports.
+- [x] Define policy as a mandatory execution boundary.
+- [x] Define task semantics above transport.
+- [ ] Define initial capability vocabulary.
+- [ ] Define session and audit-log formats.
+- [ ] Decide initial software/firmware/hardware licenses.
+
+## Phase 1 — safe local prototype
+
+Goal: prove that authorized structured intent can reach a target as USB HID input.
+
+- [ ] Dry-run transport.
+- [ ] Policy engine.
+- [ ] Structured proposals.
+- [ ] Explicit approval.
+- [ ] Immediate revoke/stop behavior.
+- [ ] USB HID adapter.
+- [ ] Action log.
+- [ ] Test on sacrificial machine.
+
+Success criterion: an approved text action is emitted exactly once, and revoking authorization prevents further output.
+
+## Phase 2 — bidirectional text
+
+- [ ] USB CDC serial.
+- [ ] Terminal helper/bridge design.
+- [ ] Capture stdout/stderr where explicitly configured.
+- [ ] Read-only diagnostic task loop.
+- [ ] Transport-independent result objects.
+
+## Phase 3 — companion control
+
+- [ ] BLE control service.
+- [ ] Phone/tablet companion UX.
+- [ ] Bluetooth HID.
+- [ ] Pairing and session display.
+- [ ] Physical authorization/stop interaction.
+
+## Phase 4 — direct IP path
+
+- [ ] USB networking.
+- [ ] Local Relmote API.
+- [ ] Local web UI.
+- [ ] SSH transport.
+- [ ] Capability discovery and automatic path selection.
+
+## Phase 5 — console and recovery
+
+- [ ] TTL UART.
+- [ ] RS-232 / console adapters.
+- [ ] Optional Ethernet.
+- [ ] KVM/video prototype.
+- [ ] Boot/recovery workflows.
+
+## Phase 6 — constrained and intermittent links
+
+- [ ] Compact protocol encoding.
+- [ ] Chunking and resumability.
+- [ ] Store-and-forward.
+- [ ] LoRa experiments.
+- [ ] Meshtastic adapter.
+- [ ] MeshCore adapter.
+- [ ] Uniline/Unilink integration experiments.
+
+## Phase 7 — out-of-band/native adapters
+
+- [ ] Redfish.
+- [ ] AMT where already configured.
+- [ ] Additional platform management APIs.
+
+## Hardware direction
+
+Avoid custom PCB work until the transport, policy, and companion model have been validated on development hardware.
