@@ -133,6 +133,9 @@ def run_bench(
                 break
 
             outcome = runtime.controller.execute(runtime.session, action)
+            # MVP-1 uses one physical lease per dispatched action. Future modes
+            # may explicitly allow bounded multi-action leases.
+            runtime.gate.disarm()
             result = outcome.result or {}
             print(
                 f"sent {result.get('characters_sent', 0)}/"
