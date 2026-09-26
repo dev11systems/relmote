@@ -8,6 +8,7 @@ from uuid import uuid4
 from .software_node import SoftwareNode
 from .access_policy import AccessPolicy
 from .feature_status import remote_feature_status
+from .terminal import TerminalAuthority, TerminalSession, TerminalState
 
 
 def utcnow_iso() -> str:
@@ -28,6 +29,7 @@ class RelmoteRuntime:
 
     node: SoftwareNode = field(default_factory=SoftwareNode)
     support_access: AccessPolicy = field(default_factory=AccessPolicy)
+    terminal_sessions: dict[str, TerminalSession] = field(default_factory=dict)
     _events: list[RuntimeEvent] = field(default_factory=list)
     _lock: RLock = field(default_factory=RLock)
 
@@ -77,6 +79,57 @@ class RelmoteRuntime:
             self.emit("support.disabled")
             return self.snapshot()
 
+    def request_terminal(
+        self,
+        target: str,
+        *,
+        controller: str = "remote-controller",
+        authority: TerminalAuthority = TerminalAuthority.USER,
+    ) -> TerminalSession:
+        with self._lock:
+            if not self.support_access.available():
+                raise PermissionError("remote support is off")
+            session = TerminalSession(
+                target=target,
+                authority=authority,
+                controller=controller,
+            )
+            self.terminal_sessions[session.session_id] = session
+            self.emit("terminal.requested", {
+                "terminal_session_id": session.session_id,
+                "target": target,
+                "controller": controller,
+                "authority": authority.value,
+            })
+            return session
+
+    def approve_terminal(self, session_id: str) -> TerminalSession:
+        with self._lock:
+            session = self.terminal_sessions[session_id]
+            session.approve()
+            self.emit("terminal.approved", {
+                "terminal_session_id": session_id,
+            })
+            return session
+
+    def deny_terminal(self, session_id: str) -> TerminalSession:
+        with self._lock:
+            session = self.terminal_sessions[session_id]
+            session.deny()
+            self.emit("terminal.denied", {
+                "terminal_session_id": session_id,
+            })
+            return session
+
+    def end_terminal(self, session_id: str) -> TerminalSession:
+        with self._lock:
+            session = self.terminal_sessions[session_id]
+            session.end()
+            self.emit("terminal.ended", {
+                "terminal_session_id": session_id,
+            })
+            return session
+
     def run_task(self, task_type: str) -> dict:
         with self._lock:
             task = self.node.run_task(task_type)
@@ -114,4 +167,14 @@ class RelmoteRuntime:
                 "mode": self.support_access.mode.value,
             }
             value["features"] = remote_feature_status()
+            value["terminal_sessions"] = [
+                {
+                    "session_id": session.session_id,
+                    "target": session.target,
+                    "controller": session.controller,
+                    "authority": session.authority.value,
+                    "state": session.state.value,
+                }
+                for session in self.terminal_sessions.values()
+            ]
             return value
