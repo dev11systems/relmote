@@ -89,3 +89,19 @@ Control:
 
 [ STOP SUPPORT ]
 ```
+
+
+## Automatic network exposure
+
+The ordinary path should not require users to understand bind addresses.
+
+On Linux preview startup:
+
+1. if Tailscale is connected with a usable IPv4 address, bind the web controller only to that Tailscale address;
+2. otherwise remain localhost-only;
+3. never silently fall back to all interfaces (`0.0.0.0`);
+4. require explicit selection for LAN/all-interface exposure.
+
+Until Relmote controller pairing is implemented, non-local web exposure also uses a random per-run access token.
+
+The TUI must display the actual reachable URL and exposure description.
