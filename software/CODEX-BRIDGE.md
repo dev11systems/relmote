@@ -10,7 +10,7 @@ Best immediate path when SSH already exists.
 
 ```text
 Codex host
-  Rae laptop/server
+  trusted laptop/server
        │
        │ planner proposes work
        ▼
@@ -18,7 +18,7 @@ Relmote controller/bridge
        │
        │ Tailscale + SSH
        ▼
-cousin computer
+target computer
 ```
 
 Codex runs on the trusted planner machine.
@@ -116,7 +116,7 @@ This is the physical fallback.
 
 A Codex-like planner might live on:
 
-- Rae's laptop;
+- trusted laptop;
 - home server;
 - VM;
 - cloud development environment;
