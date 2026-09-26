@@ -6,6 +6,7 @@ from dataclasses import asdict
 from datetime import timedelta
 
 from .audit import AuditLog
+from .bench import run_bench
 from .controller import RelmoteController
 from .model import Action, Grant, Mode
 from .session import Session, utcnow
@@ -71,6 +72,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    bench_parser = sub.add_parser(
+        "bench",
+        help="run the physical MVP-1 Pi/HID bench harness",
+    )
+    bench_parser.add_argument("--target", default="bench-target")
+    bench_parser.add_argument("--minutes", type=int, default=15)
+    bench_parser.add_argument("--key-delay", type=float, default=0.05)
+    bench_parser.add_argument("--hid-device", default="/dev/hidg0")
+    bench_parser.set_defaults(
+        func=lambda args: run_bench(
+            target_id=args.target,
+            minutes=args.minutes,
+            key_delay=args.key_delay,
+            hid_device=args.hid_device,
+        )
+    )
     return parser
 
 
