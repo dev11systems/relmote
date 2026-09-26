@@ -52,6 +52,8 @@ See:
 - [UX principles](docs/UX-PRINCIPLES.md)
 - [Preview UX checklist](docs/PREVIEW-UX-CHECKLIST.md)
 - [MVP / build sequence](docs/MVP.md)
+- [Linux Software Preview](docs/LINUX-PREVIEW.md)
+- [Platform support](docs/PLATFORM-SUPPORT.md)
 - [Identity & ownership](docs/IDENTITY.md)
 - [Recovery](docs/RECOVERY.md)
 - [Architecture](docs/ARCHITECTURE.md)
