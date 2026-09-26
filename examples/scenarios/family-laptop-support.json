@@ -1,0 +1,35 @@
+{
+  "name": "Family laptop support",
+  "controller": {
+    "distance": "remote",
+    "paths": [
+      "internet"
+    ],
+    "client": "tablet"
+  },
+  "target": {
+    "state": "degraded-os",
+    "paths": [
+      "usb.hid",
+      "kvm"
+    ],
+    "feedback": [
+      "screen"
+    ]
+  },
+  "authority": {
+    "mode": "assist",
+    "capabilities": [
+      "input.keyboard",
+      "input.pointer",
+      "observe.screen"
+    ]
+  },
+  "intelligence": "remote-planner",
+  "persistence": "temporary",
+  "requirements": [
+    "physical-authorization",
+    "visible-session",
+    "revoke"
+  ]
+}
