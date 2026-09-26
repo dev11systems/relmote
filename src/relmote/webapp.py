@@ -34,15 +34,35 @@ button{font:inherit;padding:.65rem .9rem;margin:.2rem;border:1px solid #777;bord
 button:hover{background:#333}button.danger{border-color:#aaa}
 code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white-space:pre-wrap}
 .muted{color:#aaa}.good{font-weight:700}.pill{display:inline-block;border:1px solid #666;border-radius:999px;padding:.2rem .55rem;margin:.15rem;font-size:.85rem}
+nav{position:sticky;top:0;z-index:10;background:#111;padding:.55rem 0;border-bottom:1px solid #333;overflow-x:auto;white-space:nowrap}
+nav a{display:inline-block;color:#ddd;text-decoration:none;padding:.5rem .7rem;border-radius:8px}
+nav a:hover{background:#222}
+.status-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.75rem 0}
+.status-chip{border:1px solid #555;border-radius:999px;padding:.35rem .65rem;font-size:.9rem}
+.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem}
+.action-grid button{width:100%;text-align:left;margin:0}
+.action-grid small{display:block;color:#aaa;margin-top:.25rem}
+.finding{border-left:3px solid #666;padding:.4rem .7rem;margin:.6rem 0}
+.finding.attention{border-left-width:5px}
+pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y}
+#terminalOutput{max-height:50vh;overflow:auto;overscroll-behavior:contain;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+@media(max-width:600px){body{margin:1rem auto}.card{padding:.85rem}.grid{grid-template-columns:1fr}button{min-height:44px}}
 </style>
 </head>
 <body>
 <h1>RELMOTE</h1>
 <div class="muted">Help and diagnostics for this computer</div>
+<nav>
+<a href="#overview">Overview</a>
+<a href="#diagnostics">Diagnostics</a>
+<a href="#terminal">Terminal</a>
+<a href="#help">Help</a>
+<a href="#activity">Activity</a>
+</nav>
 <div id="actionStatus" class="card" style="display:none"></div>
 <div id="startupError" class="card" style="display:none;border-color:#aaa"></div>
 
-<div class="grid">
+<div id="overview" class="grid">
  <section class="card"><h2>Node</h2><div id="node">Loading…</div></section>
  <section class="card"><h2>Target</h2><div id="target">Loading…</div></section>
  <section class="card"><h2>Session</h2><div id="session"></div></section>
@@ -57,7 +77,7 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
  <p class="muted">This controls permission for remote support. It does not configure Tailscale, SSH, or network exposure by itself.</p>
 </section>
 
-<section class="card">
+<section id="terminal" class="card">
  <h2>Remote tools</h2>
  <div id="remoteTools">Loading…</div>
  <button id="requestTerminalButton" onclick="requestTerminal()">Request terminal on this computer</button>
@@ -74,25 +94,30 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 </section>
 
 <section class="card">
- <h2>Capabilities</h2><div id="caps"></div>
+ <h2>Capabilities</h2>
+ <p class="muted">What this Relmote build can inspect or control. These are status labels, not buttons.</p>
+ <div id="caps"></div>
 </section>
 
-<section class="card">
- <h2>Check this computer</h2>
+<section id="diagnostics" class="card">
+ <h2>Diagnostics</h2>
  <button onclick="runTask('full-check')"><strong>Run Full Check</strong></button>
  <p class="muted">Looks at system, storage, services, and network configuration without changing anything.</p>
- <details><summary>Individual checks</summary>
- <button onclick="runTask('system-overview')">System overview</button>
- <button onclick="runTask('network-overview')">Network overview</button>
- <button onclick="runTask('diagnose-network')">Diagnose network</button>
- <button onclick="runTask('storage-overview')">Storage overview</button>
- <button onclick="selfCheck()">Relmote self-check</button>
+ <details open><summary>Focused checks</summary>
+ <div class="action-grid">
+  <button onclick="runTask('system-overview')"><strong>System</strong><small>Identity, platform, memory and storage</small></button>
+  <button onclick="runTask('network-overview')"><strong>Network</strong><small>Configured addresses and interfaces</small></button>
+  <button onclick="runTask('diagnose-network')"><strong>Network diagnosis</strong><small>DNS and network configuration findings</small></button>
+  <button onclick="runTask('storage-overview')"><strong>Storage</strong><small>Filesystem capacity and utilization</small></button>
+  <button onclick="selfCheck()"><strong>Relmote self-check</strong><small>Verify Relmote's own local capabilities</small></button>
+ </div>
  </details>
  <p class="muted">These checks only view information. They do not change this computer.</p>
 </section>
 
-<section class="card">
+<section id="help" class="card">
  <h2>Help</h2>
+ <p class="muted">Choose a topic for plain-language guidance.</p>
  <button onclick="showHelp('getting-started')">Getting started</button>
  <button onclick="showHelp('support')">Support</button>
  <button onclick="showHelp('remote')">Remote access</button>
@@ -106,8 +131,9 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
  <p id="previewStatus" class="muted"></p>
 </section>
 
-<section class="card">
- <h2>Observations</h2>
+<section id="activity" class="card">
+ <h2>Results & activity</h2>
+ <p class="muted">Recent checks appear here with conclusions first. Expand evidence only when you need it.</p>
  <div id="tasks" class="muted">No observations yet.</div>
 </section>
 
@@ -184,12 +210,12 @@ async function refresh(){
  if(d.tasks.length){
    tasksEl.innerHTML=d.tasks.slice().reverse().map(t=>{
      const findings=(t.findings||[]).map(f =>
-       '<p><strong>['+esc(f.status)+']</strong> '+esc(f.statement)+
-       (f.uncertainty?'<br><span class="muted">'+esc(f.uncertainty)+'</span>':'')+'</p>'
+       '<div class="finding '+esc(f.status)+'"><strong>'+esc(f.status)+'</strong> · '+esc(f.statement)+
+       (f.uncertainty?'<br><span class="muted">'+esc(f.uncertainty)+'</span>':'')+'</div>'
      ).join('');
      return '<div class="card"><strong>'+esc(t.task_type)+'</strong><br><span class="muted">'+esc(t.created_at)+'</span>'+
        findings+
-       '<details><summary>Raw observations</summary><pre>'+esc(JSON.stringify(t.observations,null,2))+'</pre></details></div>';
+       '<details><summary>Evidence / raw observations</summary><pre class="raw">'+esc(JSON.stringify(t.observations,null,2))+'</pre></details></div>';
    }).join('');
  }else tasksEl.textContent='No observations yet.';
 }
