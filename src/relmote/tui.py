@@ -9,6 +9,7 @@ def render_home(
     *,
     web_url: str = "http://127.0.0.1:8787",
     web_ready: bool = False,
+    web_exposure: str = "This computer only",
 ) -> str:
     value = runtime.snapshot()
     session = value.get("session")
@@ -32,6 +33,7 @@ def render_home(
             "3  Storage overview",
             f"Web interface: {'Ready' if web_ready else 'Unavailable'}",
             f"  {web_url}" if web_ready else "",
+            f"  {web_exposure}" if web_ready else "",
             "",
             "4  Open web interface",
             "5  Remote support settings",
@@ -46,6 +48,7 @@ def run_simple_tui(
     *,
     web_url: str = "http://127.0.0.1:8787",
     web_ready: bool = False,
+    web_exposure: str = "This computer only",
 ) -> int:
     """Dependency-free preview TUI.
 
@@ -54,7 +57,12 @@ def run_simple_tui(
     """
     while True:
         print("\033[2J\033[H", end="")
-        print(render_home(runtime, web_url=web_url, web_ready=web_ready))
+        print(render_home(
+            runtime,
+            web_url=web_url,
+            web_ready=web_ready,
+            web_exposure=web_exposure,
+        ))
         choice = input("\n> ").strip().lower()
 
         if choice == "q":
