@@ -20,6 +20,7 @@ from .version import build_info
 from .updater import update_repo_preview
 from .doctor import print_doctor
 from .check_cli import run_check
+from .help import print_help_topic, topic_names
 from .transports.dry_run import DryRunTransport
 
 
@@ -82,6 +83,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    help_parser = sub.add_parser(
+        "help",
+        help="plain-language help and workflow guides",
+    )
+    help_parser.add_argument(
+        "topic",
+        nargs="?",
+        choices=(*topic_names(), "topics"),
+    )
+    def run_help(args):
+        if args.topic == "topics":
+            print("\n".join(topic_names()))
+            return 0
+        return print_help_topic(args.topic)
+    help_parser.set_defaults(func=run_help)
 
     check_parser = sub.add_parser(
         "check",
