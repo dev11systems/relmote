@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dev11systems.github.io/relmote/spec/module-descriptor-v0.1.schema.json",
+  "title": "Relmote Module Descriptor v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["module", "protocol", "capabilities", "links", "power", "passthrough"],
+  "properties": {
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "vendor", "product", "hardware_revision"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "vendor": { "type": "string", "minLength": 1 },
+        "product": { "type": "string", "minLength": 1 },
+        "hardware_revision": { "type": ["string", "integer"] },
+        "firmware_revision": { "type": ["string", "integer", "null"] },
+        "serial": { "type": ["string", "null"] }
+      }
+    },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["descriptor_version"],
+      "properties": {
+        "descriptor_version": {
+          "type": "integer",
+          "const": 1
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9._-]*$"
+      }
+    },
+    "links": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "control",
+          "uart",
+          "i2c",
+          "spi",
+          "gpio",
+          "usb2",
+          "high_speed"
+        ]
+      }
+    },
+    "power": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["typical_mw", "peak_mw", "can_source"],
+      "properties": {
+        "typical_mw": { "type": "integer", "minimum": 0 },
+        "peak_mw": { "type": "integer", "minimum": 0 },
+        "can_source": { "type": "boolean" },
+        "source_peak_mw": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "passthrough": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["power", "control", "usb2", "high_speed"],
+      "properties": {
+        "power": { "type": "boolean" },
+        "control": { "type": "boolean" },
+        "usb2": { "type": "boolean" },
+        "high_speed": { "type": "boolean" }
+      }
+    }
+  }
+}
