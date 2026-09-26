@@ -48,11 +48,15 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 
 <section class="card">
  <h2>Check this computer</h2>
+ <button onclick="runTask('full-check')"><strong>Run Full Check</strong></button>
+ <p class="muted">Looks at system, storage, services, and network configuration without changing anything.</p>
+ <details><summary>Individual checks</summary>
  <button onclick="runTask('system-overview')">System overview</button>
  <button onclick="runTask('network-overview')">Network overview</button>
  <button onclick="runTask('diagnose-network')">Diagnose network</button>
  <button onclick="runTask('storage-overview')">Storage overview</button>
- <button onclick="selfCheck()">Self-check</button>
+ <button onclick="selfCheck()">Relmote self-check</button>
+ </details>
  <p class="muted">These checks only view information. They do not change this computer.</p>
 </section>
 
@@ -86,9 +90,9 @@ async function refresh(){
  target.innerHTML='<strong>'+esc(d.target.name)+'</strong><br><span class="muted">'+esc(d.target.relationship)+'</span>';
  caps.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(d.capability_labels[x]||x)+'</span>').join('');
  if(!d.session || d.session.revoked){
-   session.innerHTML='<strong>INACTIVE</strong><br><button onclick="startSession()">Start Observe session</button>';
+   session.innerHTML='<strong>Support checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
  }else{
-   session.innerHTML='<span class="good">OBSERVE</span><br><code>'+esc(d.session.session_id.slice(0,8))+'</code><br><button class="danger" onclick="revoke()">Revoke</button>';
+   session.innerHTML='<span class="good">Checks enabled</span><br><span class="muted">View information only</span><br><button class="danger" onclick="revoke()">Stop checks</button>';
  }
  if(d.tasks.length){
    tasks.innerHTML=d.tasks.slice().reverse().map(t=>{
