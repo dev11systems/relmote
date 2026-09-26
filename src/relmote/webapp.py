@@ -45,6 +45,7 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
  <h2>Read-only diagnostic tasks</h2>
  <button onclick="runTask('system-overview')">System overview</button>
  <button onclick="runTask('network-overview')">Network overview</button>
+ <button onclick="runTask('diagnose-network')">Diagnose network</button>
  <button onclick="runTask('storage-overview')">Storage overview</button>
  <p class="muted">Tasks require an active Observe session. S2 exposes no write capabilities.</p>
 </section>
@@ -75,9 +76,15 @@ async function refresh(){
    session.innerHTML='<span class="good">OBSERVE</span><br><code>'+esc(d.session.session_id.slice(0,8))+'</code><br><button class="danger" onclick="revoke()">Revoke</button>';
  }
  if(d.tasks.length){
-   tasks.innerHTML=d.tasks.slice().reverse().map(t=>
-     '<div class="card"><strong>'+esc(t.task_type)+'</strong><br><span class="muted">'+esc(t.created_at)+'</span><pre>'+esc(JSON.stringify(t.observations,null,2))+'</pre></div>'
-   ).join('');
+   tasks.innerHTML=d.tasks.slice().reverse().map(t=>{
+     const findings=(t.findings||[]).map(f =>
+       '<p><strong>['+esc(f.status)+']</strong> '+esc(f.statement)+
+       (f.uncertainty?'<br><span class="muted">'+esc(f.uncertainty)+'</span>':'')+'</p>'
+     ).join('');
+     return '<div class="card"><strong>'+esc(t.task_type)+'</strong><br><span class="muted">'+esc(t.created_at)+'</span>'+
+       findings+
+       '<details><summary>Raw observations</summary><pre>'+esc(JSON.stringify(t.observations,null,2))+'</pre></details></div>';
+   }).join('');
  }else tasks.textContent='No observations yet.';
 }
 async function startSession(){await request('/api/v1/session','POST');await refresh()}
