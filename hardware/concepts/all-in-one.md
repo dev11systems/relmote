@@ -4,6 +4,16 @@
 
 The All-in-One is not a “better” Relmote tier. It is a different physical configuration.
 
+## Reference envelope
+
+The current v0.1 target is approximately:
+
+```text
+155 × 78 × 28 mm
+```
+
+See [All-in-One envelope v0.1](../industrial-design/all-in-one-envelope-v0.1.md).
+
 ## Character
 
 Think:
