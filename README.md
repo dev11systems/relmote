@@ -145,10 +145,16 @@ pipx install 'git+https://github.com/dev11systems/relmote.git'
 relmote
 ```
 
-Upgrade:
+Upgrade the development preview:
 
 ```bash
-pipx upgrade relmote
+relmote update
+```
+
+Or refresh it directly with pipx:
+
+```bash
+pipx install --force 'git+https://github.com/dev11systems/relmote.git'
 ```
 
 Uninstall:
