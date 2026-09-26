@@ -11,6 +11,7 @@ from .controller import RelmoteController
 from .model import Action, Grant, Mode
 from .session import Session, utcnow
 from .webapp import serve_local
+from .diagnostic_cli import status as diagnostic_status, diagnose as diagnostic_diagnose
 from .transports.dry_run import DryRunTransport
 
 
@@ -73,6 +74,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    status_parser = sub.add_parser(
+        "status",
+        help="show read-only software-node status (useful locally or over SSH)",
+    )
+    status_parser.set_defaults(func=lambda args: diagnostic_status())
+
+    diagnose_parser = sub.add_parser(
+        "diagnose",
+        help="run a read-only deterministic diagnosis",
+    )
+    diagnose_parser.add_argument("kind", choices=["network"])
+    diagnose_parser.set_defaults(
+        func=lambda args: diagnostic_diagnose(args.kind)
+    )
 
     serve_parser = sub.add_parser(
         "serve",
