@@ -32,6 +32,14 @@ def installed_vcs_commit() -> str | None:
     return commit if isinstance(commit, str) and commit else None
 
 
+def display_version(base_version: str, commit: str, channel: str) -> str:
+    """Human-facing version that identifies development snapshots."""
+    if channel == "repository" and commit != "unknown":
+        normalized = base_version.replace(".dev0", "")
+        return f"{normalized}-dev.{commit[:8]}"
+    return base_version
+
+
 def build_info() -> dict[str, str]:
     commit = (
         os.environ.get("RELMOTE_BUILD_COMMIT")
@@ -42,8 +50,10 @@ def build_info() -> dict[str, str]:
     if not channel:
         channel = "repository" if installed_vcs_commit() else "development"
 
+    base_version = package_version()
     return {
-        "version": package_version(),
+        "version": base_version,
+        "display_version": display_version(base_version, commit, channel),
         "commit": commit,
         "short_commit": commit[:8] if commit != "unknown" else "unknown",
         "channel": channel,
