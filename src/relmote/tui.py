@@ -22,7 +22,7 @@ def render_home(
             "RELMOTE",
             "",
             value["target"]["name"],
-            f"Support checks: {support}",
+            f"Local checks: {support}",
             "",
             "1  Check this computer",
             "2  Network diagnosis",
