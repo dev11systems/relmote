@@ -12,6 +12,7 @@ from .model import Action, Grant, Mode
 from .session import Session, utcnow
 from .webapp import serve_local
 from .diagnostic_cli import status as diagnostic_status, diagnose as diagnostic_diagnose
+from .ssh_target import SSHTarget
 from .transports.dry_run import DryRunTransport
 
 
@@ -74,6 +75,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    ssh_parser = sub.add_parser(
+        "ssh",
+        help="work with an authorized external SSH target",
+    )
+    ssh_sub = ssh_parser.add_subparsers(dest="ssh_command", required=True)
+    ssh_probes = ssh_sub.add_parser("probes", help="list available read-only probes")
+    ssh_probes.set_defaults(
+        func=lambda args: (print("\n".join(SSHTarget.available_probes())) or 0)
+    )
+    ssh_probe = ssh_sub.add_parser("probe", help="run one named read-only probe")
+    ssh_probe.add_argument("target", help="SSH config host, Tailscale hostname/IP, or user@host")
+    ssh_probe.add_argument("probe", choices=SSHTarget.available_probes())
+    def run_ssh_probe(args):
+        result = SSHTarget(args.target).run_probe(args.probe)
+        if result.stdout:
+            print(result.stdout, end="")
+        if result.stderr:
+            print(result.stderr, end="", file=__import__("sys").stderr)
+        return 0 if result.ok else result.returncode or 1
+    ssh_probe.set_defaults(func=run_ssh_probe)
 
     status_parser = sub.add_parser(
         "status",
