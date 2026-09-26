@@ -81,3 +81,15 @@ def test_terminal_request_can_be_approved_and_ended():
 
     runtime.end_terminal(terminal.session_id)
     assert terminal.state.value == "ended"
+
+
+def test_stop_support_revokes_terminal_authority():
+    runtime = RelmoteRuntime()
+    runtime.enable_support_until_disabled()
+    terminal = runtime.request_terminal("target-host")
+    runtime.approve_terminal(terminal.session_id)
+
+    runtime.disable_support()
+
+    assert terminal.state.value == "ended"
+    assert runtime.snapshot()["support"]["available"] is False
