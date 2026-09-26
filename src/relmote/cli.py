@@ -15,6 +15,7 @@ from .diagnostic_cli import status as diagnostic_status, diagnose as diagnostic_
 from .ssh_target import SSHTarget
 from .ssh_workspace import SSHWorkspace
 from .workspace import WorkspacePolicy
+from .app import run_app
 from .transports.dry_run import DryRunTransport
 
 
@@ -60,7 +61,7 @@ def demo(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="relmote")
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command", required=False)
 
     demo_parser = sub.add_parser("demo", help="exercise the safe dry-run action loop")
     demo_parser.add_argument("--text", default="hello from Relmote")
