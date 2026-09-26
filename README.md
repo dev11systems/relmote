@@ -58,6 +58,7 @@ See:
 - [Modularity](docs/MODULARITY.md)
 - [Power architecture](docs/POWER.md)
 - [Hardware concepts](hardware/concepts/README.md)
+- [Industrial design](hardware/industrial-design/README.md)
 - [Open specifications](spec/README.md)
 - [USB HID transport](docs/HID-TRANSPORT.md)
 - [Safety interlock](docs/SAFETY-INTERLOCK.md)
