@@ -8,6 +8,8 @@ from dataclasses import dataclass
 
 from .agent import LocalAgent
 from .version import build_info
+from .screen_backend import detect_linux_screen_backend
+from .wayland_portal import portal_screen_cast_available
 
 
 @dataclass(frozen=True)
@@ -104,6 +106,26 @@ def run_doctor_checks() -> tuple[DoctorCheck, ...]:
             True,
         )
     )
+
+    screen = detect_linux_screen_backend()
+    checks.append(
+        DoctorCheck(
+            "Graphical session",
+            "ok" if screen.session_type in {"wayland", "x11"} else "optional-missing",
+            f"{screen.session_type} · {screen.note}",
+            False,
+        )
+    )
+    if screen.session_type == "wayland":
+        portal_ok, portal_message = portal_screen_cast_available()
+        checks.append(
+            DoctorCheck(
+                "Wayland ScreenCast portal",
+                "ok" if portal_ok else "attention",
+                portal_message,
+                False,
+            )
+        )
 
     return tuple(checks)
 
