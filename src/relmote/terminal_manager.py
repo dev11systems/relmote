@@ -30,6 +30,12 @@ class TerminalManager:
             raise KeyError("terminal process is not attached")
         process.write(data)
 
+    def resize(self, session_id: str, rows: int, cols: int) -> None:
+        process = self.processes.get(session_id)
+        if process is None:
+            raise KeyError("terminal process is not attached")
+        process.resize(rows, cols)
+
     def close(self, session_id: str) -> None:
         process = self.processes.pop(session_id, None)
         if process is not None:
