@@ -1,6 +1,6 @@
 import pytest
 
-from relmote.webapp import serve_local
+from relmote.webapp import INDEX, serve_local
 
 
 def test_non_loopback_requires_explicit_lan_mode():
@@ -11,3 +11,9 @@ def test_non_loopback_requires_explicit_lan_mode():
 def test_arbitrary_non_loopback_still_requires_explicit_exposure():
     with pytest.raises(ValueError, match="explicit private or LAN"):
         serve_local(host="192.0.2.10", port=0)
+
+
+def test_rendered_web_ui_preserves_javascript_escapes():
+    assert "terminalInputEl.value+'\\n'" in INDEX
+    assert "terminalAction(\\'approve\\'" in INDEX
+    assert "terminalAction(\\'deny\\'" in INDEX
