@@ -101,7 +101,7 @@ Persistent Tailscale reachability does not require persistent authority.
 Example:
 
 ```text
-Rae controller:
+Trusted controller:
   diagnostics.read      always allowed
   logs.read             always allowed
   screen.observe        ask
