@@ -122,6 +122,36 @@ class LocalAgent:
     def _storage(self) -> dict:
         anchor = Path.home().anchor or "/"
         usage = shutil.disk_usage(anchor)
+        mounts = []
+        seen = set()
+        mountinfo = Path("/proc/mounts")
+        if mountinfo.exists():
+            try:
+                for raw in mountinfo.read_text().splitlines():
+                    parts = raw.split()
+                    if len(parts) < 3:
+                        continue
+                    mountpoint = parts[1].replace("\\040", " ")
+                    fstype = parts[2]
+                    if mountpoint in seen or not mountpoint.startswith("/"):
+                        continue
+                    seen.add(mountpoint)
+                    try:
+                        item = shutil.disk_usage(mountpoint)
+                    except OSError:
+                        continue
+                    if not item.total:
+                        continue
+                    mounts.append({
+                        "path": mountpoint,
+                        "fstype": fstype,
+                        "total_bytes": item.total,
+                        "used_bytes": item.used,
+                        "free_bytes": item.free,
+                        "percent_used": round((item.used / item.total) * 100, 1),
+                    })
+            except OSError:
+                pass
         return {
             "path": anchor,
             "total_bytes": usage.total,
@@ -129,6 +159,7 @@ class LocalAgent:
             "free_bytes": usage.free,
             "percent_used": round((usage.used / usage.total) * 100, 1)
             if usage.total else None,
+            "mounts": mounts,
             "evidence": "local-os-api",
         }
 
