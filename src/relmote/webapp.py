@@ -101,9 +101,9 @@ async function refresh(){
  target.innerHTML='<strong>'+esc(d.target.name)+'</strong><br><span class="muted">'+esc(d.target.relationship)+'</span>';
  caps.innerHTML=d.capabilities.map(x=>'<span class="pill">'+esc(d.capability_labels[x]||x)+'</span>').join('');
  if(!d.session || d.session.revoked){
-   session.innerHTML='<strong>Support checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
+   session.innerHTML='<strong>Local checks are off</strong><br><button onclick="startSession()">Enable checks</button>';
  }else{
-   session.innerHTML='<span class="good">Checks enabled</span><br><span class="muted">View information only</span><br><button class="danger" onclick="revoke()">Stop checks</button>';
+   session.innerHTML='<span class="good">Local checks enabled</span><br><span class="muted">View information only</span><br><button class="danger" onclick="revoke()">Stop checks</button>';
  }
  if(d.tasks.length){
    tasks.innerHTML=d.tasks.slice().reverse().map(t=>{
