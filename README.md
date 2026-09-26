@@ -2,9 +2,9 @@
 
 **Portable, user-controlled intelligent interface node for connecting people and agents to computing systems across whatever authorized transports are available.**
 
-Relmote is an experimental Dev11 project exploring a small physical node that can sit between a human or AI controller and a target computing system. It is transport-agnostic by design: a controller might reach Relmote over BLE, Wi-Fi, Ethernet, the Internet, cellular, or a constrained mesh; Relmote might reach the target over USB HID, serial, SSH, USB networking, KVM, Redfish, or another adapter.
+Relmote is an experimental open platform for creating authorized, capability-aware interfaces between controllers and computing systems. A Relmote node may be physical hardware, installed or ephemeral software, a VM/container, a recovery environment, embedded firmware, or a hybrid of these. It is transport-agnostic by design: a controller might reach Relmote over BLE, Wi-Fi, Ethernet, the Internet, cellular, or a constrained mesh; Relmote might reach the target over USB HID, serial, SSH, USB networking, KVM, Redfish, or another adapter.
 
-The durable abstraction is not “an AI keyboard.” It is an **authorized interface router for computing systems**.
+The durable abstraction is not “an AI keyboard” or even one physical gadget. It is an **authorized interface layer for computing systems**. Relmote Pocket is one portable hardware implementation.
 
 ## Core model
 
@@ -47,6 +47,7 @@ Controller transports and system transports are independent. A phone can control
 
 See:
 
+- [Platform model](docs/PLATFORM-MODEL.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Software architecture](software/README.md)
 - [Transport model](docs/TRANSPORTS.md)
