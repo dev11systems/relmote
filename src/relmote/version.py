@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from importlib.metadata import PackageNotFoundError, distribution, version
 
 from .dev_revision import DEV_REVISION
@@ -37,7 +38,7 @@ def installed_vcs_commit() -> str | None:
 def display_version(base_version: str, commit: str, channel: str) -> str:
     """Human-facing version that identifies development snapshots."""
     if channel == "repository" and commit != "unknown":
-        normalized = base_version.replace(".dev0", "")
+        normalized = re.sub(r"\.dev\d+$", "", base_version)
         return f"{normalized}-dev.{DEV_REVISION}"
     return base_version
 
