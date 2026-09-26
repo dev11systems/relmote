@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="900" viewBox="0 0 520 900">
+  <rect width="520" height="900" fill="white"/>
+  <g stroke="#111" fill="none" stroke-width="3">
+    <rect x="120" y="90" width="288" height="600" rx="32"/>
+    <rect x="160" y="215" width="208" height="112" rx="8"/>
+    <rect x="155" y="548" width="90" height="36" rx="8"/>
+    <circle cx="348" cy="566" r="26"/>
+    <line x1="120" y1="735" x2="408" y2="735"/>
+    <line x1="120" y1="720" x2="120" y2="750"/>
+    <line x1="408" y1="720" x2="408" y2="750"/>
+    <line x1="92" y1="90" x2="92" y2="690"/>
+    <line x1="78" y1="90" x2="106" y2="90"/>
+    <line x1="78" y1="690" x2="106" y2="690"/>
+  </g>
+  <g fill="#111" font-family="sans-serif">
+    <text x="146" y="135" font-size="26" font-weight="700">RELMOTE</text>
+    <text x="210" y="275" font-size="18">52 × 28 mm</text>
+    <text x="186" y="298" font-size="15">display window</text>
+    <text x="168" y="537" font-size="14">AUTHORIZE</text>
+    <text x="328" y="615" font-size="14">STOP</text>
+    <text x="228" y="775" font-size="20">72 mm</text>
+    <text x="38" y="405" font-size="20" transform="rotate(-90 38 405)">150 mm</text>
+    <text x="116" y="835" font-size="18" font-weight="700">Relmote Pocket front — v0.1</text>
+    <text x="96" y="860" font-size="14">Provisional industrial-design envelope, not production CAD</text>
+  </g>
+</svg>
