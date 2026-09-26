@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from .software_node import SoftwareNode
 from .access_policy import AccessPolicy
+from .feature_status import remote_feature_status
 
 
 def utcnow_iso() -> str:
@@ -112,4 +113,5 @@ class RelmoteRuntime:
                 "available": self.support_access.available(),
                 "mode": self.support_access.mode.value,
             }
+            value["features"] = remote_feature_status()
             return value
