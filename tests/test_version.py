@@ -40,13 +40,15 @@ def test_build_info_has_short_commit(monkeypatch):
 def test_repository_display_version_is_unique():
     from relmote.version import display_version
 
+    from relmote.dev_revision import DEV_REVISION
+
     assert (
         display_version(
             "0.1.0.dev0",
             "1234567890abcdef",
             "repository",
         )
-        == "0.1.0-dev.2"
+        == f"0.1.0-dev.{DEV_REVISION}"
     )
 
 
