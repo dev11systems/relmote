@@ -69,8 +69,11 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
 <p class="muted">This preview listens only on localhost. Pairing/authentication comes before LAN or remote access.</p>
 
 <script>
+const relmoteToken=new URLSearchParams(location.search).get('token');
 async function request(path, method='GET'){
- const r=await fetch(path,{method});
+ const headers={};
+ if(relmoteToken) headers['X-Relmote-Token']=relmoteToken;
+ const r=await fetch(path,{method,headers});
  const data=await r.json();
  if(!r.ok) throw new Error(data.error || r.statusText);
  return data;
