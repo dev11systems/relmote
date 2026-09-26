@@ -21,6 +21,12 @@ from .updater import update_repo_preview
 from .doctor import print_doctor
 from .check_cli import run_check
 from .help import print_help_topic, topic_names
+from .project_info import (
+    PROJECT_URL,
+    ISSUES_URL,
+    CHANGELOG_URL,
+    bundled_changelog,
+)
 from .transports.dry_run import DryRunTransport
 
 
@@ -83,6 +89,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    about_parser = sub.add_parser(
+        "about",
+        help="show project links and build information",
+    )
+    def run_about(args):
+        info = build_info()
+        print(f'Relmote {info["display_version"]} (build {info["short_commit"]})')
+        print(f'Source: {PROJECT_URL}')
+        print(f'Issues: {ISSUES_URL}')
+        print(f'Changelog: {CHANGELOG_URL}')
+        return 0
+    about_parser.set_defaults(func=run_about)
+
+    changelog_parser = sub.add_parser(
+        "changelog",
+        help="show changes in the current development snapshot",
+    )
+    changelog_parser.set_defaults(
+        func=lambda args: (print(bundled_changelog()) or 0)
+    )
 
     help_parser = sub.add_parser(
         "help",
