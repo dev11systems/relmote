@@ -22,9 +22,13 @@ Goal: prove that authorized structured intent can reach a target as USB HID inpu
 - [x] Software session revoke/expiry behavior.
 - [x] Replay protection for dispatched action IDs.
 - [x] Metadata-only action audit log.
-- [ ] Physical stop/revoke input.
-- [ ] USB HID adapter.
-- [ ] Test on sacrificial machine.
+- [x] Linux USB HID text transport.
+- [x] Pi USB gadget configuration scripts.
+- [ ] Physical AUTHORIZE input.
+- [ ] Physical STOP/revoke input.
+- [ ] Visible armed/activity indicators.
+- [ ] Validate HID output on sacrificial machine.
+- [ ] Measure stop latency and verify no stuck keys.
 
 Success criterion: an approved text action is emitted exactly once, and revoking authorization prevents further output.
 
