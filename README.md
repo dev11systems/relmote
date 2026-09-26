@@ -60,6 +60,7 @@ See:
 - [Compute architecture](docs/COMPUTE.md)
 - [Hardware concepts](hardware/concepts/README.md)
 - [Industrial design](hardware/industrial-design/README.md)
+- [Component studies](hardware/component-studies/README.md)
 - [Open specifications](spec/README.md)
 - [USB HID transport](docs/HID-TRANSPORT.md)
 - [Safety interlock](docs/SAFETY-INTERLOCK.md)
