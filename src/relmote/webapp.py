@@ -110,7 +110,7 @@ code,pre{background:#222;border-radius:6px}pre{padding:.8rem;overflow:auto;white
  <div id="tasks" class="muted">No observations yet.</div>
 </section>
 
-<p class="muted">This preview listens only on localhost. Pairing/authentication comes before LAN or remote access.</p>
+<p class="muted">Network exposure follows the active Relmote connection policy. Automatic mode prefers a private Tailscale interface when available and otherwise stays localhost-only. Controller pairing is still under development.</p>
 
 <script>
 const relmoteToken=new URLSearchParams(location.search).get('token');
