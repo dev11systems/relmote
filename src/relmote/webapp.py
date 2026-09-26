@@ -242,7 +242,10 @@ async function refresh(){
  remoteToolsEl.innerHTML=
    '<p><strong>Screen</strong><br>'+
    (screen.available?'Available':'Not available yet')+
-   '<br><span class="muted">'+esc(screen.note||'')+'</span></p>'+
+   '<br><span class="muted">'+esc(screen.note||'')+'</span>'+
+   (screen.session_type==='wayland'
+     ? '<br><span class="muted">Portal: '+esc(screen.portal_ready?'Ready':(screen.portal_note||'Unavailable'))+'</span>'
+     : '')+'</p>'+
    '<p><strong>Terminal</strong><br>'+
    (terminal.interactive_web_implemented?'Available':
      (terminal.available?'Transport detected · web terminal coming next':'Unavailable'))+
