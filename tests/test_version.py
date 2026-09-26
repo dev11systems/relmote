@@ -35,3 +35,22 @@ def test_build_info_has_short_commit(monkeypatch):
     value = version_module.build_info()
 
     assert value["short_commit"] == "12345678"
+
+
+def test_repository_display_version_is_unique():
+    from relmote.version import display_version
+
+    assert (
+        display_version(
+            "0.1.0.dev0",
+            "1234567890abcdef",
+            "repository",
+        )
+        == "0.1.0-dev.12345678"
+    )
+
+
+def test_release_display_version_stays_semantic():
+    from relmote.version import display_version
+
+    assert display_version("0.1.0", "12345678", "stable") == "0.1.0"
