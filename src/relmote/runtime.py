@@ -9,6 +9,7 @@ from .software_node import SoftwareNode
 from .access_policy import AccessPolicy
 from .feature_status import remote_feature_status
 from .terminal import TerminalAuthority, TerminalSession, TerminalState
+from .terminal_manager import TerminalManager
 
 
 def utcnow_iso() -> str:
@@ -30,6 +31,7 @@ class RelmoteRuntime:
     node: SoftwareNode = field(default_factory=SoftwareNode)
     support_access: AccessPolicy = field(default_factory=AccessPolicy)
     terminal_sessions: dict[str, TerminalSession] = field(default_factory=dict)
+    terminal_manager: TerminalManager = field(default_factory=TerminalManager)
     _events: list[RuntimeEvent] = field(default_factory=list)
     _lock: RLock = field(default_factory=RLock)
 
@@ -76,6 +78,7 @@ class RelmoteRuntime:
         with self._lock:
             self.support_access.disable()
             self.node.revoke_session()
+            self.terminal_manager.close_all()
             for terminal in self.terminal_sessions.values():
                 terminal.revoke()
             self.emit("support.disabled")
@@ -109,6 +112,8 @@ class RelmoteRuntime:
         with self._lock:
             session = self.terminal_sessions[session_id]
             session.approve()
+            if session.target == "this-computer":
+                self.terminal_manager.attach(session)
             self.emit("terminal.approved", {
                 "terminal_session_id": session_id,
             })
@@ -126,11 +131,27 @@ class RelmoteRuntime:
     def end_terminal(self, session_id: str) -> TerminalSession:
         with self._lock:
             session = self.terminal_sessions[session_id]
-            session.end()
+            self.terminal_manager.close(session_id)
+            if session.state is TerminalState.ACTIVE:
+                session.end()
             self.emit("terminal.ended", {
                 "terminal_session_id": session_id,
             })
             return session
+
+    def read_terminal(self, session_id: str) -> bytes:
+        with self._lock:
+            session = self.terminal_sessions[session_id]
+            if session.state is not TerminalState.ACTIVE:
+                raise PermissionError("terminal session is not active")
+            return self.terminal_manager.read(session_id)
+
+    def write_terminal(self, session_id: str, data: bytes) -> None:
+        with self._lock:
+            session = self.terminal_sessions[session_id]
+            if session.state is not TerminalState.ACTIVE:
+                raise PermissionError("terminal session is not active")
+            self.terminal_manager.write(session_id, data)
 
     def run_task(self, task_type: str) -> dict:
         with self._lock:
