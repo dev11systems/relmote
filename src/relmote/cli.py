@@ -171,6 +171,10 @@ def build_parser() -> argparse.ArgumentParser:
         build = info["commit"] if args.full else info["short_commit"]
         print(f'Relmote {info["display_version"]} (build {build})')
         print(f'Channel: {info["channel"]}')
+        print()
+        print(f'Source:    {PROJECT_URL}')
+        print(f'Issues:    {ISSUES_URL}')
+        print(f'Changelog: {CHANGELOG_URL}')
         return 0
     version_parser.set_defaults(func=run_version)
 
