@@ -7,6 +7,7 @@ This directory contains draft/open specifications that are intended to outlive a
 - [Relmote Module Interface v0.1](relmote-module-v0.1.md)
 - [Module descriptor JSON Schema](module-descriptor.schema.json)
 - [Hardware compatibility draft](HARDWARE-COMPATIBILITY.md)
+- [Internal safety protocol v0.1](internal-safety-protocol-v0.1.md)
 
 ## Specification philosophy
 
