@@ -10,6 +10,7 @@ from .bench import run_bench
 from .controller import RelmoteController
 from .model import Action, Grant, Mode
 from .session import Session, utcnow
+from .webapp import serve_local
 from .transports.dry_run import DryRunTransport
 
 
@@ -72,6 +73,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    serve_parser = sub.add_parser(
+        "serve",
+        help="run the local-only software Relmote Agent and browser UI",
+    )
+    serve_parser.add_argument("--host", default="127.0.0.1")
+    serve_parser.add_argument("--port", type=int, default=8787)
+    serve_parser.set_defaults(
+        func=lambda args: serve_local(host=args.host, port=args.port)
+    )
 
     bench_parser = sub.add_parser(
         "bench",
