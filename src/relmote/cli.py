@@ -18,6 +18,7 @@ from .workspace import WorkspacePolicy
 from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
+from .doctor import print_doctor
 from .transports.dry_run import DryRunTransport
 
 
@@ -80,6 +81,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    doctor_parser = sub.add_parser(
+        "doctor",
+        help="check whether this machine is ready for the Relmote preview",
+    )
+    doctor_parser.set_defaults(func=lambda args: print_doctor())
 
     update_parser = sub.add_parser(
         "update",
