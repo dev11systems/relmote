@@ -4,15 +4,19 @@
 
 Target character: **phone-sized footprint, thicker than a modern phone, genuinely pocketable, repairable, modular.**
 
-## Rough form
+## Reference envelope
 
-Not a final dimension:
+The current v0.1 industrial-design target is:
 
 ```text
-~140–155 mm tall
-~65–75 mm wide
-~15–25 mm thick
+150 mm tall
+72 mm wide
+18 mm thick
 ```
+
+This remains provisional pending physical prototyping.
+
+See [Pocket envelope v0.1](../industrial-design/pocket-envelope-v0.1.md) for the dimensional layout.
 
 The thickness budget is intentional. It creates room for:
 
