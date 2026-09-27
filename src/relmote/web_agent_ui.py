@@ -3,9 +3,30 @@ from __future__ import annotations
 
 def agent_access_javascript() -> str:
     return r"""
+const relmoteAgentState=document.getElementById('agentAccessState');
+if(relmoteAgentState) relmoteAgentState.textContent='Status: frontend loaded · checking transport…';
+
+async function agentRequest(path,payload={}){
+  const response=await fetch(path,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  const text=await response.text();
+  let value={};
+  try{ value=text?JSON.parse(text):{}; }catch(e){}
+  if(!response.ok) throw new Error(value.error||text||('HTTP '+response.status));
+  return value;
+}
+function agentNotice(message,isError=false){
+  const status=document.getElementById('previewStatus');
+  if(status) status.textContent=message;
+  if(isError && relmoteAgentState) relmoteAgentState.textContent='Status: error · '+message;
+}
+
 async function refreshAgentAccess(){
   try{
-    const value=await requestBody('/api/v1/controller/agent/status','POST',{});
+    const value=await agentRequest('/api/v1/controller/agent/status');
     const on=!!value.enabled;
     document.getElementById('agentAccessState').textContent=
       'Status: '+(on?'ON · private transport ready':'OFF');
@@ -22,26 +43,26 @@ async function refreshAgentAccess(){
 }
 async function enableAgentAccess(){
   try{
-    showStatus('Enabling private Agent Access…');
-    await requestBody('/api/v1/controller/agent/enable','POST',{});
+    agentNotice('Enabling private Agent Access…');
+    await agentRequest('/api/v1/controller/agent/enable');
     await refreshAgentAccess();
-    showStatus('Agent Access enabled privately.');
+    agentNotice('Agent Access enabled privately.');
   }catch(e){
-    showStatus('Could not enable Agent Access: '+e.message,true);
+    agentNotice('Could not enable Agent Access: '+e.message,true);
   }
 }
 async function disableAgentAccess(){
   try{
-    await requestBody('/api/v1/controller/agent/disable','POST',{});
+    await agentRequest('/api/v1/controller/agent/disable');
     const credential=document.getElementById('agentCredential');
     const token=document.getElementById('agentToken');
     if(credential) credential.style.display='none';
     if(token) token.value='';
     await refreshAgentAccess();
     await refresh();
-    showStatus('Agent Access disabled and active grants revoked.');
+    agentNotice('Agent Access disabled and active grants revoked.');
   }catch(e){
-    showStatus('Could not disable Agent Access: '+e.message,true);
+    agentNotice('Could not disable Agent Access: '+e.message,true);
   }
 }
 
