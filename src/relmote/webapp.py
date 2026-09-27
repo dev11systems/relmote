@@ -274,6 +274,19 @@ function showStatus(message,isError=false){
  actionStatusEl.style.borderColor=isError?'#aaa':'#666';
 }
 function clearStatus(){actionStatusEl.style.display='none';}
+async function controllerRequest(path, method='GET', payload=null){
+ const headers={};
+ if(relmoteToken) headers['X-Relmote-Token']=relmoteToken;
+ if(payload!==null) headers['Content-Type']='application/json';
+ const options={method,headers};
+ if(payload!==null) options.body=JSON.stringify(payload);
+ const r=await fetch(path,options);
+ const data=await r.json();
+ if(!r.ok) throw new Error(data.error || r.statusText);
+ return data;
+}
+window.relmoteControllerRequest=controllerRequest;
+
 async function request(path, method='GET'){
  const headers={};
  if(relmoteToken) headers['X-Relmote-Token']=relmoteToken;
