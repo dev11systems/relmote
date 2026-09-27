@@ -29,7 +29,7 @@ INDEX = r"""<!doctype html>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}
 body{font-family:system-ui,sans-serif;max-width:820px;margin:2rem auto;padding:0 1rem;background:#111;color:#eee}
-h1{letter-spacing:.12em;margin-bottom:.2rem}h2{font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:#bbb}
+h1{letter-spacing:.12em;margin:0}.brand-row{display:flex;align-items:baseline;gap:.65rem;flex-wrap:wrap;margin-bottom:.2rem}.brand-version{font-family:ui-monospace,monospace;font-size:.8rem;color:#aaa;border:1px solid #555;border-radius:999px;padding:.18rem .48rem;letter-spacing:0}h2{font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:#bbb}
 .card{border:1px solid #555;border-radius:12px;padding:1rem;margin:1rem 0;background:#171717}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.75rem}
 button{font:inherit;padding:.65rem .9rem;margin:.2rem;border:1px solid #777;border-radius:8px;background:#222;color:#fff}
@@ -53,7 +53,7 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
 </style>
 </head>
 <body>
-<h1>RELMOTE</h1>
+<div class="brand-row"><h1>RELMOTE</h1><span id="headerVersion" class="brand-version">…</span></div>
 <div class="muted">Help and diagnostics for this computer</div>
 <nav>
 <a href="#overview">Overview</a>
@@ -215,6 +215,7 @@ function terminalHtml(text){
  return out;
 }
 const aboutInfoEl=document.getElementById('aboutInfo');
+const headerVersionEl=document.getElementById('headerVersion');
 const changelogTextEl=document.getElementById('changelogText');
 const actionStatusEl=document.getElementById('actionStatus');
 function showStatus(message,isError=false){
@@ -370,6 +371,7 @@ async function exportReport(){
  }catch(e){alert(e.message)}
 }
 request('/api/v1/project').then(p=>{
+ headerVersionEl.textContent=p.build.display_version;
  aboutInfoEl.textContent=p.build.display_version+' · build '+p.build.short_commit;
  changelogTextEl.textContent=p.changelog;
 }).catch(()=>{});
