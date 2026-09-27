@@ -98,6 +98,7 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
    <form onsubmit="sendTerminal(event)">
      <label for="terminalInput">Input</label>
      <input id="terminalInput" autocomplete="off" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
+ <datalist id="agentWorkspaceSuggestions"></datalist>
    </form>
    <p class="muted">Preview terminal uses a normal-user local shell. Administrative terminal is not implemented.</p>
  </div>
@@ -115,7 +116,7 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
  <hr>
  <strong>Grant a workspace</strong><br><br>
  <label for="agentWorkspace">Approved workspace</label>
- <input id="agentWorkspace" placeholder="Loading home directory…" autocomplete="off" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
+ <input id="agentWorkspace" list="agentWorkspaceSuggestions" placeholder="Loading home directory…" autocomplete="off" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
  <div style="margin:.7rem 0">
   <label><input id="agentList" type="checkbox" checked> List files</label><br>
   <label><input id="agentRead" type="checkbox" checked> Read files</label><br>
@@ -213,6 +214,7 @@ const terminalPanelEl=document.getElementById('terminalPanel');
 const terminalOutputEl=document.getElementById('terminalOutput');
 const terminalInputEl=document.getElementById('terminalInput');
 const agentWorkspaceEl=document.getElementById('agentWorkspace');
+const agentWorkspaceSuggestionsEl=document.getElementById('agentWorkspaceSuggestions');
 const agentSessionsEl=document.getElementById('agentSessions');
 const agentPairingEl=document.getElementById('agentPairing');
 const agentPairingCodeEl=document.getElementById('agentPairingCode');
@@ -375,6 +377,21 @@ async function refresh(){
 }
 let activeTerminalId=null;
 let terminalPoll=null;
+let agentWorkspaceSuggestTimer=null;
+async function refreshWorkspaceSuggestions(){
+ try{
+   const value=await requestBody('/api/v1/controller/agent/suggest','POST',{
+     query:agentWorkspaceEl.value
+   });
+   agentWorkspaceSuggestionsEl.innerHTML=(value.suggestions||[])
+     .map(path=>'<option value="'+esc(path)+'"></option>').join('');
+ }catch(e){}
+}
+agentWorkspaceEl.addEventListener('input',()=>{
+ clearTimeout(agentWorkspaceSuggestTimer);
+ agentWorkspaceSuggestTimer=setTimeout(refreshWorkspaceSuggestions,180);
+});
+agentWorkspaceEl.addEventListener('focus',refreshWorkspaceSuggestions);
 async function requestAgentAccess(){
  const capabilities=[];
  if(document.getElementById('agentList').checked) capabilities.push('workspace.list');
