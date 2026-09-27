@@ -14,16 +14,17 @@ def active_grant(tmp_path):
             "capabilities": ["workspace.read"],
         },
     )
-    approved = approve(runtime, pending["session_id"])
-    return runtime, pending["session_id"], approved
+    approve(runtime, pending["session_id"])
+    token = runtime.agent_grants[pending["session_id"]].token
+    return runtime, pending["session_id"], token
 
 
 def test_pairing_code_is_single_use(tmp_path):
-    runtime, session_id, approved = active_grant(tmp_path)
+    runtime, session_id, token = active_grant(tmp_path)
     code = runtime.create_agent_pairing(session_id)
 
     exchanged = runtime.exchange_agent_pairing(code)
-    assert exchanged["token"] == approved["token"]
+    assert exchanged["token"] == token
 
     with pytest.raises(PermissionError):
         runtime.exchange_agent_pairing(code)
