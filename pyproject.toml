@@ -10,12 +10,14 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
-test = ["pytest>=8"]
+test = ["pytest>=8", "mcp>=2,<3"]
 pi = ["gpiozero>=2.0"]
 screen-linux = ["dbus-next>=0.2.3"]
+mcp = ["mcp>=2,<3"]
 
 [project.scripts]
 relmote = "relmote.cli:main"
+relmote-mcp = "relmote.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/relmote"]

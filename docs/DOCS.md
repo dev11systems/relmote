@@ -30,7 +30,8 @@ This page is the navigation map for Relmote documentation. The root README is th
 ## Agent access
 
 - `docs/AGENT-BRIDGE.md` — target-side scoped Agent Bridge and authorization boundary.
-- `docs/AGENT-HOST.md` — controller-side Agent Host role, pairing, and future MCP/Codex adapter.
+- `docs/AGENT-HOST.md` — controller-side Agent Host role, pairing, and adapter boundary.
+- `docs/MCP-AGENT-HOST.md` — local stdio MCP/Codex adapter, tool surface, installation, and validation plan.
 - `docs/HUB.md` — optional self-hosted Hub role, co-location model, inventory, updates, rendezvous, and relay direction.
 - `docs/AGENT-HOST-VALIDATION.md` — reproducible Controller → Agent Host → Target validation runbook.
 - `docs/validation/AGENT-HOST-BASELINE-2026-09-26.md` — redacted real-machine PASS evidence for the baseline Agent Host path.

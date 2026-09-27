@@ -28,7 +28,7 @@ That service exposes the current target operations:
 - read an authorized workspace file;
 - execute a target-authorized command.
 
-The CLI is one consumer of this boundary. MCP/Codex should become another consumer after the multi-machine Agent Host path is validated.
+The CLI and the first local stdio MCP adapter are consumers of this boundary. The MCP adapter is intentionally credential-blind and does not broaden target capabilities.
 
 ## Private transport
 
@@ -42,7 +42,7 @@ The Agent Host stores the endpoint in the paired target profile after the one-ti
 
 The target-side Agent API remains agent-neutral. An Agent Host adapter can expose paired targets through MCP or another agent tool protocol.
 
-Initial conceptual MCP tools: relmote_targets, relmote_target_status, relmote_list, relmote_read, relmote_exec.
+Initial MCP tools: relmote_targets, relmote_target_status, relmote_list, relmote_read, relmote_exec. See [MCP-AGENT-HOST.md](MCP-AGENT-HOST.md).
 
 Later, when separately authorized: relmote_write, relmote_screen_observe, relmote_screen_control.
 

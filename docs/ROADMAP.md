@@ -156,13 +156,15 @@ The repository-wide documentation reconciliation has landed. The next gate is re
 - [x] Add paired-target status/list/read/allowlisted-exec operations.
 - [x] Add a shared credential-blind paired-target service for CLI and future adapters.
 - [x] Add a generalized multi-machine validation runbook.
-- [ ] Complete Controller → Agent Host → Target real-machine validation.
-- [ ] Verify consumed pairing-code rejection.
-- [ ] Verify revocation invalidates the paired credential.
+- [x] Complete Controller → Agent Host → Target real-machine validation.
+- [x] Verify consumed pairing-code rejection.
+- [x] Verify revocation invalidates the paired credential.
 - [ ] Repeat with the Agent Host moved to another machine or platform where practical.
-- [ ] Update current-status claims from observed validation evidence.
-- [ ] Cut the next coherent development snapshot if warranted.
-- [ ] Implement the first MCP/Codex adapter on top of the paired-target service.
+- [x] Update current-status claims from observed validation evidence.
+- [x] Cut the next coherent development snapshot if warranted.
+- [x] Implement the first MCP/Codex adapter on top of the paired-target service.
+- [ ] Connect a real Codex instance to the local MCP adapter.
+- [ ] Re-run read/exec/revocation boundaries through Codex itself.
 
 The MCP adapter should not precede the baseline authority/revocation validation. It must not broaden target capabilities or expose profile bearer material.
 

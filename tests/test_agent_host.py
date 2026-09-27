@@ -2,7 +2,7 @@ from relmote import agent_host
 
 
 def test_detect_agent_host_reports_portable_python_capability(monkeypatch):
-    available = {"git", "python", "docker"}
+    available = {"git", "python", "codex", "docker"}
 
     monkeypatch.setattr(
         agent_host.shutil,
@@ -22,8 +22,9 @@ def test_detect_agent_host_reports_portable_python_capability(monkeypatch):
     assert "relmote.agent-client" in host.capabilities
     assert "development.git" in host.capabilities
     assert "development.python" in host.capabilities
+    assert "development.codex" in host.capabilities
     assert "containers" in host.capabilities
-    assert host.tools == ("git", "python", "docker")
+    assert host.tools == ("git", "python", "codex", "docker")
 
 
 def test_detect_agent_host_does_not_invent_optional_capabilities(monkeypatch):
