@@ -28,6 +28,7 @@ def detect_agent_host() -> AgentHost:
             "pytest",
             "node",
             "npm",
+            "codex",
             "docker",
             "podman",
         )
@@ -41,6 +42,8 @@ def detect_agent_host() -> AgentHost:
         capabilities.append("development.git")
     if any(name in detected_tools for name in ("python3", "python")):
         capabilities.append("development.python")
+    if "codex" in detected_tools:
+        capabilities.append("development.codex")
     if any(name in detected_tools for name in ("docker", "podman")):
         capabilities.append("containers")
 

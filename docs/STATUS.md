@@ -26,6 +26,7 @@ This document is the canonical high-level implementation-status snapshot. Detail
 - Wayland ScreenCast portal integration.
 - Screen-provider discovery/selection architecture.
 - Browser Agent Access UI and modular JavaScript migration.
+- Local stdio MCP/Codex Agent Host adapter exposing paired-target status/list/read and constrained exec operations; real Codex validation is pending.
 
 These paths are under active real-machine validation and may change between development snapshots.
 
@@ -35,7 +36,6 @@ These paths are under active real-machine validation and may change between deve
 - Graphical keyboard/pointer control.
 - General file/workspace editing through the browser.
 - Production credential/keyring storage for Agent Hosts.
-- Codex/MCP Agent Host adapter.
 - Self-hosted multi-node Relmote Hub/Console, including co-located Hub + Agent Host deployment.
 - Cross-platform target adapters beyond the Linux-first preview.
 - Physical hardware validation of the current hardware concepts and transports.
