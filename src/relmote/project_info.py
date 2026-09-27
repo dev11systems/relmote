@@ -12,6 +12,9 @@ Browser repair
 - Fixed the dev.9 startup parse failure that left runtime cards on Loading.
 - Agent Access initializes only after its script has loaded.
 - Added regression coverage for the rendered external Agent resource.
+- Workspace defaults to the target user's actual home directory.
+- Workspace path autocomplete suggests safe directories within that home scope.
+- Pairing remains the normal credential handoff; bearer credentials stay out of the human controller flow.
 
 Agent Access
 - One-button private transport lifecycle and pairing-first UX continue from dev.9.
