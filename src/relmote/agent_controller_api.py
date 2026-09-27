@@ -35,9 +35,11 @@ def handle(runtime: RelmoteRuntime, path: str, payload: dict) -> tuple[int, dict
     if action == "revoke":
         return 200, revoke(runtime, session_id)
     if action == "pair":
+        transport = access.status().get("transport", {})
         return 200, {
             "session_id": session_id,
             "code": runtime.create_agent_pairing(session_id),
             "expires_seconds": 300,
+            "agent_url": transport.get("url"),
         }
     raise KeyError("unknown agent controller action")
