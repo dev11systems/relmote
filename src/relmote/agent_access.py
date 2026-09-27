@@ -66,12 +66,12 @@ def disable_private_transport() -> dict:
     if not tailscale_available():
         return {"enabled": False, "kind": "none"}
     completed = subprocess.run(
-        ["tailscale", "serve", "reset"],
+        ["tailscale", "serve", str(AGENT_PORT), "off"],
         capture_output=True,
         text=True,
         timeout=15,
         check=False,
     )
     if completed.returncode != 0:
-        raise RuntimeError(completed.stderr.strip() or "Could not reset Tailscale Serve")
+        raise RuntimeError(completed.stderr.strip() or "Could not disable Relmote Agent Serve mapping")
     return {"enabled": False, "kind": "tailscale-serve"}
