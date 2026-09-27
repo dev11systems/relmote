@@ -372,9 +372,21 @@ async function agentAction(action,id){
 }
 async function copyAgentToken(){
  try{
-   await navigator.clipboard.writeText(agentTokenEl.value);
+   if(navigator.clipboard&&navigator.clipboard.writeText){
+     await navigator.clipboard.writeText(agentTokenEl.value);
+   }else{
+     agentTokenEl.focus();
+     agentTokenEl.select();
+     agentTokenEl.setSelectionRange(0,agentTokenEl.value.length);
+     if(!document.execCommand('copy')) throw new Error('browser copy command failed');
+     agentTokenEl.setSelectionRange(0,0);
+   }
    showStatus('Agent credential copied.');
- }catch(e){showStatus('Could not copy credential: '+e.message,true)}
+ }catch(e){
+   agentTokenEl.focus();
+   agentTokenEl.select();
+   showStatus('Credential selected. Use Copy from the iPad selection menu.',true);
+ }
 }
 async function requestScreen(){
  try{
