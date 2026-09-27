@@ -1,6 +1,11 @@
 # Relmote architecture
 
-Relmote is a **portable intelligent interface node** between a controller and a target computing system.
+Relmote is an **authority-aware interface layer** between controllers and authorized computing systems. A Relmote node may be software, hardware, or hybrid.
+
+The simplest topology is controller → Relmote → target, but this is not the only topology. Current architecture also distinguishes an optional **Agent Host** (agent compute/adapters) and a future optional **Hub** (multi-node orchestration). These roles do not replace the target/node as the authority boundary.
+
+For current implementation status, see [STATUS.md](STATUS.md). For documentation ownership, see [DOCS.md](DOCS.md).
+
 
 The architecture deliberately separates **how the operator reaches Relmote** from **how Relmote reaches the target**.
 
