@@ -20,6 +20,7 @@ from .agent_access import enable_private_transport, disable_private_transport, s
 from .agent_scope import classify_scope
 from .agent_client import RelmoteAgentClient, pair as pair_agent
 from .agent_profiles import save_profile, load_profile, profile_directory
+from .agent_host import detect_agent_host
 from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
@@ -339,6 +340,24 @@ def build_parser() -> argparse.ArgumentParser:
                 "do not pass the bearer token on the command line."
             )
         return RelmoteAgentClient(args.url, token)
+
+    agent_host_cmd = agent_sub.add_parser(
+        "host",
+        help="show this machine's Agent Host identity and capabilities",
+    )
+    def run_agent_host(args):
+        host = detect_agent_host()
+        print("RELMOTE AGENT HOST")
+        print(f"Name: {host.name}")
+        print(f"Platform: {host.platform} / {host.architecture}")
+        print("Capabilities:")
+        for capability in host.capabilities:
+            print(f"  - {capability}")
+        print("Detected tools:")
+        for tool in host.tools:
+            print(f"  - {tool}")
+        return 0
+    agent_host_cmd.set_defaults(func=run_agent_host)
 
     agent_pair_cmd = agent_sub.add_parser(
         "pair",
