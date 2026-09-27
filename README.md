@@ -48,7 +48,7 @@ Relmote separates roles that are often collapsed into one remote-access applicat
 - **Controller** — where a person observes state, grants/revokes authority, and initiates work.
 - **Agent Host** — optional compute host for Codex or another agent; it receives only capabilities granted by the target.
 - **Target / Node** — the Relmote authority boundary associated with the system being supported.
-- **Hub** — planned optional self-hosted orchestration for many nodes and Agent Hosts; not the root of trust.
+- **Hub** — planned optional self-hosted orchestration/rendezvous for many nodes and Agent Hosts; it may share a machine with an Agent Host but is not the root of trust.
 
 These are roles, not fixed devices. One machine may fill several roles, and an Agent Host can move from one machine to another without silently changing target authority.
 
