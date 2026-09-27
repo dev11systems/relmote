@@ -156,6 +156,12 @@ Tailscale Serve may be selected when already configured or desired for HTTPS con
 
 Relmote must distinguish an exact private-interface bind from a wildcard listener. `0.0.0.0` is not an acceptable substitute for detecting the intended private interface.
 
+## Transport privacy side effects
+
+Transport selection must consider metadata disclosure, not only bandwidth, latency, and encryption.
+
+A path that requires publishing a certificate name, registering with an external rendezvous service, or creating public ingress is not equivalent to a private-interface bind even if both encrypt payloads. Relmote should model those side effects explicitly and require human consent before choosing the more externally visible path.
+
 ## Transport selection
 
 The router should prefer the least-invasive transport that satisfies the task.
