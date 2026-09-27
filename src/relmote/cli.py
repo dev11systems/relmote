@@ -6,6 +6,7 @@ from dataclasses import asdict
 from datetime import timedelta
 
 from .audit import AuditLog
+from .debug_log import configure_logging, log_path, tail_log
 from .bench import run_bench
 from .controller import RelmoteController
 from .model import Action, Grant, Mode
@@ -103,6 +104,40 @@ def build_parser() -> argparse.ArgumentParser:
         help="explicitly approve the proposed action before execution",
     )
     demo_parser.set_defaults(func=demo)
+
+    logs_parser = sub.add_parser(
+        "logs",
+        help="show Relmote's persistent per-user debug log",
+    )
+    logs_parser.add_argument(
+        "--tail",
+        type=int,
+        default=100,
+        help="number of recent log lines to show (default: 100)",
+    )
+    logs_parser.add_argument(
+        "--path",
+        action="store_true",
+        help="print only the debug-log path",
+    )
+    def run_logs(args):
+        path = log_path()
+        if args.path:
+            print(path)
+            return 0
+        print(f"Relmote debug log: {path}")
+        print(
+            "Privacy note: inspect before sharing; logs may contain "
+            "hostnames, paths, network details, or error output."
+        )
+        content = tail_log(args.tail)
+        if content:
+            print()
+            print(content, end="" if content.endswith("\n") else "\n")
+        else:
+            print("\nNo log entries yet.")
+        return 0
+    logs_parser.set_defaults(func=run_logs)
 
     about_parser = sub.add_parser(
         "about",
@@ -678,6 +713,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    configure_logging()
     args = build_parser().parse_args()
     if args.command is None:
         return run_app()

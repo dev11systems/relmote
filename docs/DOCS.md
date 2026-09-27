@@ -51,6 +51,7 @@ This page is the navigation map for Relmote documentation. The root README is th
 - `docs/VERSIONING.md` — version/build identity.
 - `docs/REPO-HYGIENE.md` — repository maintenance.
 - `docs/PREVIEW-UX-CHECKLIST.md` — preview UX validation checklist.
+- `docs/DEBUGGING.md` — local rotating debug logs and troubleshooting workflow.
 
 ## Hardware
 
