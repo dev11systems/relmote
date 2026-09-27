@@ -9,7 +9,7 @@ Relmote is currently in active development. Development snapshot numbers identif
 ### Web and UX
 
 - Reworked the web preview toward Overview, Diagnostics, Terminal, Help, and Activity sections.
-- Added clearer mobile/iPad navigation and touch targets.
+- Added clearer mobile/tablet navigation and touch targets.
 - Made long evidence and terminal output independently scrollable.
 - Clarified that capability labels describe available abilities rather than acting as buttons.
 - Added visible action/error feedback instead of silent web failures.
