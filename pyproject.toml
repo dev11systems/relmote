@@ -12,6 +12,7 @@ dependencies = []
 [project.optional-dependencies]
 test = ["pytest>=8"]
 pi = ["gpiozero>=2.0"]
+screen-linux = ["dbus-next>=0.2.3"]
 
 [project.scripts]
 relmote = "relmote.cli:main"
