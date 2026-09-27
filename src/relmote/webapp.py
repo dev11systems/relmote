@@ -192,6 +192,10 @@ const screenSessionsEl=document.getElementById('screenSessions');
 const terminalPanelEl=document.getElementById('terminalPanel');
 const terminalOutputEl=document.getElementById('terminalOutput');
 const terminalInputEl=document.getElementById('terminalInput');
+const agentWorkspaceEl=document.getElementById('agentWorkspace');
+const agentSessionsEl=document.getElementById('agentSessions');
+const agentCredentialEl=document.getElementById('agentCredential');
+const agentTokenEl=document.getElementById('agentToken');
 const capsEl=document.getElementById('caps');
 const tasksEl=document.getElementById('tasks');
 const helpTextEl=document.getElementById('helpText');
@@ -276,6 +280,19 @@ async function refresh(){
    (terminal.interactive_web_implemented?'Available':
      (terminal.available?'Transport detected · web terminal coming next':'Unavailable'))+
    '<br><span class="muted">'+esc(terminal.note||'')+'</span></p>';
+ const agentItems=d.agent_sessions||[];
+ agentSessionsEl.innerHTML=agentItems.length ? agentItems.map(a=>{
+   let actions='';
+   if(a.state==='requested'){
+     actions='<button onclick="agentAction(\'approve\',\''+esc(a.session_id)+'\')">Allow agent</button>'+
+             '<button class="danger" onclick="agentAction(\'revoke\',\''+esc(a.session_id)+'\')">Deny</button>';
+   }else if(a.state==='active'){
+     actions='<button class="danger" onclick="agentAction(\'revoke\',\''+esc(a.session_id)+'\')">Revoke</button>';
+   }
+   return '<div class="card"><strong>Agent · '+esc(a.state)+'</strong><br>'+
+     'Workspace: <code>'+esc(a.workspace)+'</code><br>'+
+     'Capabilities: '+esc(a.capabilities.join(', '))+'<br>'+actions+'</div>';
+ }).join('') : '';
  const screenItems=d.screen_sessions||[];
  screenSessionsEl.innerHTML=screenItems.length ? screenItems.map(s=>{
    let actions='';
@@ -327,6 +344,36 @@ async function refresh(){
 }
 let activeTerminalId=null;
 let terminalPoll=null;
+async function requestAgentAccess(){
+ const capabilities=[];
+ if(document.getElementById('agentList').checked) capabilities.push('workspace.list');
+ if(document.getElementById('agentRead').checked) capabilities.push('workspace.read');
+ if(document.getElementById('agentExec').checked) capabilities.push('terminal.exec');
+ try{
+   await requestBody('/api/v1/controller/agent/request','POST',{
+     workspace:agentWorkspaceEl.value,
+     capabilities:capabilities,
+     controller:'web-controller'
+   });
+   await refresh();
+ }catch(e){showStatus('Agent request failed: '+e.message,true)}
+}
+async function agentAction(action,id){
+ try{
+   const value=await requestBody('/api/v1/controller/agent/'+encodeURIComponent(id)+'/'+action,'POST',{});
+   if(action==='approve'&&value.token){
+     agentTokenEl.value=value.token;
+     agentCredentialEl.style.display='block';
+   }
+   await refresh();
+ }catch(e){showStatus('Agent action failed: '+e.message,true)}
+}
+async function copyAgentToken(){
+ try{
+   await navigator.clipboard.writeText(agentTokenEl.value);
+   showStatus('Agent credential copied.');
+ }catch(e){showStatus('Could not copy credential: '+e.message,true)}
+}
 async function requestScreen(){
  try{
    await request('/api/v1/screen/request','POST');
