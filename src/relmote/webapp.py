@@ -129,7 +129,9 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
  <div id="agentPairing" class="card" style="display:none">
   <strong>Pair an agent</strong>
   <p class="muted">Enter this one-time code on the agent host. It expires after 5 minutes.</p>
+  <div id="agentPairingEndpoint" class="muted"></div>
   <div id="agentPairingCode" style="font:700 1.8rem ui-monospace,monospace;letter-spacing:.18em"></div>
+  <div id="agentPairingCommand" style="font:ui-monospace,monospace;overflow-wrap:anywhere"></div>
   <button onclick="copyPairingCode()">Copy pairing code</button>
  </div>
  <details>
@@ -217,7 +219,9 @@ const agentWorkspaceEl=document.getElementById('agentWorkspace');
 const agentWorkspaceSuggestionsEl=document.getElementById('agentWorkspaceSuggestions');
 const agentSessionsEl=document.getElementById('agentSessions');
 const agentPairingEl=document.getElementById('agentPairing');
+const agentPairingEndpointEl=document.getElementById('agentPairingEndpoint');
 const agentPairingCodeEl=document.getElementById('agentPairingCode');
+const agentPairingCommandEl=document.getElementById('agentPairingCommand');
 const agentCredentialEl=document.getElementById('agentCredential');
 const agentTokenEl=document.getElementById('agentToken');
 const capsEl=document.getElementById('caps');
@@ -433,7 +437,10 @@ async function pairAgent(id){
  try{
    const value=await requestBody('/api/v1/controller/agent/'+encodeURIComponent(id)+'/pair','POST',{});
    const code=String(value.code||'');
+   const endpoint=String(value.agent_url||'');
+   agentPairingEndpointEl.textContent=endpoint?'Endpoint: '+endpoint:'Private endpoint unavailable';
    agentPairingCodeEl.textContent=code;
+   agentPairingCommandEl.textContent=endpoint?'relmote agent pair '+endpoint:'';
    agentPairingEl.style.display='block';
    showStatus('Pairing code created. It expires in 5 minutes and works once.');
  }catch(e){showStatus('Could not create pairing code: '+e.message,true)}
