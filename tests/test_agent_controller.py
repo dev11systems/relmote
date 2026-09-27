@@ -39,3 +39,16 @@ def test_disabling_support_revokes_agent(tmp_path):
     runtime.disable_support()
 
     assert runtime.agent_grants[pending["session_id"]].session.state.value == "ended"
+
+
+def test_revoked_bearer_token_is_rejected(tmp_path):
+    runtime = RelmoteRuntime()
+    runtime.enable_support_until_disabled()
+    pending = create_request(runtime, {"workspace": str(tmp_path)})
+    approved = approve(runtime, pending["session_id"])
+
+    runtime.revoke_agent(pending["session_id"])
+
+    import pytest
+    with pytest.raises(PermissionError, match="not active"):
+        runtime.agent_by_token(approved["token"])
