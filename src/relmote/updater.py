@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from .version import build_info
 
 
-REPO_SPEC = "git+https://github.com/dev11systems/relmote.git"
+REPO_SPEC = "git+https://github.com/dev11systems/relmote.git#egg=relmote[screen-linux]"
 
 
 @dataclass(frozen=True)
