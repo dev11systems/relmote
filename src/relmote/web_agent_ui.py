@@ -37,7 +37,7 @@ async function refreshAgentAccess(){
 async function enableAgentAccess(){
   try{
     agentNotice('Enabling private Agent Access…');
-    await agentRequest('/api/v1/controller/agent/enable');
+    await agentRequest('/api/v1/controller/agent/enable',{});
     await refreshAgentAccess();
     agentNotice('Agent Access enabled privately.');
   }catch(e){
@@ -46,7 +46,7 @@ async function enableAgentAccess(){
 }
 async function disableAgentAccess(){
   try{
-    await agentRequest('/api/v1/controller/agent/disable');
+    await agentRequest('/api/v1/controller/agent/disable',{});
     const credential=document.getElementById('agentCredential');
     const token=document.getElementById('agentToken');
     if(credential) credential.style.display='none';
