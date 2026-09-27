@@ -34,7 +34,7 @@ These paths are under active real-machine validation and may change between deve
 - General file/workspace editing through the browser.
 - Production credential/keyring storage for Agent Hosts.
 - Codex/MCP Agent Host adapter.
-- Self-hosted multi-node Relmote Hub/Console.
+- Self-hosted multi-node Relmote Hub/Console, including co-located Hub + Agent Host deployment.
 - Cross-platform target adapters beyond the Linux-first preview.
 - Physical hardware validation of the current hardware concepts and transports.
 - Hardware KVM/video and mature physical control modules.

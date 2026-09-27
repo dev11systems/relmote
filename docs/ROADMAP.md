@@ -118,6 +118,7 @@ Build an optional self-hosted control plane for people who administer or support
 
 Potential scope:
 
+- support a co-located Hub + Agent Host deployment as a first-class self-hosted topology;
 - discover and organize software and hardware Relmote nodes;
 - show node identity, availability, target, transport/path, and capability status;
 - launch/revoke support sessions;
@@ -127,6 +128,8 @@ Potential scope:
 - show audit/activity history;
 - support groups/tags/locations without making physical location mandatory;
 - coordinate software updates while preserving per-node authority;
+- show exact version/build drift across Nodes and Agent Hosts before coordinating updates;
+- provide presence/rendezvous for outbound-enrolled nodes without requiring per-target inbound setup;
 - expose provider status such as Tailscale, LAN, SSH, RDP/VNC, portal/PipeWire, serial, and hardware KVM.
 
 ### Architectural constraint
@@ -134,6 +137,10 @@ Potential scope:
 The Hub is optional orchestration, not the root of trust.
 
 A Relmote node must remain locally owned and useful without the Hub, a Dev11 service, cloud connectivity, or an Internet connection. Connecting a node to the Hub must not silently broaden controller authority or existing grants.
+
+Hub and Agent Host may share a machine, but that must not make Hub process access equivalent to Agent Host credentials or target authority.
+
+The first Hub MVP should be inventory/version/session coordination on top of already-validated Agent Host primitives, followed by outbound enrollment/rendezvous and only later optional relay.
 
 This milestone follows the near-term single-node remote-support and Agent Bridge work.
 

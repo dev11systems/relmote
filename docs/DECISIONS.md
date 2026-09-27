@@ -17,3 +17,4 @@ Compact record of durable decisions.
 - **D013 — Do not freeze hardware connectors prematurely.** Stabilize logical interfaces first.
 - **D014 — Build before polishing everything.** Immediate milestone is real HID + physical authorization/STOP.
 - **D015 — No silent external metadata side effects.** Transport activation must not publish durable identifiers, request publicly logged certificates, create public ingress, or register with third-party control infrastructure without explicit informed consent. Prefer an equally useful lower-disclosure path when available.
+- **D016 — Roles may co-locate without collapsing authority.** Controller, Agent Host, Hub, and Target are logical roles rather than mandatory physical machines. A Hub and Agent Host may share one host for operational convenience, but co-location must not imply credential or authority inheritance.

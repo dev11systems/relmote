@@ -57,9 +57,11 @@ The Agent Host cannot manufacture target authority; it consumes scoped grants is
 
 ## Hub
 
-A future **Relmote Hub** is an optional self-hosted multi-node controller/orchestration layer.
+A future **Relmote Hub** is an optional self-hosted multi-node controller/orchestration and rendezvous layer.
 
-The Hub may organize targets, Agent Hosts, sessions, diagnostics, and permission requests, but it is not the root of trust. Nodes remain independently usable and enforce their own grants.
+The Hub may organize targets, Agent Hosts, sessions, diagnostics, permission requests, versions, and connection paths, but it is not the root of trust. Nodes remain independently usable and enforce their own grants.
+
+Hub and Agent Host are separate roles but may intentionally share one machine. A self-hosted server/workstation that already runs agent tooling is a natural default place for the Hub, while dedicated or distributed deployments remain supported.
 
 ## Planner
 
