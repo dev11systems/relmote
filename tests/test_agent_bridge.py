@@ -4,6 +4,7 @@ import pytest
 
 from relmote.agent_executor import list_path, read_text, run_command
 from relmote.agent_session import AgentCapability, AgentSession
+from relmote.agent_bridge import create_grant
 from relmote.workspace import WorkspacePolicy
 
 
@@ -59,3 +60,31 @@ def test_agent_cannot_escape_workspace_through_symlink(tmp_path):
     session = session_for(tmp_path, AgentCapability.READ)
     with pytest.raises(ValueError):
         read_text(session, "link")
+
+
+def test_agent_token_is_not_in_public_session(tmp_path):
+    grant = create_grant(
+        str(tmp_path),
+        controller="test",
+        capabilities=["workspace.read"],
+    )
+    public = grant.public()
+
+    assert "token" not in public
+    assert grant.token not in repr(public)
+
+
+def test_write_capability_controls_workspace_write_policy(tmp_path):
+    readonly = create_grant(
+        str(tmp_path),
+        controller="test",
+        capabilities=["workspace.read"],
+    )
+    writable = create_grant(
+        str(tmp_path),
+        controller="test",
+        capabilities=["workspace.write"],
+    )
+
+    assert readonly.session.workspace.writable is False
+    assert writable.session.workspace.writable is True
