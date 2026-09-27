@@ -10,6 +10,8 @@ Candidate transports include:
 
 - BLE GATT
 - Wi-Fi LAN
+- direct Tailscale/WireGuard private addressing
+- optional Tailscale Serve / private reverse-proxy paths
 - Relmote-hosted Wi-Fi access point
 - Ethernet
 - USB device/network connection
@@ -137,6 +139,22 @@ dhcp timeout x3
 REQUEST:
 read NetworkManager configuration?
 ```
+
+## Private-network selection
+
+For Agent Access, current preference is:
+
+```text
+direct exact-interface Tailscale bind
+        ↓ unavailable
+explicit private LAN / other authorized private path
+        ↓ unavailable
+optional rendezvous/relay path (future)
+```
+
+Tailscale Serve may be selected when already configured or desired for HTTPS convenience, but it is not required for ordinary private Agent reachability.
+
+Relmote must distinguish an exact private-interface bind from a wildcard listener. `0.0.0.0` is not an acceptable substitute for detecting the intended private interface.
 
 ## Transport selection
 

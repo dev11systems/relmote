@@ -38,6 +38,7 @@ This page is the navigation map for Relmote documentation. The root README is th
 
 - `docs/SCREEN-PROVIDERS.md` — pluggable screen observe/control providers.
 - `docs/TRANSPORTS.md` — controller/system transport model.
+- `software/TAILSCALE.md` — current direct-Tailscale binding model and optional Serve integration.
 - `docs/PROTOCOL.md` — protocol direction.
 - `docs/PLATFORM-SUPPORT.md` — platform support model.
 - `docs/HID-TRANSPORT.md` — USB HID transport specifics.

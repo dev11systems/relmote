@@ -1,64 +1,88 @@
 # Tailscale integration
 
-Tailscale is an optional **reachability adapter** for Relmote.
+Tailscale is an optional **private reachability adapter** for Relmote.
 
-It does not replace Relmote identity, session policy, capabilities, or evidence.
+It does not replace Relmote identity, pairing, session policy, capability grants, revocation, or evidence. Tailscale answers whether two devices may reach each other over an encrypted private network; Relmote answers what an authenticated controller or Agent session may do.
 
-## Preferred preview pattern: localhost + Tailscale Serve
+## Preferred preview pattern: direct Tailscale binding
 
-Keep Relmote bound to localhost:
-
-```text
-relmote serve
-→ 127.0.0.1:8787
-```
-
-Then publish that local service privately through Tailscale Serve.
+For the current Agent Access preview, Relmote prefers a direct listener bound to the target's detected Tailscale IPv4 address.
 
 Conceptually:
 
 ```text
-Relmote
-127.0.0.1:8787
-      │
-Tailscale Serve
-      │
-encrypted tailnet
-      │
-controller browser
+Agent Host
+    │
+    │ encrypted Tailscale/WireGuard path
+    ▼
+100.x.y.z:8788
+Relmote Agent API
+    │
+    ▼
+scoped pairing + capability grants
 ```
 
-Advantages:
+When Agent Access is OFF, the remotely reachable Agent listener is not started.
 
-- Relmote itself remains localhost-only;
-- Tailscale provides encrypted reachability;
-- tailnet access controls apply;
-- no public Internet listener;
-- Relmote does not need to discover/bind a specific VPN interface.
+When Agent Access is enabled, Relmote:
 
-Exact Tailscale CLI syntax can vary by installed version; use current Tailscale documentation.
+1. detects the target's local Tailscale IPv4 address;
+2. binds the Agent API only to that exact address and port;
+3. does not bind the Agent API to `0.0.0.0`;
+4. continues to require one-time pairing for credential exchange;
+5. requires the scoped Agent bearer for subsequent operations.
 
-## Direct Tailscale-IP binding
+This path does not require Tailscale Serve, HTTPS certificate setup, or administrative access to the tailnet that owns the target. That makes it suitable for ordinary nodes and for machines shared into another tailnet when Tailscale ACLs permit inbound access.
 
-Relmote may also support binding directly to a user-specified Tailscale address.
+The direct endpoint currently uses HTTP at the application layer because Tailscale encrypts the network path. Relmote authorization remains mandatory on top of that encrypted transport.
 
-This is useful when:
+## Human Controller web interface
 
-- Serve is unavailable;
-- the user wants direct port access;
-- another reverse proxy/service manager is used.
+The browser Controller may also bind directly to the detected Tailscale address when Relmote's automatic private-network exposure selects Tailscale.
 
-Prefer explicit:
+Controller authentication and Agent authentication are separate. A Controller token is not an Agent bearer credential.
+
+## Tailscale Serve is optional
+
+Tailscale Serve can still be useful as an optional HTTPS convenience layer:
 
 ```text
---bind <tailscale-ip>
+Agent Host
+    │
+    ▼
+https://node.example.ts.net
+    │
+Tailscale Serve
+    │
+    ▼
+loopback Relmote service
 ```
 
-rather than listening on every interface.
+However, Serve can require tailnet-level feature enablement, HTTPS certificate setup, or administrative rights that the local target operator may not possess. Relmote therefore must not make Serve a prerequisite for Agent Access.
 
-## Availability
+Relmote should surface Serve as an optional transport/provider when it is already configured or deliberately selected.
 
-Tailscale reachability and Relmote availability are separate.
+## Why exact-interface binding matters
+
+Relmote should never turn "private reachability requested" into "listen on every interface."
+
+Preferred:
+
+```text
+100.x.y.z:8788
+```
+
+Not:
+
+```text
+0.0.0.0:8788
+```
+
+Explicit LAN exposure remains a separate future/advanced choice with its own authorization and warning model.
+
+## Availability and authority
+
+Reachability and authority are separate.
 
 Examples:
 
@@ -66,48 +90,32 @@ Examples:
 
 ```text
 Relmote installed
-support disabled
+Agent Access disabled
 
-user chooses Enable Support
-→ start Relmote listener/Serve
+user chooses Enable Agent Access
+→ bind Agent API to exact Tailscale address
+→ create/approve scoped Agent grant
+→ generate one-time pairing code
 
-user chooses Disable Support
-→ revoke sessions
-→ stop exposure
+user chooses Disable Agent Access
+→ revoke active Agent grants
+→ stop Tailscale-bound Agent listener
 ```
 
-### Timed
+### Timed or persistent support
 
-Enable for:
+Remote Support policy may be timed or enabled until manually disabled, but that does not imply Agent authority. Agent sessions still require their own explicit capabilities and revocation boundary.
 
-- 15 minutes;
-- 1 hour;
-- custom duration.
+## Shared machines
 
-### Persistent
+A machine may be reachable through Tailscale without the current operator being an administrator of the tailnet that owns it.
 
-Explicit:
+Relmote should treat this as a normal topology:
 
-```text
-Until manually disabled
-```
-
-Useful for trusted family support or infrastructure.
-
-## Grants
-
-Persistent Tailscale reachability does not require persistent authority.
-
-Example:
-
-```text
-Trusted controller:
-  diagnostics.read      always allowed
-  logs.read             always allowed
-  screen.observe        ask
-  keyboard.input        ask every session
-  system.write          deny
-```
+- direct Tailscale reachability may work;
+- Tailscale Serve configuration may not be available;
+- Relmote pairing and grants still apply;
+- no re-enrollment into another tailnet should be required merely to use Relmote.
 
 ## SSH
 
@@ -122,16 +130,16 @@ relmote diagnose network
 
 Relmote does not configure SSH automatically.
 
-## Future
+## Future: rendezvous and relay
 
-Once Relmote pairing is implemented, the browser/API should authenticate the Relmote controller identity even when Tailscale already authenticated network membership.
+Direct Tailscale is a useful current transport, not the final multi-network design.
 
-Defense in depth:
+A future optional Relmote Hub/rendezvous layer may support:
 
-```text
-Tailscale:
-may this device reach this service?
+1. authenticated outbound node enrollment;
+2. presence and version coordination;
+3. direct peer-to-peer connection negotiation;
+4. private-network/LAN paths where available;
+5. encrypted relay fallback when direct connectivity cannot be established.
 
-Relmote:
-which controller is this and what may it do?
-```
+The Hub must remain orchestration/reachability infrastructure rather than the root of target authority.

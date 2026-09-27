@@ -46,7 +46,7 @@ Record these facts before testing:
 | Agent Host architecture | |
 | Target OS | |
 | Target architecture | |
-| Private transport | |
+| Private transport | direct Tailscale / Tailscale Serve / LAN / other |
 | Workspace type | disposable repo / test directory / other |
 
 Use generic labels such as `controller-a`, `agent-host-a`, and `target-a` in notes.
@@ -72,6 +72,8 @@ Confirm that the reported operating system, architecture, and detected tools are
 ## 2. Start the Target controller
 
 Start Relmote on the Target using the preview method being tested.
+
+For the baseline Tailscale validation, confirm that the Target has a Tailscale IPv4 address. Direct Tailscale binding is the preferred Agent transport; Tailscale Serve is not required.
 
 Open the human Controller and:
 
@@ -102,6 +104,8 @@ relmote agent use target-a status
 ```
 
 **Pass:** the paired target appears by profile name, the approved workspace/capabilities are visible, and no bearer credential is printed.
+
+For a direct-Tailscale run, also confirm the pairing endpoint uses the Target's Tailscale address and that Relmote did not bind the Agent API to every interface.
 
 ## 4. Exercise read-only workspace operations
 
