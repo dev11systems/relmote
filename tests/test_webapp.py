@@ -55,6 +55,12 @@ def test_agent_script_has_independent_fetch_helper():
     assert "frontend loaded · checking transport" in script
     assert "requestBody('/api/v1/controller/agent/status'" not in script
 
+def test_agent_lifecycle_actions_use_post_requests():
+    script = agent_access_javascript()
+    assert "agentRequest('/api/v1/controller/agent/enable',{})" in script
+    assert "agentRequest('/api/v1/controller/agent/disable',{})" in script
+
+
 
 def test_static_agent_script_does_not_require_controller_query_token():
     # Browser subresource requests do not inherit ?token= from the page URL.
