@@ -5,6 +5,9 @@ import logging
 import shutil
 import subprocess
 
+from .agent_server import start_tailscale_agent_api
+from .network_exposure import tailscale_ipv4
+
 
 AGENT_PORT = 8788
 LOGGER = logging.getLogger("relmote.agent_access")
@@ -14,9 +17,95 @@ def tailscale_available() -> bool:
     return shutil.which("tailscale") is not None
 
 
-def serve_status() -> dict:
+def direct_transport_status(runtime) -> dict:
+    address = tailscale_ipv4()
+    listener = getattr(runtime, "_agent_direct_listener", None)
+    running = bool(listener is not None and listener.running)
+    bound_address = getattr(listener, "host", None) if running else None
+
+    detail = None
+    if running and address and bound_address != address:
+        detail = (
+            "Agent API is bound to a previous Tailscale address; "
+            "disable and re-enable Agent Access."
+        )
+
+    return {
+        "available": bool(address),
+        "enabled": running,
+        "kind": "tailscale-direct",
+        "address": address,
+        "bound_address": bound_address,
+        "url": (
+            f"http://{bound_address}:{AGENT_PORT}"
+            if running and bound_address
+            else None
+        ),
+        "detail": detail,
+    }
+
+
+def enable_direct_transport(runtime) -> dict:
+    address = tailscale_ipv4()
+    if not address:
+        LOGGER.error(
+            "Cannot enable direct Agent Access: Tailscale has no IPv4 address"
+        )
+        raise RuntimeError("Tailscale is not connected or has no IPv4 address")
+
+    current = getattr(runtime, "_agent_direct_listener", None)
+    if current is not None and current.running:
+        if current.host == address:
+            return direct_transport_status(runtime)
+        current.stop()
+
+    LOGGER.info(
+        "Binding Agent API directly to Tailscale address %s:%s",
+        address,
+        AGENT_PORT,
+    )
+    try:
+        listener = start_tailscale_agent_api(runtime, AGENT_PORT)
+    except OSError as exc:
+        LOGGER.exception(
+            "Could not bind Agent API to Tailscale address %s:%s",
+            address,
+            AGENT_PORT,
+        )
+        raise RuntimeError(
+            f"Could not bind Agent API to Tailscale address {address}:{AGENT_PORT}: "
+            f"{exc}"
+        ) from exc
+
+    setattr(runtime, "_agent_direct_listener", listener)
+    LOGGER.info("Direct Tailscale Agent Access enabled at %s:%s", address, AGENT_PORT)
+    return direct_transport_status(runtime)
+
+
+def disable_direct_transport(runtime) -> dict:
+    listener = getattr(runtime, "_agent_direct_listener", None)
+    if listener is not None:
+        LOGGER.info(
+            "Stopping direct Tailscale Agent API listener at %s:%s",
+            listener.host,
+            listener.port,
+        )
+        listener.stop()
+        setattr(runtime, "_agent_direct_listener", None)
+    return direct_transport_status(runtime)
+
+
+# Tailscale Serve remains an optional convenience path. It is no longer the
+# default Agent Access transport because Serve may require tailnet-admin setup
+# that a shared-in target or ordinary operator cannot perform.
+def tailscale_serve_status() -> dict:
     if not tailscale_available():
-        return {"available": False, "enabled": False, "url": None}
+        return {
+            "available": False,
+            "enabled": False,
+            "kind": "tailscale-serve",
+            "url": None,
+        }
     completed = subprocess.run(
         ["tailscale", "serve", "status", "--json"],
         capture_output=True,
@@ -28,6 +117,7 @@ def serve_status() -> dict:
         return {
             "available": True,
             "enabled": False,
+            "kind": "tailscale-serve",
             "url": None,
             "detail": completed.stderr.strip(),
         }
@@ -36,9 +126,13 @@ def serve_status() -> dict:
     except json.JSONDecodeError:
         value = {}
     text = completed.stdout
-    enabled = f"127.0.0.1:{AGENT_PORT}" in text or f"localhost:{AGENT_PORT}" in text
+    enabled = (
+        f"127.0.0.1:{AGENT_PORT}" in text
+        or f"localhost:{AGENT_PORT}" in text
+    )
 
     urls: list[str] = []
+
     def collect_urls(item):
         if isinstance(item, dict):
             for key, child in item.items():
@@ -50,50 +144,30 @@ def serve_status() -> dict:
                 collect_urls(child)
         elif isinstance(item, str) and item.startswith("https://"):
             urls.append(item.rstrip("/"))
+
     collect_urls(value)
 
     return {
         "available": True,
         "enabled": enabled,
+        "kind": "tailscale-serve",
         "url": urls[0] if urls else None,
         "raw": value,
     }
 
 
-def enable_private_transport() -> dict:
+def enable_tailscale_serve() -> dict:
     if not tailscale_available():
-        LOGGER.error("Cannot enable Agent Access: Tailscale is not installed")
         raise RuntimeError("Tailscale is not installed")
-
-    LOGGER.info("Enabling private Agent Access with Tailscale Serve on port %s", AGENT_PORT)
-    try:
-        completed = subprocess.run(
-            ["tailscale", "serve", "--bg", str(AGENT_PORT)],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            check=False,
-        )
-    except subprocess.TimeoutExpired as exc:
-        LOGGER.exception(
-            "Tailscale Serve timed out while enabling Agent Access on port %s",
-            AGENT_PORT,
-        )
-        raise RuntimeError(
-            "Tailscale Serve did not return within 30 seconds. "
-            "Check tailscale serve status and relmote logs."
-        ) from exc
-
+    completed = subprocess.run(
+        ["tailscale", "serve", "--bg", str(AGENT_PORT)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
     if completed.returncode != 0:
-        detail = completed.stderr.strip() or "Tailscale Serve failed"
-        LOGGER.error(
-            "Tailscale Serve failed while enabling Agent Access: returncode=%s stderr=%s",
-            completed.returncode,
-            detail,
-        )
-        raise RuntimeError(detail)
-
-    LOGGER.info("Private Agent Access transport enabled")
+        raise RuntimeError(completed.stderr.strip() or "Tailscale Serve failed")
     return {
         "enabled": True,
         "kind": "tailscale-serve",
@@ -101,37 +175,24 @@ def enable_private_transport() -> dict:
     }
 
 
-def disable_private_transport() -> dict:
+def disable_tailscale_serve() -> dict:
     if not tailscale_available():
-        return {"enabled": False, "kind": "none"}
-
-    LOGGER.info("Disabling private Agent Access transport on port %s", AGENT_PORT)
-    try:
-        completed = subprocess.run(
-            ["tailscale", "serve", str(AGENT_PORT), "off"],
-            capture_output=True,
-            text=True,
-            timeout=15,
-            check=False,
-        )
-    except subprocess.TimeoutExpired as exc:
-        LOGGER.exception(
-            "Tailscale Serve timed out while disabling Agent Access on port %s",
-            AGENT_PORT,
-        )
-        raise RuntimeError(
-            "Tailscale Serve did not return while disabling Agent Access. "
-            "Check tailscale serve status and relmote logs."
-        ) from exc
-
+        return {"enabled": False, "kind": "tailscale-serve"}
+    completed = subprocess.run(
+        ["tailscale", "serve", str(AGENT_PORT), "off"],
+        capture_output=True,
+        text=True,
+        timeout=15,
+        check=False,
+    )
     if completed.returncode != 0:
-        detail = completed.stderr.strip() or "Could not disable Relmote Agent Serve mapping"
-        LOGGER.error(
-            "Tailscale Serve failed while disabling Agent Access: returncode=%s stderr=%s",
-            completed.returncode,
-            detail,
+        raise RuntimeError(
+            completed.stderr.strip()
+            or "Could not disable Relmote Agent Serve mapping"
         )
-        raise RuntimeError(detail)
-
-    LOGGER.info("Private Agent Access transport disabled")
     return {"enabled": False, "kind": "tailscale-serve"}
+
+
+serve_status = tailscale_serve_status
+enable_private_transport = enable_tailscale_serve
+disable_private_transport = disable_tailscale_serve
