@@ -5,7 +5,18 @@ PROJECT_URL = "https://github.com/dev11systems/relmote"
 ISSUES_URL = "https://github.com/dev11systems/relmote/issues"
 CHANGELOG_URL = "https://github.com/dev11systems/relmote/blob/main/CHANGELOG.md"
 
-SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.10
+SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.11
+
+Dev11 snapshot
+- Agent Access browser code is self-contained instead of depending on inline-script helpers.
+- Agent status visibly distinguishes frontend loading from transport/API state.
+- Agent Access status is available through a read-only controller endpoint.
+- Added lifecycle endpoint tests before enabling the simplified UI.
+- Keeps pairing-first credentials, private transport, home-directory defaults, and safe path autocomplete.
+
+Previous snapshot: 0.1.0-dev.10
+
+Relmote 0.1.0-dev.10
 
 Browser repair
 - Agent Access JavaScript is served as a separate browser resource.
