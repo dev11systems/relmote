@@ -14,13 +14,15 @@ This document is the canonical high-level implementation-status snapshot. Detail
 - Agent workspace confinement, including traversal and symlink-escape protection.
 - Agent session revocation and bearer rejection after revocation.
 - Short-lived, single-use Agent pairing codes.
+- Direct private Agent Access bound to the target's exact Tailscale interface, including transport shutdown/re-enable behavior.
+- Cross-machine Agent Host pairing and paired-target status/list/read/allowlisted-exec operations.
+- Target-side Agent revocation invalidating already-paired Agent Host credentials.
+- Agent Host capability discovery.
 - Target-home workspace defaults, scope warnings, and home-confined path suggestions.
 
 ## Implemented, actively experimental
 
-- One-button private Agent Access using an exact direct Tailscale-interface bind; Tailscale Serve is optional.
-- Cross-machine Agent Host pairing and paired-target profiles.
-- Agent Host capability discovery.
+- Cross-platform/private-transport portability beyond the exercised Linux direct-Tailscale path.
 - Wayland ScreenCast portal integration.
 - Screen-provider discovery/selection architecture.
 - Browser Agent Access UI and modular JavaScript migration.

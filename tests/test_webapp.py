@@ -81,3 +81,12 @@ def test_agent_module_uses_page_controller_bridge():
     assert "relmote'+'Controller'+'Request" in script
     # Authentication belongs to the page/controller layer, not this module.
     assert "X-Relmote-" not in script
+
+
+def test_agent_disable_clears_stale_pairing_display():
+    script = agent_access_javascript()
+    assert "function clearAgentPairingDisplay()" in script
+    assert "if(!on) clearAgentPairingDisplay();" in script
+    disable_start = script.index("async function disableAgentAccess()")
+    disable_end = script.index("refreshAgentAccess().catch", disable_start)
+    assert "clearAgentPairingDisplay();" in script[disable_start:disable_end]
