@@ -19,7 +19,7 @@ def test_agent_token_only_revealed_by_approval(tmp_path):
 
     approved = approve(runtime, pending["session_id"])
     assert approved["state"] == "active"
-    assert approved["token"]
+    assert "token" not in approved
 
     snapshot = runtime.snapshot()
     public = next(
@@ -45,10 +45,11 @@ def test_revoked_bearer_token_is_rejected(tmp_path):
     runtime = RelmoteRuntime()
     runtime.enable_support_until_disabled()
     pending = create_request(runtime, {"workspace": str(tmp_path)})
-    approved = approve(runtime, pending["session_id"])
+    approve(runtime, pending["session_id"])
+    token = runtime.agent_grants[pending["session_id"]].token
 
     runtime.revoke_agent(pending["session_id"])
 
     import pytest
     with pytest.raises(PermissionError, match="not active"):
-        runtime.agent_by_token(approved["token"])
+        runtime.agent_by_token(token)
