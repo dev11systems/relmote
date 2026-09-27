@@ -5,7 +5,23 @@ PROJECT_URL = "https://github.com/dev11systems/relmote"
 ISSUES_URL = "https://github.com/dev11systems/relmote/issues"
 CHANGELOG_URL = "https://github.com/dev11systems/relmote/blob/main/CHANGELOG.md"
 
-SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.4
+SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.5
+
+Screen Observe
+- Added explicit screen-observe request and approval sessions.
+- Verified Wayland graphical-session and ScreenCast portal readiness.
+- Added consent-preserving GNOME ScreenCast portal flow foundations.
+- Added asynchronous OS-consent handling so the web controller remains responsive.
+- Screen observation and screen control remain separate permissions.
+
+Web/UX
+- Added the active Relmote version beside the wordmark.
+- Screen request state and portal failures are surfaced to the controller.
+- Browser terminal capability status now reflects the implemented terminal.
+
+Previous snapshot: 0.1.0-dev.4
+
+Relmote 0.1.0-dev.4
 
 Terminal
 - Browser PTY command execution works end-to-end.
