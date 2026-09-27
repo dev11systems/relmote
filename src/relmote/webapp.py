@@ -115,7 +115,7 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
  <hr>
  <strong>Grant a workspace</strong><br><br>
  <label for="agentWorkspace">Approved workspace</label>
- <input id="agentWorkspace" placeholder="/home/user/project" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
+ <input id="agentWorkspace" placeholder="Loading home directory…" autocomplete="off" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
  <div style="margin:.7rem 0">
   <label><input id="agentList" type="checkbox" checked> List files</label><br>
   <label><input id="agentRead" type="checkbox" checked> Read files</label><br>
@@ -302,6 +302,10 @@ async function refresh(){
    (terminal.interactive_web_implemented?'Available':
      (terminal.available?'Transport detected · web terminal coming next':'Unavailable'))+
    '<br><span class="muted">'+esc(terminal.note||'')+'</span></p>';
+ if(agentWorkspaceEl && !agentWorkspaceEl.dataset.defaulted && d.home_directory){
+   agentWorkspaceEl.value=d.home_directory;
+   agentWorkspaceEl.dataset.defaulted='true';
+ }
  const agentItems=d.agent_sessions||[];
  agentSessionsEl.innerHTML=agentItems.length ? agentItems.map(a=>{
    let actions='';
