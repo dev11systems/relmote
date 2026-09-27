@@ -47,3 +47,10 @@ def test_agent_access_javascript_is_external_and_renderable():
     assert "async function refreshAgentAccess()" in script
     assert "async function enableAgentAccess()" in script
     assert "async function disableAgentAccess()" in script
+
+
+def test_agent_script_has_independent_fetch_helper():
+    script = agent_access_javascript()
+    assert "async function agentRequest(" in script
+    assert "frontend loaded · checking transport" in script
+    assert "requestBody('/api/v1/controller/agent/status'" not in script
