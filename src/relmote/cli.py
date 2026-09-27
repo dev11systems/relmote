@@ -22,7 +22,7 @@ from .doctor import print_doctor
 from .check_cli import run_check
 from .help import print_help_topic, topic_names
 from .wayland_portal import portal_environment, portal_screen_cast_available
-from .portal_screencast import request_monitor_share, diagnose_portal_flow
+from .portal_dbus import request_monitor_share, diagnose
 from .screen_backend import detect_linux_screen_backend
 from .project_info import (
     PROJECT_URL,
@@ -225,23 +225,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="show which Wayland ScreenCast portal stage succeeds or fails",
     )
     def run_screen_debug(args):
-        print("ScreenCast portal diagnostic", flush=True)
-        print("stage: CreateSession", flush=True)
-        try:
-            from .portal_screencast import create_session, select_monitor, start_screen_cast
-            session_handle = create_session()
-            print(f"CreateSession OK: {session_handle}", flush=True)
-            print("stage: SelectSources", flush=True)
-            select_monitor(session_handle)
-            print("SelectSources OK", flush=True)
-            print("stage: Start", flush=True)
-            response = start_screen_cast(session_handle)
-            print("Start OK", flush=True)
-            print(response.results_text, flush=True)
-            return 0
-        except Exception as exc:
-            print(f"FAILED: {type(exc).__name__}: {exc}", flush=True)
-            return 1
+        for line in diagnose():
+            print(line, flush=True)
+        return 0
+
     screen_debug.set_defaults(func=run_screen_debug)
 
 
