@@ -126,6 +126,18 @@ relmote hub inventory --live
 relmote hub inventory --json
 ```
 
+A read-only web dashboard renders the same live inventory:
+
+```bash
+# localhost only
+relmote hub serve
+
+# exact Tailscale interface + temporary browser token
+relmote hub serve --tailscale
+```
+
+The Tailscale mode does not bind to `0.0.0.0`. It binds only to the detected Tailscale IPv4 address and requires a temporary browser token. The initial dashboard has no write/action API.
+
 It reports:
 
 - the co-located Agent Host identity/platform/capabilities/tools;
