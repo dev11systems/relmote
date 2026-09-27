@@ -33,6 +33,7 @@ This page is the navigation map for Relmote documentation. The root README is th
 - `docs/AGENT-HOST.md` — controller-side Agent Host role, pairing, and future MCP/Codex adapter.
 - `docs/HUB.md` — optional self-hosted Hub role, co-location model, inventory, updates, rendezvous, and relay direction.
 - `docs/AGENT-HOST-VALIDATION.md` — reproducible Controller → Agent Host → Target validation runbook.
+- `docs/validation/AGENT-HOST-BASELINE-2026-09-26.md` — redacted real-machine PASS evidence for the baseline Agent Host path.
 - `docs/USE-CASES-CODEX.md` — Codex-oriented use cases; treat implementation-status claims here as subordinate to `STATUS.md`.
 
 ## Screen and transports

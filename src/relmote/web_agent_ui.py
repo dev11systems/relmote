@@ -16,6 +16,16 @@ function agentNotice(message,isError=false){
   if(status) status.textContent=message;
   if(isError && relmoteAgentState) relmoteAgentState.textContent='Status: error · '+message;
 }
+function clearAgentPairingDisplay(){
+  const pairing=document.getElementById('agentPairing');
+  const endpoint=document.getElementById('agentPairingEndpoint');
+  const code=document.getElementById('agentPairingCode');
+  const command=document.getElementById('agentPairingCommand');
+  if(pairing) pairing.style.display='none';
+  if(endpoint) endpoint.textContent='';
+  if(code) code.textContent='';
+  if(command) command.textContent='';
+}
 
 async function refreshAgentAccess(){
   try{
@@ -29,6 +39,7 @@ async function refreshAgentAccess(){
       on?'inline-block':'none';
     document.getElementById('agentGrantSetup').style.display=
       on?'block':'none';
+    if(!on) clearAgentPairingDisplay();
   }catch(e){
     document.getElementById('agentAccessState').textContent=
       'Status unavailable: '+e.message;
@@ -51,6 +62,7 @@ async function disableAgentAccess(){
     const token=document.getElementById('agentToken');
     if(credential) credential.style.display='none';
     if(token) token.value='';
+    clearAgentPairingDisplay();
     await refreshAgentAccess();
     await refresh();
     agentNotice('Agent Access disabled and active grants revoked.');

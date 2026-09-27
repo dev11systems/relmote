@@ -4,6 +4,8 @@ This runbook validates the current Relmote Controller → Agent Host → Target 
 
 It is a validation procedure, not evidence that the path has already passed. Record results only after they are observed.
 
+A redacted real-machine baseline PASS is recorded in [validation/AGENT-HOST-BASELINE-2026-09-26.md](validation/AGENT-HOST-BASELINE-2026-09-26.md).
+
 ## Goal
 
 Prove that:
