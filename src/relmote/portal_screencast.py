@@ -5,6 +5,7 @@ import re
 import shutil
 import subprocess
 import time
+import selectors
 from dataclasses import dataclass
 from uuid import uuid4
 
@@ -93,13 +94,18 @@ def _portal_request(
         deadline = time.monotonic() + timeout_seconds
         captured: list[str] = []
         assert monitor.stdout is not None
+        selector = selectors.DefaultSelector()
+        selector.register(monitor.stdout, selectors.EVENT_READ)
         while time.monotonic() < deadline:
+            remaining = max(0.0, deadline - time.monotonic())
+            events = selector.select(timeout=min(0.25, remaining))
+            if not events:
+                continue
             line = monitor.stdout.readline()
             if not line:
-                time.sleep(0.05)
                 continue
             captured.append(line.strip())
-            joined = " ".join(captured[-12:])
+            joined = " ".join(captured[-20:])
             if "Response" not in joined:
                 continue
             code_match = re.search(r"uint32\s+(\d+)", joined)
@@ -109,7 +115,7 @@ def _portal_request(
                     results_text=joined,
                 )
         raise RuntimeError(
-            f"{method}: portal response was not received before timeout"
+            f"{method}: portal response was not received before {timeout_seconds}s"
         )
     finally:
         monitor.terminate()
