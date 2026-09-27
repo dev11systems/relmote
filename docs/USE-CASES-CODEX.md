@@ -1,59 +1,67 @@
-# External agent use case
+# External agent / Codex use case
 
-## Remote coding/support without installing the planner on the target
+> Current implementation status lives in [STATUS.md](STATUS.md). The canonical Agent architecture is split between [AGENT-BRIDGE.md](AGENT-BRIDGE.md) and [AGENT-HOST.md](AGENT-HOST.md).
 
-Scenario:
+## Goal
 
-- target is an authorized computer;
-- target is already reachable through Tailscale;
-- SSH is available;
-- an authorized user wants Codex or another planner to run elsewhere.
+Run Codex or another agent away from the target while keeping target authority local, scoped, visible, and revocable.
+
+A current reference topology is:
 
 ```text
-Controller / Codex host
-       │
-       │ Tailscale
-       ▼
-Relmote SSH adapter
-       │
-       ▼
-remote target
+iPad / browser            Kaonashi or Falkor              russ-pc
+   Controller      ───►       Agent Host        ───►    Relmote Target
+ approvals/revoke            Codex / adapter             scoped grant
 ```
 
-The target can remain free of Codex itself.
+The target does not need Codex installed and does not need to store Codex credentials.
 
-Relmote should surface:
+## Why Relmote instead of simply giving the agent SSH
 
-- target identity;
-- SSH host identity;
-- configured workspace roots;
-- available commands/capabilities;
-- requested changes;
-- actual stdout/stderr as observations.
+Plain SSH may be perfectly appropriate for a human administrator. Relmote's value for an agent is the smaller, explicit authority envelope:
+
+- approved target identity;
+- approved workspace root;
+- separate list/read/execute/write capabilities;
+- command/tool policy;
+- visible session state;
+- one-time pairing;
+- immediate revocation;
+- observations/evidence returned through a structured interface.
+
+The underlying implementation may still use SSH or another transport where appropriate, but transport access does not become the authorization model.
+
+## Current Agent Bridge direction
+
+The target-side Agent API is agent-neutral. A paired Agent Host receives only the capabilities granted by the target.
+
+Initial operations include:
+
+- list within an approved workspace;
+- read within an approved workspace;
+- run allowlisted commands within an approved workspace;
+- inspect session/target state.
+
+Write access, screen observation, and screen control are separate future/experimental grants rather than implied capabilities.
+
+## Pairing
+
+The Controller enables private Agent Access, creates/approves a scoped target grant, and generates a short-lived single-use pairing code. The Agent Host exchanges that code for the session credential over the private Agent endpoint.
+
+After pairing, the human should normally refer to the target by profile/name rather than manually handling URLs or bearer credentials.
+
+## Codex adapter
+
+The planned Codex integration lives on the Agent Host, not the target. MCP is a candidate adapter boundary because it can expose Relmote operations as tools while leaving target authorization in Relmote.
+
+Conceptual tools include: relmote_targets, relmote_target_status, relmote_list, relmote_read, and relmote_exec. Later tools such as write or screen control must exist only when the target grant includes those capabilities.
 
 ## Example
 
-Task:
+Task: diagnose why an application fails to start.
 
-```text
-Diagnose why this application fails to start.
-```
+An Agent Host may use the target grant to inspect project files, run approved diagnostics, inspect returned stdout/stderr, and propose a change. If writing is not granted, it must stop at proposal/diagnosis rather than silently modifying the target.
 
-Planner may request:
+## Reference deployment
 
-1. inspect project files;
-2. inspect service/log state;
-3. run read-only diagnostics;
-4. propose a patch;
-5. request permission to write the patch;
-6. run tests.
-
-Relmote records which observations support the result.
-
-## Why not just SSH?
-
-For a human, plain SSH may be sufficient.
-
-Relmote becomes useful when an agent is involved because it can impose a smaller authority envelope than the underlying SSH account and preserve task/evidence/approval semantics.
-
-SSH is then the transport, not the policy model.
+The first intended real multi-machine validation is Controller on iPad, Agent Host on Kaonashi, and Target on russ-pc. Falkor can later fill the Agent Host role without changing the target-side authority model.
