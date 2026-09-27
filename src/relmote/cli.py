@@ -25,6 +25,9 @@ from .wayland_portal import portal_environment, portal_screen_cast_available
 from .portal_dbus import request_monitor_share, diagnose
 from .screen_backend import detect_linux_screen_backend
 from .screen_providers import discover_screen_providers, preferred_observe_provider
+from .agent_session import AgentCapability, AgentSession
+from .agent_executor import list_path, read_text, run_command
+from .workspace import WorkspacePolicy
 from .project_info import (
     PROJECT_URL,
     ISSUES_URL,
@@ -262,6 +265,66 @@ def build_parser() -> argparse.ArgumentParser:
     screen_debug.set_defaults(func=run_screen_debug)
 
 
+
+    agent_parser = sub.add_parser(
+        "agent",
+        help="preview the scoped agent bridge",
+    )
+    agent_sub = agent_parser.add_subparsers(dest="agent_command", required=True)
+
+    agent_list = agent_sub.add_parser("list", help="list an approved workspace path")
+    agent_list.add_argument("root")
+    agent_list.add_argument("path", nargs="?", default=".")
+    def run_agent_list(args):
+        policy = WorkspacePolicy.create(args.root)
+        session = AgentSession(
+            workspace=policy,
+            controller="local-cli",
+            capabilities=frozenset({AgentCapability.LIST}),
+        )
+        session.approve()
+        for item in list_path(session, args.path):
+            print(f"{item['type']:9} {item['name']}")
+        return 0
+    agent_list.set_defaults(func=run_agent_list)
+
+    agent_read = agent_sub.add_parser("read", help="read a text file in an approved workspace")
+    agent_read.add_argument("root")
+    agent_read.add_argument("path")
+    def run_agent_read(args):
+        policy = WorkspacePolicy.create(args.root)
+        session = AgentSession(
+            workspace=policy,
+            controller="local-cli",
+            capabilities=frozenset({AgentCapability.READ}),
+        )
+        session.approve()
+        print(read_text(session, args.path), end="")
+        return 0
+    agent_read.set_defaults(func=run_agent_read)
+
+    agent_exec = agent_sub.add_parser("exec", help="run an allowlisted command in a workspace")
+    agent_exec.add_argument("root")
+    agent_exec.add_argument("tool", choices=("git", "pytest"))
+    agent_exec.add_argument("tool_args", nargs="*")
+    def run_agent_exec(args):
+        policy = WorkspacePolicy.create(
+            args.root,
+            allowed_tools=frozenset({"git", "pytest"}),
+        )
+        session = AgentSession(
+            workspace=policy,
+            controller="local-cli",
+            capabilities=frozenset({AgentCapability.EXEC}),
+        )
+        session.approve()
+        result = run_command(session, [args.tool, *args.tool_args])
+        if result["stdout"]:
+            print(result["stdout"], end="")
+        if result["stderr"]:
+            print(result["stderr"], end="", file=sys.stderr)
+        return result["returncode"]
+    agent_exec.set_defaults(func=run_agent_exec)
 
     ssh_parser = sub.add_parser(
         "ssh",
