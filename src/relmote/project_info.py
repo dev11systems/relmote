@@ -5,7 +5,20 @@ PROJECT_URL = "https://github.com/dev11systems/relmote"
 ISSUES_URL = "https://github.com/dev11systems/relmote/issues"
 CHANGELOG_URL = "https://github.com/dev11systems/relmote/blob/main/CHANGELOG.md"
 
-SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.7
+SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.9
+
+Pairing-first Agent Access
+- One-button private Agent Access lifecycle foundation.
+- Workspace authority remains separate from transport enablement.
+- Active sessions pair with short-lived, single-use codes.
+- Human controllers no longer receive agent bearer credentials.
+- Disabling Agent Access revokes active grants before removing transport.
+- Broad workspace scopes are surfaced explicitly.
+- Revoked bearer credentials are rejected at authentication.
+
+Previous snapshot: 0.1.0-dev.8
+
+Relmote 0.1.0-dev.7
 
 Screen Observe
 - Added explicit screen-observe request and approval sessions.
