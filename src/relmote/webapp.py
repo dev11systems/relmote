@@ -254,6 +254,20 @@ async function refresh(){
    (terminal.interactive_web_implemented?'Available':
      (terminal.available?'Transport detected · web terminal coming next':'Unavailable'))+
    '<br><span class="muted">'+esc(terminal.note||'')+'</span></p>';
+ const screenItems=d.screen_sessions||[];
+ screenSessionsEl.innerHTML=screenItems.length ? screenItems.map(s=>{
+   let actions='';
+   if(s.state==='requested'){
+     actions='<button onclick="screenAction(\'approve\',\''+esc(s.session_id)+'\')">Allow screen view</button>'+
+             '<button onclick="screenAction(\'deny\',\''+esc(s.session_id)+'\')">Deny</button>';
+   }else if(s.state==='os-consent'){
+     actions='<span class="muted">Waiting for consent on target desktop.</span>';
+   }else if(s.state==='active'){
+     actions='<span class="good">Screen view active</span>';
+   }
+   return '<div class="card"><strong>Screen · '+esc(s.state)+'</strong><br>'+
+     'Controller: '+esc(s.controller)+'<br>Authority: '+esc(s.authority)+'<br>'+actions+'</div>';
+ }).join('') : '';
  const terminalItems=d.terminal_sessions||[];
  terminalSessionsEl.innerHTML=terminalItems.length ? terminalItems.map(t=>{
    let actions='';
