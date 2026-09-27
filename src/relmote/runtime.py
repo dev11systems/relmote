@@ -14,6 +14,7 @@ from .terminal_manager import TerminalManager
 from .screen_session import ScreenSession
 from .portal_dbus import request_monitor_share
 from .agent_bridge import AgentGrant, create_grant
+from .agent_pairing import PairingRegistry
 
 
 def utcnow_iso() -> str:
@@ -38,6 +39,7 @@ class RelmoteRuntime:
     terminal_manager: TerminalManager = field(default_factory=TerminalManager)
     screen_sessions: dict[str, ScreenSession] = field(default_factory=dict)
     agent_grants: dict[str, AgentGrant] = field(default_factory=dict)
+    pairing_registry: PairingRegistry = field(default_factory=PairingRegistry)
     _events: list[RuntimeEvent] = field(default_factory=list)
     _lock: RLock = field(default_factory=RLock)
 
@@ -141,6 +143,30 @@ class RelmoteRuntime:
                         raise PermissionError("agent session is not active")
                     return grant
         raise PermissionError("invalid agent session token")
+
+    def create_agent_pairing(self, session_id: str) -> str:
+        with self._lock:
+            grant = self.agent_grants[session_id]
+            if grant.session.state.value != "active":
+                raise PermissionError("agent session must be active before pairing")
+            code = self.pairing_registry.create(session_id)
+            self.emit("agent.pairing-created", {
+                "agent_session_id": session_id,
+                "expires_seconds": 300,
+            })
+            return code
+
+    def exchange_agent_pairing(self, code: str) -> dict:
+        with self._lock:
+            session_id = self.pairing_registry.consume(code)
+            grant = self.agent_grants[session_id]
+            if grant.session.state.value != "active":
+                raise PermissionError("agent session is no longer active")
+            self.emit("agent.paired", {"agent_session_id": session_id})
+            return {
+                "session": grant.public(),
+                "token": grant.token,
+            }
 
     def request_screen(self, *, controller: str = "remote-controller") -> ScreenSession:
         with self._lock:
