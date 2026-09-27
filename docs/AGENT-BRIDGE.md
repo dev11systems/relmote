@@ -60,3 +60,17 @@ The web controller can create a pending Agent session by choosing:
 After explicit approval, the UI reveals the temporary agent credential once and offers Copy/Pair actions. Normal runtime snapshots and activity logs omit the credential.
 
 Revoking the Agent session or disabling Remote Support invalidates the grant.
+
+
+## Relationship to Relmote Hub
+
+The future self-hosted Relmote Hub should consume the same controller/session abstractions rather than gaining implicit superuser authority.
+
+A Hub may coordinate many nodes and Agent sessions, but each node continues to enforce its own grants. This allows:
+
+- iPad/browser controllers;
+- a self-hosted multi-node Hub;
+- Codex/agent adapters;
+- CLI/TUI controllers;
+
+to share one authorization model without making any one controller the permanent root of trust.
