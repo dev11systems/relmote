@@ -537,13 +537,14 @@ request('/api/v1/project').then(p=>{
  aboutInfoEl.textContent=p.build.display_version+' · build '+p.build.short_commit;
  changelogTextEl.textContent=p.changelog;
 }).catch(()=>{});
-__RELMOTE_AGENT_ACCESS_JS__
+
 refreshAgentAccess().catch(()=>{});
 refresh().catch(e=>{
  startupErrorEl.style.display='block';
  startupErrorEl.textContent='Relmote could not load runtime data: '+e.message;
 });
 </script>
+<script src="/relmote-agent.js"></script>
 </body></html>
 """
 
@@ -588,7 +589,15 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 _json(self, HTTPStatus.UNAUTHORIZED, {"error": "temporary LAN token required"})
                 return
             path = urlparse(self.path).path
-            if path == "/":
+            if path == "/relmote-agent.js":
+                body = agent_access_javascript().encode()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "application/javascript; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
+            elif path == "/":
                 body = INDEX.encode()
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
