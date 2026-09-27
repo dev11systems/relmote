@@ -25,9 +25,24 @@ def test_parser_accepts_logs_command():
     assert args.command == "logs"
     assert args.tail == 25
     assert args.path is False
+    assert args.save is None
 
 
 def test_parser_accepts_logs_path_only():
     args = build_parser().parse_args(["logs", "--path"])
     assert args.command == "logs"
     assert args.path is True
+
+
+def test_parser_accepts_logs_save_default_filename():
+    args = build_parser().parse_args(["logs", "--save"])
+    assert args.save == "relmote-debug.log"
+    assert args.tail is None
+
+
+def test_parser_accepts_logs_save_custom_filename():
+    args = build_parser().parse_args(
+        ["logs", "--tail", "250", "--save", "/tmp/relmote-debug.txt"]
+    )
+    assert args.save == "/tmp/relmote-debug.txt"
+    assert args.tail == 250

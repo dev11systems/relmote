@@ -6,15 +6,15 @@ Relmote keeps a small rotating per-user debug log for preview troubleshooting.
 
 On XDG-style environments:
 
-\`\`\`text
+```text
 $XDG_STATE_HOME/relmote/relmote.log
-\`\`\`
+```
 
-When \`XDG_STATE_HOME\` is not set:
+When `XDG_STATE_HOME` is not set:
 
-\`\`\`text
+```text
 ~/.local/state/relmote/relmote.log
-\`\`\`
+```
 
 The active file is limited to roughly 1 MB with three rotated backups.
 
@@ -22,23 +22,47 @@ The active file is limited to roughly 1 MB with three rotated backups.
 
 Show the most recent 100 lines:
 
-\`\`\`bash
+```bash
 relmote logs
-\`\`\`
+```
 
 Show more:
 
-\`\`\`bash
+```bash
 relmote logs --tail 300
-\`\`\`
+```
 
-Print only the file path:
+Print only the internal log path:
 
-\`\`\`bash
+```bash
 relmote logs --path
-\`\`\`
+```
 
-The path-only form is useful when attaching the log to a private support/debugging conversation.
+Save the full active log to an ordinary file in the current directory:
+
+```bash
+relmote logs --save
+```
+
+This creates:
+
+```text
+./relmote-debug.log
+```
+
+Save to a specific location:
+
+```bash
+relmote logs --save ~/relmote-debug.txt
+```
+
+Save only the most recent lines:
+
+```bash
+relmote logs --tail 200 --save ~/relmote-debug.txt
+```
+
+The save form is useful on mobile/remote terminal clients where selecting and copying large terminal scrollback is awkward. The exported file is a copy or excerpt of the active debug log; rotated backups are not included.
 
 ## Privacy
 
