@@ -11,7 +11,7 @@ from .feature_status import remote_feature_status
 from .terminal import TerminalAuthority, TerminalSession, TerminalState
 from .terminal_manager import TerminalManager
 from .screen_session import ScreenSession
-from .portal_screencast import request_monitor_share
+from .portal_dbus import request_monitor_share
 
 
 def utcnow_iso() -> str:
