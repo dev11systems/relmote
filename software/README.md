@@ -1,5 +1,12 @@
 # Relmote software
 
+> **Architecture-direction note:** this directory contains both current software concepts and intended mature architecture. It should not be read as a claim that every named daemon/client/component is implemented today. See [../docs/STATUS.md](../docs/STATUS.md) for current implementation status and [../docs/DOCS.md](../docs/DOCS.md) for canonical documentation.
+
+The current preview is Linux-first and can run as a single Relmote process providing a browser controller, diagnostics, terminal sessions, and emerging Agent Access. The longer-term headless-daemon/controller split described below remains a useful architecture direction.
+
+Current role terminology also distinguishes **Controller**, **Target/Node**, optional **Agent Host**, and future optional **Hub**. See [../docs/AGENT-HOST.md](../docs/AGENT-HOST.md) and [../docs/AGENT-BRIDGE.md](../docs/AGENT-BRIDGE.md).
+
+
 Relmote software is a **deployable form of the Relmote platform**, built around a headless core plus interchangeable controllers.
 
 It can stand alone: a target can run Relmote software without any Relmote hardware attached. It can also act as the controller, policy/runtime layer, or target-side agent for a physical Relmote node.
