@@ -649,6 +649,14 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                     _json(self, HTTPStatus.OK, {
                         "data": base64.b64encode(data).decode("ascii"),
                     })
+            elif path == "/api/v1/controller/agent/status":
+                if not runtime:
+                    _json(self, HTTPStatus.SERVICE_UNAVAILABLE, {
+                        "error": "agent lifecycle requires shared runtime",
+                    })
+                else:
+                    status, value = agent_controller_handle(runtime, path, {})
+                    _json(self, HTTPStatus(status), value)
             elif path == "/api/v1/project":
                 info = build_info()
                 _json(self, HTTPStatus.OK, {
