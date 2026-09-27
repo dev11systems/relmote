@@ -136,3 +136,31 @@ The Hub is optional orchestration, not the root of trust.
 A Relmote node must remain locally owned and useful without the Hub, a Dev11 service, cloud connectivity, or an Internet connection. Connecting a node to the Hub must not silently broaden controller authority or existing grants.
 
 This milestone follows the near-term single-node remote-support and Agent Bridge work.
+
+
+## Near-term: documentation consolidation
+
+After the first successful multi-machine Agent Host pairing test, perform a repository-wide documentation reconciliation.
+
+Priorities:
+
+1. Rewrite the root README as the current product/platform entry point.
+2. Clearly distinguish current working preview features, experimental/in-progress features, and future concepts.
+3. Explain the independent roles: Controller, Relmote Target/Node, Agent Host, and optional future Hub.
+4. Present software and hardware as peer implementations of the shared Relmote authority/capability/session model.
+5. Remove or relocate obsolete implementation-order/status claims from the README.
+6. Reconcile overlapping architecture, capability, session, transport, remote-support, Agent Bridge, Agent Host, hardware, and roadmap documents.
+7. Add a compact documentation map so readers can find canonical deep dives without a giant undifferentiated link list.
+8. Mark historical design material as historical where it remains useful rather than silently mixing it with current behavior.
+9. Verify install/update commands and current versioning behavior against the actual CLI.
+10. Add a current-state matrix: implemented and tested; implemented but experimental; planned.
+
+The README should answer, in order:
+
+- What is Relmote?
+- What can I do with it today?
+- What are its roles/components?
+- How do I install and try it?
+- What security/authority guarantees matter?
+- Where is it going?
+- Where do I read deeper documentation?
