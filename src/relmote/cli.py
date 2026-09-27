@@ -732,6 +732,14 @@ def build_parser() -> argparse.ArgumentParser:
         print()
         print("PAIRED TARGETS")
         targets = snapshot["paired_targets"]
+        if args.live:
+            summary = snapshot.get("summary") or {}
+            print(
+                "Summary: "
+                f"{summary.get('total', len(targets))} total · "
+                f"{summary.get('active', 0)} active · "
+                f"{summary.get('attention', 0)} need attention"
+            )
         if not targets:
             print("No paired Relmote targets.")
             return 0
@@ -739,10 +747,10 @@ def build_parser() -> argparse.ArgumentParser:
         for target in targets:
             print(f"- {target['name']}")
             print(f"  workspace: {target.get('workspace') or '?'}")
-            print(f"  stored state: {target.get('state') or '?'}")
+            print(f"  paired profile state (cached): {target.get('state') or '?'}")
             capabilities = target.get("capabilities") or []
             print(
-                "  stored capabilities: "
+                "  paired profile capabilities (cached): "
                 + (", ".join(capabilities) if capabilities else "none")
             )
             if args.live:
@@ -754,11 +762,15 @@ def build_parser() -> argparse.ArgumentParser:
                     reachability = "unreachable"
                 else:
                     reachability = "unknown"
+                current = target.get("current") or {}
                 print(f"  live: {reachability} · {live.get('authority') or 'unknown'}")
+                print(f"  current: {current.get('health') or 'unknown'}")
                 if live.get("state"):
                     print(f"  live state: {live['state']}")
                 if live.get("detail"):
                     print(f"  detail: {live['detail']}")
+                if current.get("recommended_action"):
+                    print(f"  action: {current['recommended_action']}")
         return 0
 
     hub_inventory.set_defaults(func=run_hub_inventory)

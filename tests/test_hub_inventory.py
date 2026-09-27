@@ -109,3 +109,62 @@ def test_hub_live_inventory_distinguishes_revoked_from_unreachable():
     assert unavailable["reachable"] is False
     assert unavailable["authority"] == "unknown"
     assert "connection refused" in unavailable["detail"]
+
+
+def test_hub_reconciles_revoked_and_stale_credentials_into_attention_states():
+    revoked = HubInventory(
+        paired_targets=FakePairedTargets(
+            status_error=PermissionError(
+                "Relmote Agent API: agent session is not active"
+            )
+        ),
+        host_factory=fake_host,
+        build_factory=fake_build,
+    ).snapshot(live=True)
+
+    stale = HubInventory(
+        paired_targets=FakePairedTargets(
+            status_error=PermissionError(
+                "Relmote Agent API: invalid agent session token"
+            )
+        ),
+        host_factory=fake_host,
+        build_factory=fake_build,
+    ).snapshot(live=True)
+
+    revoked_target = revoked["paired_targets"][0]
+    assert revoked_target["current"]["health"] == "revoked"
+    assert revoked_target["current"]["needs_attention"] is True
+    assert "re-pair" in revoked_target["current"]["recommended_action"]
+    assert revoked["summary"]["revoked"] == 1
+    assert revoked["summary"]["attention"] == 1
+
+    stale_target = stale["paired_targets"][0]
+    assert stale_target["current"]["health"] == "stale_credential"
+    assert stale_target["current"]["needs_attention"] is True
+    assert "re-pair" in stale_target["current"]["recommended_action"]
+    assert stale["summary"]["stale_credential"] == 1
+
+
+def test_hub_summary_counts_active_and_unreachable_targets():
+    active = HubInventory(
+        paired_targets=FakePairedTargets(),
+        host_factory=fake_host,
+        build_factory=fake_build,
+    ).snapshot(live=True)
+
+    unreachable = HubInventory(
+        paired_targets=FakePairedTargets(
+            status_error=ConnectionError("connection refused")
+        ),
+        host_factory=fake_host,
+        build_factory=fake_build,
+    ).snapshot(live=True)
+
+    assert active["summary"]["active"] == 1
+    assert active["summary"]["attention"] == 0
+    assert active["paired_targets"][0]["current"]["health"] == "active"
+
+    assert unreachable["summary"]["unreachable"] == 1
+    assert unreachable["summary"]["attention"] == 1
+    assert unreachable["paired_targets"][0]["current"]["health"] == "unreachable"
