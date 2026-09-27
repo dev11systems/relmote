@@ -14,6 +14,7 @@ from .presentation import capability_label
 from .help import render_help
 from .project_info import PROJECT_URL, ISSUES_URL, CHANGELOG_URL, bundled_changelog
 from .version import build_info
+from .agent_controller_api import handle as agent_controller_handle
 import tempfile
 import socket
 import secrets
@@ -510,7 +511,14 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 return
             path = urlparse(self.path).path
             try:
-                if path == "/api/v1/screen/request":
+                if path.startswith("/api/v1/controller/agent"):
+                    if not runtime:
+                        raise ValueError("agent lifecycle requires shared runtime")
+                    length = int(self.headers.get("Content-Length", "0"))
+                    payload = json.loads(self.rfile.read(length) or b"{}")
+                    status, value = agent_controller_handle(runtime, path, payload)
+                    _json(self, HTTPStatus(status), value)
+                elif path == "/api/v1/screen/request":
                     if not runtime:
                         raise ValueError("screen lifecycle requires shared runtime")
                     session = runtime.request_screen(controller="web-controller")
