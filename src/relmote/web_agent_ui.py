@@ -7,17 +7,9 @@ const relmoteAgentState=document.getElementById('agentAccessState');
 if(relmoteAgentState) relmoteAgentState.textContent='Status: frontend loaded · checking transport…';
 
 async function agentRequest(path,payload=null){
-  const options={headers:{'Content-Type':'application/json'}};
-  if(payload!==null){
-    options.method='POST';
-    options.body=JSON.stringify(payload);
-  }
-  const response=await fetch(path,options);
-  const text=await response.text();
-  let value={};
-  try{ value=text?JSON.parse(text):{}; }catch(e){}
-  if(!response.ok) throw new Error(value.error||text||('HTTP '+response.status));
-  return value;
+  const bridge=window['relmote'+'Controller'+'Request'];
+  if(!bridge) throw new Error('controller bridge unavailable');
+  return bridge(path,payload===null?'GET':'POST',payload);
 }
 function agentNotice(message,isError=false){
   const status=document.getElementById('previewStatus');
