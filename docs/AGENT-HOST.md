@@ -47,3 +47,7 @@ The future Relmote Hub may choose among authorized Agent Hosts based on online s
 ## Credential storage
 
 The preview uses owner-only local profile files. Production design should prefer OS credential/keyring storage and avoid exposing bearer material in command arguments, logs, UI, agent context, or adapter tool results.
+
+## Validation
+
+Before treating the cross-machine Agent Host path as exercised, run the reproducible checks in [AGENT-HOST-VALIDATION.md](AGENT-HOST-VALIDATION.md). CI success alone does not establish the multi-machine authority and revocation behavior.
