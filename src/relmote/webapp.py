@@ -84,7 +84,9 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
 <section id="terminal" class="card">
  <h2>Remote tools</h2>
  <div id="remoteTools">Loading…</div>
- <button id="requestScreenButton" onclick="requestScreen()">Request screen view</button>\n <div id="screenSessions"></div>\n <button id="requestTerminalButton" onclick="requestTerminal()">Request terminal on this computer</button>
+ <button id="requestScreenButton" onclick="requestScreen()">Request screen view</button>
+ <div id="screenSessions"></div>
+ <button id="requestTerminalButton" onclick="requestTerminal()">Request terminal on this computer</button>
  <div id="terminalSessions"></div>
  <div id="terminalPanel" style="display:none">
    <h3>Terminal</h3>
@@ -163,7 +165,8 @@ const targetEl=document.getElementById('target');
 const sessionEl=document.getElementById('session');
 const supportStateEl=document.getElementById('supportState');
 const remoteToolsEl=document.getElementById('remoteTools');
-const terminalSessionsEl=document.getElementById('terminalSessions');\nconst screenSessionsEl=document.getElementById('screenSessions');
+const terminalSessionsEl=document.getElementById('terminalSessions');
+const screenSessionsEl=document.getElementById('screenSessions');
 const terminalPanelEl=document.getElementById('terminalPanel');
 const terminalOutputEl=document.getElementById('terminalOutput');
 const terminalInputEl=document.getElementById('terminalInput');
