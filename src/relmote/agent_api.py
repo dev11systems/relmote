@@ -27,6 +27,12 @@ def handle_post(
     path: str,
     payload: dict,
 ) -> dict:
+    if path == "/api/v1/agent/pair":
+        code = str(payload.get("code", "")).strip()
+        if not code:
+            raise ValueError("pairing code is required")
+        return runtime.exchange_agent_pairing(code)
+
     grant = runtime.agent_by_token(bearer_token(headers))
     session = grant.session
 
