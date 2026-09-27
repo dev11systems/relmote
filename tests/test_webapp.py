@@ -67,3 +67,11 @@ def test_static_agent_script_does_not_require_controller_query_token():
     auth_pos = source.index("if not authorized(self)", static_pos)
     assert static_pos < auth_pos
     assert "return" in source[static_pos:auth_pos]
+
+
+def test_agent_module_uses_page_controller_bridge():
+    script = agent_access_javascript()
+    assert "controller bridge unavailable" in script
+    assert "relmote'+'Controller'+'Request" in script
+    # Authentication belongs to the page/controller layer, not this module.
+    assert "X-Relmote-" not in script
