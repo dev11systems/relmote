@@ -5,7 +5,7 @@ PROJECT_URL = "https://github.com/dev11systems/relmote"
 ISSUES_URL = "https://github.com/dev11systems/relmote/issues"
 CHANGELOG_URL = "https://github.com/dev11systems/relmote/blob/main/CHANGELOG.md"
 
-SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.5
+SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.7
 
 Screen Observe
 - Added explicit screen-observe request and approval sessions.
