@@ -65,6 +65,9 @@ class PairedTargetService:
     def status(self, target: str) -> dict:
         return self._client(target).session()
 
+    def info(self, target: str) -> dict:
+        return self._client(target).info()
+
     def list(self, target: str, path: str = ".") -> list[dict]:
         return self._client(target).list(path)
 

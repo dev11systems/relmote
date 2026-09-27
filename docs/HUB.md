@@ -143,7 +143,9 @@ It reports:
 - the co-located Agent Host identity/platform/capabilities/tools;
 - the exact local Relmote version/build;
 - credential-blind paired-target summaries;
-- optionally, live Target reachability and authority state.
+- optionally, live Target reachability and authority state;
+- for live authorized Targets, the Target's minimal platform metadata and exact Relmote version/build;
+- a conservative build relation: `same_build`, `different_build_same_snapshot`, `different_version`, or `unknown`.
 
 The live probe distinguishes a reachable-but-revoked Target from an unreachable Target. The snapshot does not expose paired-target bearer credentials or stored endpoint URLs.
 
@@ -268,3 +270,10 @@ Hub implementation should reuse the same:
 - revocation semantics.
 
 The Hub should coordinate those primitives rather than invent a second authorization model.
+
+
+## Version/build coordination boundary
+
+The Hub must not infer "older" or "newer" from two different commit hashes alone.
+
+The first version-coordination slice reports exact live Target build identity and build drift relative to the co-located Agent Host. A later update-availability provider may compare those builds against an authoritative configured source/channel and then state whether an update is actually available.

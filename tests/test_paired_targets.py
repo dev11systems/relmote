@@ -12,6 +12,21 @@ class FakeClient:
         self.calls.append(("session",))
         return {"state": "active", "session_id": "session-1"}
 
+    def info(self):
+        self.calls.append(("info",))
+        return {
+            "role": "target",
+            "target": {"name": "target-a-node"},
+            "platform": {"system": "linux", "architecture": "x86_64"},
+            "relmote": {
+                "display_version": "0.1.0-dev.12",
+                "commit": "abcdef1234567890",
+                "short_commit": "abcdef12",
+                "channel": "repository",
+            },
+            "session": {"state": "active", "workspace": "/workspace"},
+        }
+
     def list(self, path="."):
         self.calls.append(("list", path))
         return [{"name": "README.md", "type": "file"}]
@@ -74,6 +89,7 @@ def test_service_reuses_profile_credentials_without_returning_them(tmp_path, mon
     service = PairedTargetService(client_factory=client_factory)
 
     assert service.status("target-a")["state"] == "active"
+    assert service.info("target-a")["target"]["name"] == "target-a-node"
     assert service.list("target-a", "src")[0]["name"] == "README.md"
     assert service.read("target-a", "README.md") == "hello\n"
     assert service.exec(
@@ -86,9 +102,10 @@ def test_service_reuses_profile_credentials_without_returning_them(tmp_path, mon
     assert all(client.base_url == "https://target-a.example.invalid" for client in clients)
     assert all(client.token == "secret-bearer" for client in clients)
     assert clients[0].calls == [("session",)]
-    assert clients[1].calls == [("list", "src")]
-    assert clients[2].calls == [("read", "README.md")]
-    assert clients[3].calls == [("exec", ["git", "status"], "repo", 12)]
+    assert clients[1].calls == [("info",)]
+    assert clients[2].calls == [("list", "src")]
+    assert clients[3].calls == [("read", "README.md")]
+    assert clients[4].calls == [("exec", ["git", "status"], "repo", 12)]
 
 
 def test_targets_marks_unreadable_profiles_without_exposing_file_contents(

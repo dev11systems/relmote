@@ -46,6 +46,9 @@ class RelmoteAgentClient:
     def session(self) -> dict:
         return self._request("/api/v1/agent/session")
 
+    def info(self) -> dict:
+        return self._request("/api/v1/agent/info")
+
     def list(self, path: str = ".") -> list[dict]:
         return self._request("/api/v1/agent/list", {"path": path})["entries"]
 
