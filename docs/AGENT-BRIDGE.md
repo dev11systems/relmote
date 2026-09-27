@@ -48,9 +48,9 @@ The preview should treat the human controller and external agent as different pr
 
 The first Agent API binds to loopback only. Remote agent connectivity must use an explicitly configured private path or future paired transport.
 
-## iPad flow
+## Controller flow
 
-The web controller can create a pending Agent session by choosing:
+A human-facing controller can create a pending Agent session by choosing:
 
 - workspace root;
 - list/read/exec/write capabilities;
@@ -68,7 +68,7 @@ The future self-hosted Relmote Hub should consume the same controller/session ab
 
 A Hub may coordinate many nodes and Agent sessions, but each node continues to enforce its own grants. This allows:
 
-- iPad/browser controllers;
+- browser, CLI, or other human-facing controllers;
 - a self-hosted multi-node Hub;
 - Codex/agent adapters;
 - CLI/TUI controllers;

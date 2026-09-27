@@ -19,7 +19,7 @@ Pocket:
 PAIRING
 7A2F-91C0-4B11-88DE
 
-iPad:
+Controller:
 Pair with "Pocket"?
 Fingerprint:
 7A2F-91C0-4B11-88DE

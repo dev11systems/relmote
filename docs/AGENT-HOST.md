@@ -16,9 +16,23 @@ Example deployment: a browser on a phone, tablet, or computer serves as the Cont
 
 An Agent Host does not create target authority. Every target grant originates from and remains revocable by the target/controller authorization model.
 
+## Current implementation boundary
+
+The current CLI and future adapters share one paired-target service rather than each reimplementing profile and credential handling.
+
+That service exposes the current target operations:
+
+- enumerate paired targets without exposing bearer credentials;
+- inspect target/session status;
+- list an authorized workspace path;
+- read an authorized workspace file;
+- execute a target-authorized command.
+
+The CLI is one consumer of this boundary. MCP/Codex should become another consumer after the multi-machine Agent Host path is validated.
+
 ## Adapter boundary
 
-The target-side Agent API remains agent-neutral. A controller-side adapter can expose paired targets through MCP or another agent tool protocol.
+The target-side Agent API remains agent-neutral. An Agent Host adapter can expose paired targets through MCP or another agent tool protocol.
 
 Initial conceptual MCP tools: relmote_targets, relmote_target_status, relmote_list, relmote_read, relmote_exec.
 
@@ -32,4 +46,4 @@ The future Relmote Hub may choose among authorized Agent Hosts based on online s
 
 ## Credential storage
 
-The preview uses owner-only local profile files. Production design should prefer OS credential/keyring storage and avoid exposing bearer material in command arguments, logs, UI, or agent context.
+The preview uses owner-only local profile files. Production design should prefer OS credential/keyring storage and avoid exposing bearer material in command arguments, logs, UI, agent context, or adapter tool results.

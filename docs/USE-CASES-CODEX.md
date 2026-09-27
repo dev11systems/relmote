@@ -52,7 +52,7 @@ After pairing, the human should normally refer to the target by profile/name rat
 
 ## Codex adapter
 
-The planned Codex integration lives on the Agent Host, not the target. MCP is a candidate adapter boundary because it can expose Relmote operations as tools while leaving target authorization in Relmote.
+The planned Codex integration lives on the Agent Host, not the target. MCP is a candidate adapter boundary because it can expose Relmote operations as tools while leaving target authorization in Relmote. The CLI and future adapters should share the credential-blind paired-target service instead of duplicating profile or bearer handling.
 
 Conceptual tools include: relmote_targets, relmote_target_status, relmote_list, relmote_read, and relmote_exec. Later tools such as write or screen control must exist only when the target grant includes those capabilities.
 
@@ -64,4 +64,10 @@ An Agent Host may use the target grant to inspect project files, run approved di
 
 ## Reference validation
 
-The first intended multi-machine validation uses a browser Controller, a separate Agent Host, and a Linux software Target. A later validation should move the Agent Host to another machine without changing the target-side authority model. These are validation goals, not a claim that the end-to-end deployment has already passed.
+The first intended multi-machine validation should exercise the three roles independently where practical:
+
+1. a human-facing Controller;
+2. an Agent Host running the paired-target client/tooling;
+3. a Linux software Target enforcing the scoped grant.
+
+A later validation should move the Agent Host to another machine without changing the target-side authority model. Specific hostnames, device brands, and maintainer lab machines are validation details rather than part of the public architecture. Useful test reports should record relevant operating system, architecture, transport, and Relmote build/commit after redaction. These are validation goals, not a claim that the end-to-end deployment has already passed.
