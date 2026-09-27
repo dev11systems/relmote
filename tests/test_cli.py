@@ -72,3 +72,29 @@ def test_main_formats_permission_denial_without_traceback(monkeypatch, capsys):
         "Denied: agent capability not granted: terminal.exec"
     )
     assert "Traceback" not in captured.err
+
+
+def test_main_formats_connection_failure_without_traceback(monkeypatch, capsys):
+    import relmote.cli as cli
+
+    class Args:
+        command = "agent"
+
+        @staticmethod
+        def func(args):
+            raise ConnectionError("Relmote Agent API unavailable: connection refused")
+
+    class Parser:
+        @staticmethod
+        def parse_args():
+            return Args()
+
+    monkeypatch.setattr(cli, "build_parser", lambda: Parser())
+
+    assert cli.main() == 3
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.strip() == (
+        "Unavailable: Relmote Agent API unavailable: connection refused"
+    )
+    assert "Traceback" not in captured.err

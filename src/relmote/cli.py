@@ -750,6 +750,9 @@ def main() -> int:
     except PermissionError as exc:
         print(f"Denied: {exc}", file=__import__("sys").stderr)
         return 2
+    except ConnectionError as exc:
+        print(f"Unavailable: {exc}", file=__import__("sys").stderr)
+        return 3
 
 
 if __name__ == "__main__":

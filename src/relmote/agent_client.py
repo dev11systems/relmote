@@ -37,6 +37,11 @@ class RelmoteAgentClient:
             except Exception:
                 detail = exc.reason
             raise PermissionError(f"Relmote Agent API: {detail}") from exc
+        except (urllib.error.URLError, TimeoutError) as exc:
+            reason = getattr(exc, "reason", exc)
+            raise ConnectionError(
+                f"Relmote Agent API unavailable: {reason}"
+            ) from exc
 
     def session(self) -> dict:
         return self._request("/api/v1/agent/session")
@@ -77,3 +82,8 @@ def pair(base_url: str, code: str, *, timeout: int = 15) -> dict:
         except Exception:
             detail = exc.reason
         raise PermissionError(f"Relmote pairing failed: {detail}") from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        reason = getattr(exc, "reason", exc)
+        raise ConnectionError(
+            f"Relmote pairing endpoint unavailable: {reason}"
+        ) from exc
