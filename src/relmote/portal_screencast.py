@@ -109,7 +109,7 @@ def _portal_request(
                     results_text=joined,
                 )
         raise RuntimeError(
-            f"{method} portal response was not received before timeout"
+            f"{method}: portal response was not received before timeout"
         )
     finally:
         monitor.terminate()
