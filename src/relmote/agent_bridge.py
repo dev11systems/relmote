@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 
 from .agent_session import AgentCapability, AgentSession
 from .workspace import WorkspacePolicy
+from .agent_scope import classify_scope
 
 
 @dataclass
@@ -19,6 +20,7 @@ class AgentGrant:
             "workspace": str(self.session.workspace.root),
             "capabilities": sorted(cap.value for cap in self.session.capabilities),
             "state": self.session.state.value,
+            "scope": classify_scope(str(self.session.workspace.root)),
         }
 
 
