@@ -131,3 +131,42 @@ def create_session() -> str:
             "ScreenCast portal approved CreateSession but no session handle was returned"
         )
     return match.group(1)
+
+
+def _request_method(method: str, *args: str) -> PortalRequest:
+    token = "relmote_" + uuid4().hex
+    options = "{'handle_token': <'%s'>}" % token
+    output = _call(method, *args, options)
+    match = re.search(r"'(/org/freedesktop/portal/desktop/request/[^']+)'", output)
+    if not match:
+        raise RuntimeError(f"could not parse {method} request path: {output}")
+    return PortalRequest(token=token, request_path=match.group(1))
+
+
+def select_monitor(session_handle: str) -> None:
+    request = _request_method(
+        "SelectSources",
+        session_handle,
+        "{'types': <uint32 1>, 'multiple': <false>, 'cursor_mode': <uint32 2>}",
+    )
+    response = wait_for_response(request.request_path)
+    if response.code != 0:
+        raise PermissionError(
+            f"screen source selection was declined or cancelled (response {response.code})"
+        )
+
+
+def start_screen_cast(session_handle: str) -> PortalResponse:
+    request = _request_method("Start", session_handle, "")
+    response = wait_for_response(request.request_path, timeout_seconds=120)
+    if response.code != 0:
+        raise PermissionError(
+            f"screen sharing was declined or cancelled (response {response.code})"
+        )
+    return response
+
+
+def request_monitor_share() -> PortalResponse:
+    session_handle = create_session()
+    select_monitor(session_handle)
+    return start_screen_cast(session_handle)
