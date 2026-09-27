@@ -77,3 +77,5 @@ Documents such as `docs/MVP.md`, `docs/FIRST-TEST.md`, `docs/SOFTWARE-PREVIEW-TE
 ## Documentation rule
 
 When two documents disagree about whether a feature currently works, `docs/STATUS.md` is authoritative. Architecture/design documents may intentionally describe intended future behavior.
+
+Public documentation should describe portable roles and platform requirements rather than maintainer-specific hostnames, personal device names, or one lab topology. Real-world validation notes may record relevant operating system, architecture, form factor, transport, and build identity when those details help reproduce a result.

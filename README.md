@@ -30,12 +30,12 @@ Relmote separates roles that are often collapsed into one remote-access applicat
 ```text
              Controller
           human-facing UI
-        (iPad / browser / CLI)
+     (browser / CLI / controller UI)
                  │
                  ▼
           optional Agent Host
        agent compute / adapters
-       (Kaonashi, Falkor, etc.)
+     (workstation / server / appliance)
                  │
                  ▼
           Relmote Target / Node
@@ -114,9 +114,9 @@ Relmote's Agent Bridge lets an agent running elsewhere work against a narrowly a
 A representative deployment is:
 
 ```text
-iPad / browser          Kaonashi                 russ-pc
-   Controller   ───►    Agent Host    ───►    Relmote Target
- approvals/revoke      Codex/MCP later         scoped authority
+Browser / CLI          Agent Host                Relmote Target
+   Controller   ───►  agent runtime / adapter ───► scoped authority
+ approvals/revoke       Codex/MCP optional       local enforcement
 ```
 
 Agent workspace list/read/execute permissions are separate grants. Pairing uses short-lived, single-use codes; revocation remains target-controlled. The current cross-machine Agent Host workflow is experimental.

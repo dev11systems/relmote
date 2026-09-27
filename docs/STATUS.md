@@ -51,12 +51,12 @@ Status is capability-specific. A broad subsystem may contain items in more than 
 
 A useful current deployment model is:
 
-- **Controller:** iPad/browser or another human-facing interface.
-- **Agent Host:** Kaonashi today; Falkor or another capable machine can fill the same role later.
+- **Controller:** a browser, CLI, or other human-facing interface.
+- **Agent Host:** an optional workstation, server, or appliance that runs agent tooling and adapters.
 - **Target / Node:** the authorized computer or system being observed, diagnosed, or controlled.
 - **Hub:** a future optional self-hosted multi-node orchestration layer.
 
-These are roles, not fixed products. One machine may fill multiple roles, and changing Agent Host does not itself change target authority.
+These are roles, not fixed products. One machine may fill multiple roles, and moving the Agent Host to another machine does not itself change target authority.
 
 ## Security note
 

@@ -19,8 +19,9 @@ from .agent_transport import tailscale_transport
 from .agent_access import enable_private_transport, disable_private_transport, serve_status
 from .agent_scope import classify_scope
 from .agent_client import RelmoteAgentClient, pair as pair_agent
-from .agent_profiles import save_profile, load_profile, profile_directory
+from .agent_profiles import save_profile
 from .agent_host import detect_agent_host
+from .paired_targets import PairedTargetService
 from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
@@ -391,6 +392,8 @@ def build_parser() -> argparse.ArgumentParser:
         return 0
     agent_pair_cmd.set_defaults(func=run_agent_pair)
 
+    paired_targets = PairedTargetService()
+
     agent_use = agent_sub.add_parser(
         "use",
         help="operate on a previously paired Relmote target",
@@ -407,19 +410,25 @@ def build_parser() -> argparse.ArgumentParser:
     use_exec.add_argument("tool_args", nargs="*")
 
     def run_agent_use(args):
-        profile = load_profile(args.target)
-        client = RelmoteAgentClient(profile["base_url"], profile["token"])
         if args.use_command == "status":
-            print(__import__("json").dumps(client.session(), indent=2))
+            print(__import__("json").dumps(paired_targets.status(args.target), indent=2))
             return 0
         if args.use_command == "list":
-            print(__import__("json").dumps(client.list(args.path), indent=2))
+            print(
+                __import__("json").dumps(
+                    paired_targets.list(args.target, args.path),
+                    indent=2,
+                )
+            )
             return 0
         if args.use_command == "read":
-            print(client.read(args.path), end="")
+            print(paired_targets.read(args.target, args.path), end="")
             return 0
         if args.use_command == "exec":
-            result = client.exec([args.tool, *args.tool_args])
+            result = paired_targets.exec(
+                args.target,
+                [args.tool, *args.tool_args],
+            )
             if result.get("stdout"):
                 print(result["stdout"], end="")
             if result.get("stderr"):
@@ -435,25 +444,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="list locally paired Relmote targets",
     )
     def run_agent_targets(args):
-        directory = profile_directory()
-        if not directory.exists():
+        targets = paired_targets.targets()
+        if not targets:
             print("No paired Relmote targets.")
             return 0
-        profiles = sorted(directory.glob("*.json"))
-        if not profiles:
-            print("No paired Relmote targets.")
-            return 0
-        for path in profiles:
-            try:
-                value = __import__("json").loads(path.read_text())
-                session = value.get("session", {})
-                print(
-                    f"{value.get('name', path.stem)}  "
-                    f"{session.get('workspace', '?')}  "
-                    f"{session.get('state', '?')}"
-                )
-            except Exception:
-                print(f"{path.stem}  unreadable profile")
+        for target in targets:
+            print(
+                f"{target['name']}  "
+                f"{target.get('workspace') or '?'}  "
+                f"{target.get('state') or '?'}"
+            )
         return 0
     agent_targets.set_defaults(func=run_agent_targets)
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import platform
 import shutil
 import socket
@@ -22,7 +21,16 @@ class AgentHost:
 def detect_agent_host() -> AgentHost:
     detected_tools = tuple(
         name
-        for name in ("git", "python3", "pytest", "node", "npm", "docker", "podman")
+        for name in (
+            "git",
+            "python3",
+            "python",
+            "pytest",
+            "node",
+            "npm",
+            "docker",
+            "podman",
+        )
         if shutil.which(name)
     )
     capabilities = [
@@ -31,7 +39,7 @@ def detect_agent_host() -> AgentHost:
     ]
     if "git" in detected_tools:
         capabilities.append("development.git")
-    if "python3" in detected_tools:
+    if any(name in detected_tools for name in ("python3", "python")):
         capabilities.append("development.python")
     if any(name in detected_tools for name in ("docker", "podman")):
         capabilities.append("containers")

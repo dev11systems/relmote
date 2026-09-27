@@ -9,9 +9,9 @@ Run Codex or another agent away from the target while keeping target authority l
 A current reference topology is:
 
 ```text
-iPad / browser            Kaonashi or Falkor              russ-pc
-   Controller      ───►       Agent Host        ───►    Relmote Target
- approvals/revoke            Codex / adapter             scoped grant
+Browser / CLI               Agent Host                    Relmote Target
+   Controller      ───►   Codex / agent adapter   ───►    scoped grant
+ approvals/revoke          paired-target service          local enforcement
 ```
 
 The target does not need Codex installed and does not need to store Codex credentials.
@@ -62,6 +62,12 @@ Task: diagnose why an application fails to start.
 
 An Agent Host may use the target grant to inspect project files, run approved diagnostics, inspect returned stdout/stderr, and propose a change. If writing is not granted, it must stop at proposal/diagnosis rather than silently modifying the target.
 
-## Reference deployment
+## Validation topology
 
-The first intended real multi-machine validation is Controller on iPad, Agent Host on Kaonashi, and Target on russ-pc. Falkor can later fill the Agent Host role without changing the target-side authority model.
+The first real multi-machine validation should exercise the three roles independently where practical:
+
+1. a human-facing Controller;
+2. an Agent Host running the paired-target client/tooling;
+3. a Relmote Target enforcing the scoped grant.
+
+Specific hostnames, device brands, and maintainer lab machines are validation details rather than part of the public architecture. Useful test reports should record relevant platform facts such as operating system, architecture, transport, and Relmote build/commit without making a personal lab topology canonical.

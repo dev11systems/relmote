@@ -2,9 +2,7 @@
 
 An Agent Host supplies compute and agent tooling for one or more authorized Relmote targets.
 
-Controller, Agent Host, and Target are independent roles.
-
-Example deployment: Controller = iPad web UI; Agent Host = Kaonashi; Target = russ-pc. A later deployment may use Falkor without changing target-side authorization.
+Controller, Agent Host, and Target are independent roles. A representative deployment uses a human-facing browser or CLI as the Controller, a separate workstation or server as the Agent Host, and another authorized computer as the Relmote Target. The roles may also be colocated where appropriate.
 
 ## Responsibilities
 
@@ -16,20 +14,34 @@ Example deployment: Controller = iPad web UI; Agent Host = Kaonashi; Target = ru
 
 An Agent Host does not create target authority. Every target grant originates from and remains revocable by the target/controller authorization model.
 
+## Current implementation boundary
+
+The current CLI and future adapters should share one paired-target service rather than each reimplementing profile and credential handling.
+
+That service exposes the current target operations:
+
+- enumerate paired targets without exposing bearer credentials;
+- inspect target/session status;
+- list an authorized workspace path;
+- read an authorized workspace file;
+- execute a target-authorized command.
+
+The CLI is one consumer of this boundary. MCP/Codex should become another consumer after the multi-machine Agent Host path is validated.
+
 ## Adapter boundary
 
-The target-side Agent API remains agent-neutral. A controller-side adapter can expose paired targets through MCP or another agent tool protocol.
+The target-side Agent API remains agent-neutral. An Agent Host adapter can expose paired targets through MCP or another agent tool protocol.
 
-Initial conceptual MCP tools: relmote_targets, relmote_target_status, relmote_list, relmote_read, relmote_exec.
+Initial conceptual MCP tools: `relmote_targets`, `relmote_target_status`, `relmote_list`, `relmote_read`, `relmote_exec`.
 
-Later, when separately authorized: relmote_write, relmote_screen_observe, relmote_screen_control.
+Later, when separately authorized: `relmote_write`, `relmote_screen_observe`, `relmote_screen_control`.
 
 Adapters must not broaden target capabilities. A read-only target grant cannot become write authority through the adapter.
 
 ## Host selection
 
-The future Relmote Hub may choose among Agent Hosts such as Kaonashi and Falkor based on online state, installed tools, compute capacity, locality/latency, privacy policy, workload, and user preference. Automatic selection must remain visible and overridable.
+A future Relmote Hub may choose among available Agent Hosts based on online state, installed tools, compute capacity, locality/latency, privacy policy, workload, and user preference. Automatic selection must remain visible and overridable.
 
 ## Credential storage
 
-The preview uses owner-only local profile files. Production design should prefer OS credential/keyring storage and avoid exposing bearer material in command arguments, logs, UI, or agent context.
+The preview uses owner-only local profile files. Production design should prefer OS credential/keyring storage and avoid exposing bearer material in command arguments, logs, UI, agent context, or adapter tool results.
