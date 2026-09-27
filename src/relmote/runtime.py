@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from threading import RLock, Thread
 from uuid import uuid4
+import secrets
 
 from .software_node import SoftwareNode
 from .access_policy import AccessPolicy
@@ -12,6 +13,7 @@ from .terminal import TerminalAuthority, TerminalSession, TerminalState
 from .terminal_manager import TerminalManager
 from .screen_session import ScreenSession
 from .portal_dbus import request_monitor_share
+from .agent_bridge import AgentGrant, create_grant
 
 
 def utcnow_iso() -> str:
@@ -35,6 +37,7 @@ class RelmoteRuntime:
     terminal_sessions: dict[str, TerminalSession] = field(default_factory=dict)
     terminal_manager: TerminalManager = field(default_factory=TerminalManager)
     screen_sessions: dict[str, ScreenSession] = field(default_factory=dict)
+    agent_grants: dict[str, AgentGrant] = field(default_factory=dict)
     _events: list[RuntimeEvent] = field(default_factory=list)
     _lock: RLock = field(default_factory=RLock)
 
@@ -86,9 +89,56 @@ class RelmoteRuntime:
                 terminal.revoke()
             for screen in self.screen_sessions.values():
                 screen.revoke()
+            for grant in self.agent_grants.values():
+                grant.session.revoke()
             self.emit("support.disabled")
             return self.snapshot()
 
+
+    def request_agent(
+        self,
+        root: str,
+        capabilities: list[str],
+        *,
+        controller: str = "external-agent",
+    ) -> AgentGrant:
+        with self._lock:
+            if not self.support_access.available():
+                raise PermissionError("remote support is off")
+            grant = create_grant(
+                root,
+                controller=controller,
+                capabilities=capabilities,
+            )
+            self.agent_grants[grant.session.session_id] = grant
+            self.emit("agent.requested", {
+                "agent_session_id": grant.session.session_id,
+                "controller": controller,
+                "workspace": root,
+                "capabilities": capabilities,
+            })
+            return grant
+
+    def approve_agent(self, session_id: str) -> AgentGrant:
+        with self._lock:
+            grant = self.agent_grants[session_id]
+            grant.session.approve()
+            self.emit("agent.approved", {"agent_session_id": session_id})
+            return grant
+
+    def revoke_agent(self, session_id: str) -> AgentGrant:
+        with self._lock:
+            grant = self.agent_grants[session_id]
+            grant.session.revoke()
+            self.emit("agent.revoked", {"agent_session_id": session_id})
+            return grant
+
+    def agent_by_token(self, token: str) -> AgentGrant:
+        with self._lock:
+            for grant in self.agent_grants.values():
+                if secrets.compare_digest(grant.token, token):
+                    return grant
+        raise PermissionError("invalid agent session token")
 
     def request_screen(self, *, controller: str = "remote-controller") -> ScreenSession:
         with self._lock:
@@ -281,6 +331,9 @@ class RelmoteRuntime:
                 "mode": self.support_access.mode.value,
             }
             value["features"] = remote_feature_status()
+            value["agent_sessions"] = [
+                grant.public() for grant in self.agent_grants.values()
+            ]
             value["screen_sessions"] = [
                 {
                     "session_id": session.session_id,
