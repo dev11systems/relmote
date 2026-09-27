@@ -4,6 +4,7 @@ import shutil
 
 from .screen_backend import detect_linux_screen_backend
 from .wayland_portal import portal_screen_cast_available
+from .screen_providers import discover_screen_providers, preferred_observe_provider
 
 
 def remote_feature_status() -> dict[str, dict]:
@@ -23,6 +24,11 @@ def remote_feature_status() -> dict[str, dict]:
             "portal_ready": portal_ready,
             "portal_note": portal_note,
             "note": screen.note,
+            "providers": [item.as_dict() for item in discover_screen_providers()],
+            "preferred_observe_provider": (
+                preferred_observe_provider().provider_id
+                if preferred_observe_provider() else None
+            ),
         },
         "terminal": {
             "available": ssh,
