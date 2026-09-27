@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 import shutil
 import subprocess
 
 
 AGENT_PORT = 8788
+LOGGER = logging.getLogger("relmote.agent_access")
 
 
 def tailscale_available() -> bool:
@@ -60,16 +62,38 @@ def serve_status() -> dict:
 
 def enable_private_transport() -> dict:
     if not tailscale_available():
+        LOGGER.error("Cannot enable Agent Access: Tailscale is not installed")
         raise RuntimeError("Tailscale is not installed")
-    completed = subprocess.run(
-        ["tailscale", "serve", "--bg", str(AGENT_PORT)],
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
+
+    LOGGER.info("Enabling private Agent Access with Tailscale Serve on port %s", AGENT_PORT)
+    try:
+        completed = subprocess.run(
+            ["tailscale", "serve", "--bg", str(AGENT_PORT)],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        LOGGER.exception(
+            "Tailscale Serve timed out while enabling Agent Access on port %s",
+            AGENT_PORT,
+        )
+        raise RuntimeError(
+            "Tailscale Serve did not return within 30 seconds. "
+            "Check tailscale serve status and relmote logs."
+        ) from exc
+
     if completed.returncode != 0:
-        raise RuntimeError(completed.stderr.strip() or "Tailscale Serve failed")
+        detail = completed.stderr.strip() or "Tailscale Serve failed"
+        LOGGER.error(
+            "Tailscale Serve failed while enabling Agent Access: returncode=%s stderr=%s",
+            completed.returncode,
+            detail,
+        )
+        raise RuntimeError(detail)
+
+    LOGGER.info("Private Agent Access transport enabled")
     return {
         "enabled": True,
         "kind": "tailscale-serve",
@@ -80,13 +104,34 @@ def enable_private_transport() -> dict:
 def disable_private_transport() -> dict:
     if not tailscale_available():
         return {"enabled": False, "kind": "none"}
-    completed = subprocess.run(
-        ["tailscale", "serve", str(AGENT_PORT), "off"],
-        capture_output=True,
-        text=True,
-        timeout=15,
-        check=False,
-    )
+
+    LOGGER.info("Disabling private Agent Access transport on port %s", AGENT_PORT)
+    try:
+        completed = subprocess.run(
+            ["tailscale", "serve", str(AGENT_PORT), "off"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        LOGGER.exception(
+            "Tailscale Serve timed out while disabling Agent Access on port %s",
+            AGENT_PORT,
+        )
+        raise RuntimeError(
+            "Tailscale Serve did not return while disabling Agent Access. "
+            "Check tailscale serve status and relmote logs."
+        ) from exc
+
     if completed.returncode != 0:
-        raise RuntimeError(completed.stderr.strip() or "Could not disable Relmote Agent Serve mapping")
+        detail = completed.stderr.strip() or "Could not disable Relmote Agent Serve mapping"
+        LOGGER.error(
+            "Tailscale Serve failed while disabling Agent Access: returncode=%s stderr=%s",
+            completed.returncode,
+            detail,
+        )
+        raise RuntimeError(detail)
+
+    LOGGER.info("Private Agent Access transport disabled")
     return {"enabled": False, "kind": "tailscale-serve"}
