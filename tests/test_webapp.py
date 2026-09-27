@@ -54,3 +54,16 @@ def test_agent_script_has_independent_fetch_helper():
     assert "async function agentRequest(" in script
     assert "frontend loaded · checking transport" in script
     assert "requestBody('/api/v1/controller/agent/status'" not in script
+
+
+def test_static_agent_script_does_not_require_controller_query_token():
+    # Browser subresource requests do not inherit ?token= from the page URL.
+    # The JS contains no target data/authority, so it must be loadable without
+    # weakening authentication on controller API endpoints.
+    source = __import__("inspect").getsource(
+        __import__("relmote.webapp", fromlist=["make_handler"]).make_handler
+    )
+    static_pos = source.index('if path == "/relmote-agent.js"')
+    auth_pos = source.index("if not authorized(self)", static_pos)
+    assert static_pos < auth_pos
+    assert "return" in source[static_pos:auth_pos]
