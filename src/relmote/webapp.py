@@ -291,8 +291,12 @@ async function refresh(){
    }else if(a.state==='active'){
      actions='<button class="danger" onclick="agentAction(\'revoke\',\''+esc(a.session_id)+'\')">Revoke</button>';
    }
+   const scope=a.scope||{};
+   const scopeLine=scope.level&&scope.level!=='normal'
+     ? '<br><strong>Scope: '+esc(scope.level.toUpperCase())+' · '+esc(scope.label||'')+'</strong><br><span class="muted">'+esc(scope.message||'')+'</span>'
+     : '';
    return '<div class="card"><strong>Agent · '+esc(a.state)+'</strong><br>'+
-     'Workspace: <code>'+esc(a.workspace)+'</code><br>'+
+     'Workspace: <code>'+esc(a.workspace)+'</code>'+scopeLine+'<br>'+
      'Capabilities: '+esc(a.capabilities.join(', '))+'<br>'+actions+'</div>';
  }).join('') : '';
  const screenItems=d.screen_sessions||[];
