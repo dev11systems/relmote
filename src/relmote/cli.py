@@ -22,6 +22,7 @@ from .doctor import print_doctor
 from .check_cli import run_check
 from .help import print_help_topic, topic_names
 from .wayland_portal import portal_environment, portal_screen_cast_available
+from .portal_screencast import request_monitor_share
 from .screen_backend import detect_linux_screen_backend
 from .project_info import (
     PROJECT_URL,
@@ -204,6 +205,21 @@ def build_parser() -> argparse.ArgumentParser:
             return 0 if ok else 1
         return 0 if screen.session_type == "x11" else 1
     screen_probe.set_defaults(func=run_screen_probe)
+
+    screen_request = screen_sub.add_parser(
+        "request",
+        help="request a Wayland monitor share through the desktop portal",
+    )
+    def run_screen_request(args):
+        print("Requesting screen share from the target desktop…")
+        print("A GNOME screen-sharing chooser should appear on that computer.")
+        response = request_monitor_share()
+        print("Screen sharing approved.")
+        print(response.results_text)
+        print("PipeWire stream attachment is the next preview step.")
+        return 0
+    screen_request.set_defaults(func=run_screen_request)
+
 
     ssh_parser = sub.add_parser(
         "ssh",
