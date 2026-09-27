@@ -46,3 +46,29 @@ def test_parser_accepts_logs_save_custom_filename():
     )
     assert args.save == "/tmp/relmote-debug.txt"
     assert args.tail == 250
+
+
+def test_main_formats_permission_denial_without_traceback(monkeypatch, capsys):
+    import relmote.cli as cli
+
+    class Args:
+        command = "agent"
+
+        @staticmethod
+        def func(args):
+            raise PermissionError("agent capability not granted: terminal.exec")
+
+    class Parser:
+        @staticmethod
+        def parse_args():
+            return Args()
+
+    monkeypatch.setattr(cli, "build_parser", lambda: Parser())
+
+    assert cli.main() == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.strip() == (
+        "Denied: agent capability not granted: terminal.exec"
+    )
+    assert "Traceback" not in captured.err
