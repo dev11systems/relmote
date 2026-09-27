@@ -22,7 +22,7 @@ from .doctor import print_doctor
 from .check_cli import run_check
 from .help import print_help_topic, topic_names
 from .wayland_portal import portal_environment, portal_screen_cast_available
-from .portal_screencast import request_monitor_share
+from .portal_screencast import request_monitor_share, diagnose_portal_flow
 from .screen_backend import detect_linux_screen_backend
 from .project_info import (
     PROJECT_URL,
@@ -219,6 +219,17 @@ def build_parser() -> argparse.ArgumentParser:
         print("PipeWire stream attachment is the next preview step.")
         return 0
     screen_request.set_defaults(func=run_screen_request)
+
+    screen_debug = screen_sub.add_parser(
+        "debug-portal",
+        help="show which Wayland ScreenCast portal stage succeeds or fails",
+    )
+    def run_screen_debug(args):
+        for line in diagnose_portal_flow():
+            print(line)
+        return 0
+    screen_debug.set_defaults(func=run_screen_debug)
+
 
 
     ssh_parser = sub.add_parser(
