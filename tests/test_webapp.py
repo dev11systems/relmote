@@ -1,6 +1,7 @@
 import pytest
 
 from relmote.webapp import INDEX, _parse_terminal_path, serve_local
+from relmote.web_agent_ui import agent_access_javascript
 
 
 def test_non_loopback_requires_explicit_lan_mode():
@@ -39,9 +40,10 @@ def test_rendered_web_ui_has_no_literal_source_newline_escape():
     )
 
 
-def test_agent_access_functions_are_rendered_as_real_javascript():
-    assert "async function refreshAgentAccess()" in INDEX
-    assert "async function enableAgentAccess()" in INDEX
-    assert "async function disableAgentAccess()" in INDEX
-    # The Python interpolation expression itself must never reach the browser.
+def test_agent_access_javascript_is_external_and_renderable():
+    assert '<script src="/relmote-agent.js"></script>' in INDEX
     assert "{agent_access_javascript()}" not in INDEX
+    script = agent_access_javascript()
+    assert "async function refreshAgentAccess()" in script
+    assert "async function enableAgentAccess()" in script
+    assert "async function disableAgentAccess()" in script
