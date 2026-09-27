@@ -137,6 +137,8 @@ class RelmoteRuntime:
         with self._lock:
             for grant in self.agent_grants.values():
                 if secrets.compare_digest(grant.token, token):
+                    if grant.session.state.value != "active":
+                        raise PermissionError("agent session is not active")
                     return grant
         raise PermissionError("invalid agent session token")
 
