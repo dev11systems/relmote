@@ -110,3 +110,29 @@ Avoid custom PCB work until the transport, policy, and companion model have been
 - [ ] workspace proposal approval UI
 - [ ] external planner bridge MVP
 
+
+
+## Future: self-hosted Relmote Hub / Console
+
+Build an optional self-hosted control plane for people who administer or support multiple authorized Relmote nodes.
+
+Potential scope:
+
+- discover and organize software and hardware Relmote nodes;
+- show node identity, availability, target, transport/path, and capability status;
+- launch/revoke support sessions;
+- aggregate diagnostics and attention items;
+- open Terminal, Screen, Files/Workspace, and Agent sessions;
+- surface permission requests and active grants;
+- show audit/activity history;
+- support groups/tags/locations without making physical location mandatory;
+- coordinate software updates while preserving per-node authority;
+- expose provider status such as Tailscale, LAN, SSH, RDP/VNC, portal/PipeWire, serial, and hardware KVM.
+
+### Architectural constraint
+
+The Hub is optional orchestration, not the root of trust.
+
+A Relmote node must remain locally owned and useful without the Hub, a Dev11 service, cloud connectivity, or an Internet connection. Connecting a node to the Hub must not silently broaden controller authority or existing grants.
+
+This milestone follows the near-term single-node remote-support and Agent Bridge work.
