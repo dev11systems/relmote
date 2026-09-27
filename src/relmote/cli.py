@@ -15,6 +15,9 @@ from .diagnostic_cli import status as diagnostic_status, diagnose as diagnostic_
 from .ssh_target import SSHTarget
 from .ssh_workspace import SSHWorkspace
 from .workspace import WorkspacePolicy
+from .agent_transport import tailscale_transport
+from .agent_scope import classify_scope
+from .agent_client import RelmoteAgentClient
 from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
@@ -325,6 +328,34 @@ def build_parser() -> argparse.ArgumentParser:
             print(result["stderr"], end="", file=sys.stderr)
         return result["returncode"]
     agent_exec.set_defaults(func=run_agent_exec)
+    agent_transport_cmd = agent_sub.add_parser(
+        "transport",
+        help="show an explicit private transport for the Agent API",
+    )
+    def run_agent_transport(args):
+        info = tailscale_transport()
+        print("RELMOTE AGENT TRANSPORT\n")
+        print(info["message"])
+        if not info["available"]:
+            return 1
+        print(f"\nEnable:  {info['command']}")
+        print(f"Status:  {info['status_command']}")
+        print(f"Disable: {info['disable_command']}")
+        return 0
+    agent_transport_cmd.set_defaults(func=run_agent_transport)
+
+    agent_scope_cmd = agent_sub.add_parser(
+        "scope",
+        help="classify how broad a proposed Agent workspace is",
+    )
+    agent_scope_cmd.add_argument("root")
+    def run_agent_scope(args):
+        info = classify_scope(args.root)
+        print(f"{info['level'].upper()}: {info['label']}")
+        print(info["message"])
+        return 0
+    agent_scope_cmd.set_defaults(func=run_agent_scope)
+
 
     ssh_parser = sub.add_parser(
         "ssh",
