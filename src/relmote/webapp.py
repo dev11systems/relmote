@@ -306,6 +306,13 @@ async function requestScreen(){
    await refresh();
  }catch(e){showStatus('Screen request failed: '+e.message,true)}
 }
+async function screenAction(action,id){
+ try{
+   showStatus(action==='approve'?'Preparing screen consent…':'Updating screen request…');
+   await request('/api/v1/screen/'+encodeURIComponent(id)+'/'+encodeURIComponent(action),'POST');
+   await refresh();
+ }catch(e){showStatus('Screen action failed: '+e.message,true)}
+}
 async function requestTerminal(){
  try{
    await request('/api/v1/terminal/request-local','POST');
@@ -506,6 +513,22 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                         "session_id": session.session_id,
                         "state": session.state.value,
                     })
+                elif path.startswith("/api/v1/screen/"):
+                    if not runtime:
+                        raise ValueError("screen lifecycle requires shared runtime")
+                    parts = path.strip("/").split("/")
+                    if len(parts) != 5:
+                        raise ValueError("invalid screen action path")
+                    session_id, action = parts[3], parts[4]
+                    if action == "approve":
+                        runtime.approve_screen(session_id)
+                    elif action == "deny":
+                        runtime.deny_screen(session_id)
+                    elif action == "end":
+                        runtime.end_screen(session_id)
+                    else:
+                        raise ValueError("unknown screen action")
+                    _json(self, HTTPStatus.OK, runtime.snapshot())
                 elif path == "/api/v1/terminal/request-local":
                     if not runtime:
                         raise ValueError("terminal lifecycle requires shared runtime")
