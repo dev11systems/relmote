@@ -12,7 +12,7 @@ def active_runtime():
     runtime = RelmoteRuntime()
     runtime.support_access.enable_until_disabled()
     grant = runtime.request_agent(
-        ".",
+        "/workspace",
         ["workspace.list"],
         controller="test-controller",
     )
