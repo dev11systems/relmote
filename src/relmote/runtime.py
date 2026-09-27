@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from threading import RLock
+from threading import RLock, Thread
 from uuid import uuid4
 
 from .software_node import SoftwareNode
@@ -11,6 +11,7 @@ from .feature_status import remote_feature_status
 from .terminal import TerminalAuthority, TerminalSession, TerminalState
 from .terminal_manager import TerminalManager
 from .screen_session import ScreenSession
+from .portal_screencast import request_monitor_share
 
 
 def utcnow_iso() -> str:
@@ -118,7 +119,36 @@ class RelmoteRuntime:
                 "screen_session_id": session_id,
                 "next": "os-consent",
             })
+            Thread(
+                target=self._run_screen_portal,
+                args=(session_id,),
+                daemon=True,
+                name=f"relmote-screen-{session_id[:8]}",
+            ).start()
             return session
+
+    def _run_screen_portal(self, session_id: str) -> None:
+        try:
+            response = request_monitor_share()
+            with self._lock:
+                session = self.screen_sessions.get(session_id)
+                if session is None or session.state.value != "os-consent":
+                    return
+                session.activate()
+                self.emit("screen.portal-approved", {
+                    "screen_session_id": session_id,
+                    "portal_response": response.results_text,
+                })
+        except Exception as exc:
+            with self._lock:
+                session = self.screen_sessions.get(session_id)
+                if session is None or session.state.value == "ended":
+                    return
+                session.fail(f"{type(exc).__name__}: {exc}")
+                self.emit("screen.failed", {
+                    "screen_session_id": session_id,
+                    "error": session.error,
+                })
 
     def deny_screen(self, session_id: str) -> ScreenSession:
         with self._lock:
