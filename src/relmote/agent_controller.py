@@ -31,10 +31,9 @@ def create_request(runtime: RelmoteRuntime, payload: dict) -> dict:
 
 def approve(runtime: RelmoteRuntime, session_id: str) -> dict:
     grant = runtime.approve_agent(session_id)
-    # The bearer token is intentionally returned only by this approval action.
-    value = grant.public()
-    value["token"] = grant.token
-    return value
+    # Human controllers approve authority but never receive the agent bearer.
+    # The bearer is released only through a one-time pairing exchange.
+    return grant.public()
 
 
 def revoke(runtime: RelmoteRuntime, session_id: str) -> dict:
