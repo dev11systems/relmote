@@ -91,17 +91,19 @@ Control:
 ```
 
 
-## Automatic network exposure
+## Network exposure
 
-The ordinary path should not require users to understand bind addresses.
+The ordinary path should not require users to reason about bind addresses, but Relmote should also avoid silently broadening network exposure.
 
-On Linux preview startup:
+Current direction:
 
-1. if Tailscale is connected with a usable IPv4 address, bind the web controller only to that Tailscale address;
-2. otherwise remain localhost-only;
-3. never silently fall back to all interfaces (`0.0.0.0`);
-4. require explicit selection for LAN/all-interface exposure.
+1. keep underlying Relmote services loopback-only by default;
+2. use an explicit private transport such as Tailscale Serve for ordinary remote access where available;
+3. do not use public Funnel exposure by default;
+4. do not silently fall back to all interfaces (`0.0.0.0`);
+5. require an explicit action for trusted-LAN/all-interface exposure;
+6. show the actual reachable private endpoint and whether temporary controller authentication/pairing is active.
 
-Until Relmote controller pairing is implemented, non-local web exposure also uses a random per-run access token.
+Agent API and human controller exposure are separate surfaces and may use different credentials/policies.
 
-The TUI must display the actual reachable URL and exposure description.
+The TUI/web controller should explain the active exposure path in plain language.
