@@ -353,8 +353,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="local name for this target profile",
     )
     def run_agent_pair(args):
-        import getpass
-        code = getpass.getpass("8-digit pairing code: ")
+        code = input("8-digit pairing code: ").strip()
         value = pair_agent(args.url, code)
         session = value["session"]
         target_name = args.name or session.get("controller") or session["session_id"][:8]
