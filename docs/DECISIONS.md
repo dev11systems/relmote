@@ -16,3 +16,4 @@ Compact record of durable decisions.
 - **D012 — Recovery must not be a vendor backdoor.**
 - **D013 — Do not freeze hardware connectors prematurely.** Stabilize logical interfaces first.
 - **D014 — Build before polishing everything.** Immediate milestone is real HID + physical authorization/STOP.
+- **D015 — No silent external metadata side effects.** Transport activation must not publish durable identifiers, request publicly logged certificates, create public ingress, or register with third-party control infrastructure without explicit informed consent. Prefer an equally useful lower-disclosure path when available.

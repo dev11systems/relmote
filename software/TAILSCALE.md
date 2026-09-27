@@ -44,6 +44,10 @@ Controller authentication and Agent authentication are separate. A Controller to
 
 ## Tailscale Serve is optional
 
+Tailscale Serve can add useful HTTPS convenience, but enabling Tailscale HTTPS has a privacy side effect that Relmote must not hide: public-CA TLS certificates are recorded in Certificate Transparency logs, including the device's fully qualified `*.ts.net` name. Tailscale requires an acknowledgment before enabling HTTPS and warns against sensitive machine names.
+
+Relmote must therefore never auto-enable Tailscale HTTPS, auto-accept that consent, or treat refusal as a failure when direct private reachability is available.
+
 Tailscale Serve can still be useful as an optional HTTPS convenience layer:
 
 ```text
