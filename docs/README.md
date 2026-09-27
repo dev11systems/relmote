@@ -62,3 +62,15 @@ This directory contains Relmote's deeper design and implementation documentation
 Documents such as scenario matrices, use-case atlases, decision UX, feature placement, TUI design, preview checklists, and test guides provide supporting detail. They should not override the canonical current status or architecture documents above.
 
 Where an older document describes an implementation sequence or status that conflicts with `STATUS.md`, treat `STATUS.md` as current.
+
+## Terminology
+
+Prefer these current role names:
+
+- **Controller** — human/upstream control surface.
+- **Relmote node / Target node / software node** — Relmote authority boundary associated with the target.
+- **Target** — computing system being observed or operated.
+- **Agent Host** — separate compute running Codex or another external agent/adapter.
+- **Hub** — optional future multi-node orchestration/controller.
+
+Older documents may use **Agent** for target-side Relmote software. Where that wording would now be ambiguous, interpret it as **software node** unless the document clearly means an external intelligent agent.
