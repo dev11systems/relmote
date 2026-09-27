@@ -1,5 +1,7 @@
 # Relmote hardware architecture
 
+> **Hardware-track context:** this document describes the physical Relmote reference architecture, especially the Pocket-style concept. Hardware is a first-class peer of Relmote software, but these boards/modules are not required to use the current software preview. See [../../docs/STATUS.md](../../docs/STATUS.md) for current validation status and [../../README.md](../../README.md) for the platform overview.
+
 Relmote Pocket should be internally modular in **fault domains**, not merely assembled from multiple PCBs.
 
 Reference domains:
