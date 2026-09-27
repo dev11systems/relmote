@@ -138,29 +138,24 @@ A Relmote node must remain locally owned and useful without the Hub, a Dev11 ser
 This milestone follows the near-term single-node remote-support and Agent Bridge work.
 
 
-## Near-term: documentation consolidation
+## Near-term: Agent Host validation and MCP adapter
 
-After the first successful multi-machine Agent Host pairing test, perform a repository-wide documentation reconciliation.
+The repository-wide documentation reconciliation has landed. The next gate is real-machine validation of the independent Controller, Agent Host, and Target roles.
 
-Priorities:
+- [x] Define Controller, Agent Host, Target, and optional Hub roles.
+- [x] Implement short-lived, single-use Agent pairing.
+- [x] Store paired-target profiles locally with owner-only permissions.
+- [x] Add Agent Host capability discovery.
+- [x] Add paired-target status/list/read/allowlisted-exec operations.
+- [x] Add a shared credential-blind paired-target service for CLI and future adapters.
+- [x] Add a generalized multi-machine validation runbook.
+- [ ] Complete Controller → Agent Host → Target real-machine validation.
+- [ ] Verify consumed pairing-code rejection.
+- [ ] Verify revocation invalidates the paired credential.
+- [ ] Repeat with the Agent Host moved to another machine or platform where practical.
+- [ ] Update current-status claims from observed validation evidence.
+- [ ] Cut the next coherent development snapshot if warranted.
+- [ ] Implement the first MCP/Codex adapter on top of the paired-target service.
 
-1. Rewrite the root README as the current product/platform entry point.
-2. Clearly distinguish current working preview features, experimental/in-progress features, and future concepts.
-3. Explain the independent roles: Controller, Relmote Target/Node, Agent Host, and optional future Hub.
-4. Present software and hardware as peer implementations of the shared Relmote authority/capability/session model.
-5. Remove or relocate obsolete implementation-order/status claims from the README.
-6. Reconcile overlapping architecture, capability, session, transport, remote-support, Agent Bridge, Agent Host, hardware, and roadmap documents.
-7. Add a compact documentation map so readers can find canonical deep dives without a giant undifferentiated link list.
-8. Mark historical design material as historical where it remains useful rather than silently mixing it with current behavior.
-9. Verify install/update commands and current versioning behavior against the actual CLI.
-10. Add a current-state matrix: implemented and tested; implemented but experimental; planned.
+The MCP adapter should not precede the baseline authority/revocation validation. It must not broaden target capabilities or expose profile bearer material.
 
-The README should answer, in order:
-
-- What is Relmote?
-- What can I do with it today?
-- What are its roles/components?
-- How do I install and try it?
-- What security/authority guarantees matter?
-- Where is it going?
-- Where do I read deeper documentation?
