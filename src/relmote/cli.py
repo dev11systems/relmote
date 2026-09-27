@@ -374,8 +374,8 @@ def build_parser() -> argparse.ArgumentParser:
             return int(result.get("returncode", 1))
         raise ValueError("unknown remote agent command")
 
-    for parser in (remote_session, remote_list, remote_read, remote_exec):
-        parser.set_defaults(func=run_agent_remote)
+    for remote_parser in (remote_session, remote_list, remote_read, remote_exec):
+        remote_parser.set_defaults(func=run_agent_remote)
 
     agent_transport_cmd = agent_sub.add_parser(
         "transport",
