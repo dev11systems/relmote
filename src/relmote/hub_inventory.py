@@ -50,6 +50,53 @@ class HubInventory:
             "detail": str(exc),
         }
 
+    @staticmethod
+    def _reconcile_live(live: dict[str, Any]) -> dict[str, Any]:
+        reachable = live.get("reachable")
+        authority = live.get("authority")
+        state = live.get("state")
+        detail = str(live.get("detail") or "")
+        lowered = detail.lower()
+
+        if reachable is False:
+            return {
+                "health": "unreachable",
+                "needs_attention": True,
+                "recommended_action": "check private transport and target availability",
+            }
+        if authority == "active" and state == "active":
+            return {
+                "health": "active",
+                "needs_attention": False,
+                "recommended_action": None,
+            }
+        if authority == "denied":
+            if "invalid agent session token" in lowered:
+                health = "stale_credential"
+                action = "create a new Target grant and re-pair this profile"
+            elif "session is not active" in lowered:
+                health = "revoked"
+                action = "create a new Target grant and re-pair if access is still needed"
+            else:
+                health = "denied"
+                action = "review the Target grant before re-pairing"
+            return {
+                "health": health,
+                "needs_attention": True,
+                "recommended_action": action,
+            }
+        if state and state != "active":
+            return {
+                "health": "inactive",
+                "needs_attention": True,
+                "recommended_action": "review or replace the inactive Target grant",
+            }
+        return {
+            "health": "unknown",
+            "needs_attention": True,
+            "recommended_action": "review live Target status",
+        }
+
     def snapshot(self, *, live: bool = False) -> dict[str, Any]:
         host = self._host_factory()
         build = self._build_factory()
@@ -78,7 +125,27 @@ class HubInventory:
                         "workspace": status.get("workspace"),
                         "capabilities": list(status.get("capabilities") or []),
                     }
+                item["current"] = self._reconcile_live(item["live"])
             targets.append(item)
+
+        summary = {
+            "total": len(targets),
+            "active": 0,
+            "attention": 0,
+            "unreachable": 0,
+            "revoked": 0,
+            "stale_credential": 0,
+        }
+        if live:
+            for item in targets:
+                current = item.get("current") or {}
+                health = current.get("health")
+                if health == "active":
+                    summary["active"] += 1
+                if current.get("needs_attention"):
+                    summary["attention"] += 1
+                if health in summary:
+                    summary[health] += 1
 
         return {
             "hub": {
@@ -98,4 +165,5 @@ class HubInventory:
                 },
             },
             "paired_targets": targets,
+            "summary": summary,
         }

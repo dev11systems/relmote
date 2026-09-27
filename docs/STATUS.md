@@ -23,7 +23,7 @@ This document is the canonical high-level implementation-status snapshot. Detail
 
 ## Implemented, actively experimental
 
-- First Hub MVP slice: credential-blind local Agent Host/paired-target inventory with optional live reachability/authority probes.
+- First Hub MVP slice: credential-blind local Agent Host/paired-target inventory with live reachability/authority probes, cached-vs-current state reconciliation, and non-destructive attention guidance.
 
 - Cross-platform/private-transport portability beyond the exercised Linux direct-Tailscale path.
 - Wayland ScreenCast portal integration.

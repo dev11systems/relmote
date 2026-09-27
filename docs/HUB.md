@@ -135,6 +135,8 @@ It reports:
 
 The live probe distinguishes a reachable-but-revoked Target from an unreachable Target. The snapshot does not expose paired-target bearer credentials or stored endpoint URLs.
 
+Live inventory also reconciles cached pairing metadata with current Target truth. Cached profile state is labeled as such; current health is classified as `active`, `revoked`, `stale_credential`, `unreachable`, `denied`, `inactive`, or `unknown`, with a non-destructive recommended action when attention is needed.
+
 This is inventory only. It cannot create grants, execute Target operations, update nodes, or act as a relay.
 
 ## Initial Hub MVP
