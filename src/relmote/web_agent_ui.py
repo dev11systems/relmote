@@ -6,12 +6,13 @@ def agent_access_javascript() -> str:
 const relmoteAgentState=document.getElementById('agentAccessState');
 if(relmoteAgentState) relmoteAgentState.textContent='Status: frontend loaded · checking transport…';
 
-async function agentRequest(path,payload={}){
-  const response=await fetch(path,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload)
-  });
+async function agentRequest(path,payload=null){
+  const options={headers:{'Content-Type':'application/json'}};
+  if(payload!==null){
+    options.method='POST';
+    options.body=JSON.stringify(payload);
+  }
+  const response=await fetch(path,options);
   const text=await response.text();
   let value={};
   try{ value=text?JSON.parse(text):{}; }catch(e){}
