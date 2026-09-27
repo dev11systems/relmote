@@ -264,6 +264,8 @@ async function refresh(){
      actions='<span class="muted">Waiting for consent on target desktop.</span>';
    }else if(s.state==='active'){
      actions='<span class="good">Screen view active</span>';
+   }else if(s.state==='failed'){
+     actions='<span>Screen request failed.</span><br><span class="muted">'+esc(s.error||'Unknown portal error')+'</span>';
    }
    return '<div class="card"><strong>Screen · '+esc(s.state)+'</strong><br>'+
      'Controller: '+esc(s.controller)+'<br>Authority: '+esc(s.authority)+'<br>'+actions+'</div>';
