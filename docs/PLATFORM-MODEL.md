@@ -51,7 +51,7 @@ laptop
 
 An **Agent Host** is optional compute that runs an agent or agent adapter away from the target while using only capabilities granted by the target Relmote node.
 
-Controller and Agent Host are separate roles. An iPad/browser may supervise a session while Kaonashi, Falkor, or another server performs agent compute.
+Controller and Agent Host are separate roles. A browser on a phone, tablet, or computer may supervise a session while a separate workstation, server, or VM performs agent compute.
 
 The Agent Host cannot manufacture target authority; it consumes scoped grants issued by the target/controller model.
 
