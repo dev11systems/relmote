@@ -4,5 +4,5 @@ Increment this for each testable development snapshot in the current release
 series. It is intentionally not the raw Git commit count.
 """
 
-# Snapshot 7: scoped external Agent Bridge with iPad approval UI.
-DEV_REVISION = 7
+# Snapshot 8: remote Agent Bridge transport, revocation hardening, and scope UX.
+DEV_REVISION = 8
