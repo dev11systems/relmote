@@ -69,3 +69,25 @@ def tail_log(lines: int = 100) -> str:
         return ""
     with path.open("r", encoding="utf-8", errors="replace") as handle:
         return "".join(deque(handle, maxlen=lines))
+
+
+def save_log(destination: str | Path, *, lines: int | None = None) -> Path:
+    target = Path(destination).expanduser()
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    if lines is None:
+        source = log_path()
+        content = (
+            source.read_text(encoding="utf-8", errors="replace")
+            if source.exists()
+            else ""
+        )
+    else:
+        content = tail_log(lines)
+
+    target.write_text(content, encoding="utf-8")
+    try:
+        target.chmod(0o600)
+    except OSError:
+        pass
+    return target

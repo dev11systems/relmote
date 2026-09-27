@@ -6,7 +6,7 @@ from dataclasses import asdict
 from datetime import timedelta
 
 from .audit import AuditLog
-from .debug_log import configure_logging, log_path, tail_log
+from .debug_log import configure_logging, log_path, save_log, tail_log
 from .bench import run_bench
 from .controller import RelmoteController
 from .model import Action, Grant, Mode
@@ -112,25 +112,48 @@ def build_parser() -> argparse.ArgumentParser:
     logs_parser.add_argument(
         "--tail",
         type=int,
-        default=100,
-        help="number of recent log lines to show (default: 100)",
+        default=None,
+        help=(
+            "limit output or saved file to N recent lines "
+            "(default display: 100; save: full current log)"
+        ),
     )
-    logs_parser.add_argument(
+    logs_output = logs_parser.add_mutually_exclusive_group()
+    logs_output.add_argument(
         "--path",
         action="store_true",
         help="print only the debug-log path",
+    )
+    logs_output.add_argument(
+        "--save",
+        nargs="?",
+        const="relmote-debug.log",
+        metavar="FILE",
+        help=(
+            "save the log to FILE instead of printing it; "
+            "without FILE, use ./relmote-debug.log"
+        ),
     )
     def run_logs(args):
         path = log_path()
         if args.path:
             print(path)
             return 0
+        if args.save is not None:
+            written = save_log(args.save, lines=args.tail)
+            print(f"Saved Relmote debug log to: {written}")
+            print(
+                "Inspect before sharing; the file may contain hostnames, "
+                "paths, network details, or error output."
+            )
+            return 0
+
         print(f"Relmote debug log: {path}")
         print(
             "Privacy note: inspect before sharing; logs may contain "
             "hostnames, paths, network details, or error output."
         )
-        content = tail_log(args.tail)
+        content = tail_log(args.tail or 100)
         if content:
             print()
             print(content, end="" if content.endswith("\n") else "\n")
