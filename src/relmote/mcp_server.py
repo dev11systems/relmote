@@ -73,6 +73,26 @@ class RelmoteMCPTools:
             "execution_location": "target",
         }
 
+    @staticmethod
+    def _expected_error(
+        target: str,
+        exc: Exception,
+    ) -> dict[str, Any]:
+        if isinstance(exc, PermissionError):
+            kind = "denied"
+        elif isinstance(exc, ConnectionError):
+            kind = "unavailable"
+        else:
+            kind = "invalid_request"
+        return {
+            "ok": False,
+            "context": RelmoteMCPTools._target_context(target),
+            "error": {
+                "kind": kind,
+                "message": str(exc),
+            },
+        }
+
     def targets(self) -> dict[str, Any]:
         targets = []
         for item in self.service.targets():
@@ -86,29 +106,50 @@ class RelmoteMCPTools:
         }
 
     def status(self, target: str) -> dict[str, Any]:
+        try:
+            value = self.service.status(target)
+        except (PermissionError, ConnectionError, ValueError) as exc:
+            return self._expected_error(target, exc)
         return {
+            "ok": True,
             "context": self._target_context(target),
-            "target_status": self.service.status(target),
+            "target_status": value,
         }
 
     def list(self, target: str, path: str = ".") -> dict[str, Any]:
+        context = {
+            **self._target_context(target),
+            "path": path,
+            "path_location": "target_workspace",
+        }
+        try:
+            entries = self.service.list(target, path)
+        except (PermissionError, ConnectionError, ValueError) as exc:
+            value = self._expected_error(target, exc)
+            value["context"] = context
+            return value
         return {
-            "context": {
-                **self._target_context(target),
-                "path": path,
-                "path_location": "target_workspace",
-            },
-            "entries": self.service.list(target, path),
+            "ok": True,
+            "context": context,
+            "entries": entries,
         }
 
     def read(self, target: str, path: str) -> dict[str, Any]:
+        context = {
+            **self._target_context(target),
+            "path": path,
+            "path_location": "target_workspace",
+        }
+        try:
+            text = self.service.read(target, path)
+        except (PermissionError, ConnectionError, ValueError) as exc:
+            value = self._expected_error(target, exc)
+            value["context"] = context
+            return value
         return {
-            "context": {
-                **self._target_context(target),
-                "path": path,
-                "path_location": "target_workspace",
-            },
-            "text": self.service.read(target, path),
+            "ok": True,
+            "context": context,
+            "text": text,
         }
 
     def exec(
@@ -134,19 +175,26 @@ class RelmoteMCPTools:
         else:  # Defensive for direct Python callers; MCP validates Literal.
             raise ValueError(f"unsupported MCP execution operation: {operation}")
 
-        result = self.service.exec(
-            target,
-            argv,
-            cwd=cwd,
-            timeout=timeout,
-        )
+        context = {
+            **self._target_context(target),
+            "cwd": cwd,
+            "cwd_location": "target_workspace",
+            "operation": operation,
+        }
+        try:
+            result = self.service.exec(
+                target,
+                argv,
+                cwd=cwd,
+                timeout=timeout,
+            )
+        except (PermissionError, ConnectionError, ValueError) as exc:
+            value = self._expected_error(target, exc)
+            value["context"] = context
+            return value
         return {
-            "context": {
-                **self._target_context(target),
-                "cwd": cwd,
-                "cwd_location": "target_workspace",
-                "operation": operation,
-            },
+            "ok": True,
+            "context": context,
             "result": result,
         }
 
@@ -227,8 +275,10 @@ def build_mcp_server(
         Execution happens in the Target's authorized workspace, not on the
         local Agent Host. git_status and git_diff accept no extra arguments.
         pytest may receive explicit pytest arguments. Target-side workspace,
-        capability, and revocation policy remains authoritative. A denial must
-        not be bypassed through another transport.
+        capability, and revocation policy remains authoritative. Expected
+        denials/unavailable states are returned as structured ok=false results
+        so the reason stays visible to the MCP host. A denial must not be
+        bypassed through another transport.
         """
         return tools.exec(
             target,

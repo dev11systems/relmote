@@ -104,6 +104,17 @@ The first MCP adapter intentionally exposes named operations rather than arbitra
 
 This is narrower than the raw paired-target service by design.
 
+Expected target-side policy and reachability failures are returned as structured results rather than opaque MCP server errors:
+
+```text
+ok: false
+error:
+  kind: denied | unavailable | invalid_request
+  message: <target/transport reason>
+```
+
+This lets the MCP host distinguish an authorization denial from transport loss or an invalid target request without exposing credentials.
+
 ## Codex connection
 
 Codex supports MCP servers in both the CLI and IDE extension, with shared configuration.
