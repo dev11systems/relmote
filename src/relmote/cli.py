@@ -743,9 +743,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     configure_logging()
     args = build_parser().parse_args()
-    if args.command is None:
-        return run_app()
-    return args.func(args)
+    try:
+        if args.command is None:
+            return run_app()
+        return args.func(args)
+    except PermissionError as exc:
+        print(f"Denied: {exc}", file=__import__("sys").stderr)
+        return 2
 
 
 if __name__ == "__main__":
