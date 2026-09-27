@@ -175,3 +175,32 @@ def request_monitor_share() -> PortalResponse:
     session_handle = create_session()
     select_monitor(session_handle)
     return start_screen_cast(session_handle)
+
+
+def diagnose_portal_flow() -> list[str]:
+    lines = ["ScreenCast portal diagnostic"]
+    lines.append("stage: CreateSession")
+    try:
+        session_handle = create_session()
+    except Exception as exc:
+        lines.append(f"CreateSession FAILED: {type(exc).__name__}: {exc}")
+        return lines
+    lines.append(f"CreateSession OK: {session_handle}")
+
+    lines.append("stage: SelectSources")
+    try:
+        select_monitor(session_handle)
+    except Exception as exc:
+        lines.append(f"SelectSources FAILED: {type(exc).__name__}: {exc}")
+        return lines
+    lines.append("SelectSources OK")
+
+    lines.append("stage: Start")
+    try:
+        response = start_screen_cast(session_handle)
+    except Exception as exc:
+        lines.append(f"Start FAILED: {type(exc).__name__}: {exc}")
+        return lines
+    lines.append("Start OK")
+    lines.append(response.results_text)
+    return lines
