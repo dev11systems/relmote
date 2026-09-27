@@ -286,6 +286,12 @@ async function refresh(){
 }
 let activeTerminalId=null;
 let terminalPoll=null;
+async function requestScreen(){
+ try{
+   await request('/api/v1/screen/request','POST');
+   await refresh();
+ }catch(e){showStatus('Screen request failed: '+e.message,true)}
+}
 async function requestTerminal(){
  try{
    await request('/api/v1/terminal/request-local','POST');
