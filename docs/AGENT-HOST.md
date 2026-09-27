@@ -30,6 +30,14 @@ That service exposes the current target operations:
 
 The CLI is one consumer of this boundary. MCP/Codex should become another consumer after the multi-machine Agent Host path is validated.
 
+## Private transport
+
+The baseline Agent Host path uses the target's direct Tailscale address when available. Enabling Agent Access starts a listener bound only to that exact Tailscale address; disabling Agent Access revokes active grants before stopping that listener.
+
+Tailscale Serve is optional HTTPS convenience, not a prerequisite. This avoids making Agent Access depend on tailnet-admin features and allows the same Relmote authorization model to work with shared-in machines when Tailscale reachability permits it.
+
+The Agent Host stores the endpoint in the paired target profile after the one-time pairing exchange.
+
 ## Adapter boundary
 
 The target-side Agent API remains agent-neutral. An Agent Host adapter can expose paired targets through MCP or another agent tool protocol.

@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .agent_access import (
-    disable_private_transport,
-    enable_private_transport,
-    serve_status,
+    direct_transport_status,
+    disable_direct_transport,
+    enable_direct_transport,
 )
 from .runtime import RelmoteRuntime
 
@@ -15,7 +15,7 @@ class AgentAccessService:
     runtime: RelmoteRuntime
 
     def status(self) -> dict:
-        transport = serve_status()
+        transport = direct_transport_status(self.runtime)
         sessions = [
             grant.public()
             for grant in self.runtime.agent_grants.values()
@@ -28,19 +28,19 @@ class AgentAccessService:
         }
 
     def enable_transport(self) -> dict:
-        result = enable_private_transport()
+        result = enable_direct_transport(self.runtime)
         self.runtime.emit("agent.transport-enabled", {
             "kind": result.get("kind"),
+            "address": result.get("bound_address"),
         })
         return self.status()
 
     def disable(self) -> dict:
-        # Disable authority first, then remove remote reachability.
         for grant in self.runtime.agent_grants.values():
             if grant.session.state.value != "ended":
                 grant.session.revoke()
         try:
-            disable_private_transport()
+            disable_direct_transport(self.runtime)
         finally:
             self.runtime.emit("agent.access-disabled")
         return self.status()

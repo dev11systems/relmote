@@ -18,7 +18,7 @@ This document is the canonical high-level implementation-status snapshot. Detail
 
 ## Implemented, actively experimental
 
-- One-button private Agent Access using Tailscale Serve.
+- One-button private Agent Access using an exact direct Tailscale-interface bind; Tailscale Serve is optional.
 - Cross-machine Agent Host pairing and paired-target profiles.
 - Agent Host capability discovery.
 - Wayland ScreenCast portal integration.

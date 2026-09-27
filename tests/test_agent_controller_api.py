@@ -7,11 +7,11 @@ from relmote.runtime import RelmoteRuntime
 def test_agent_access_status_endpoint_reports_transport_state():
     runtime = RelmoteRuntime()
     with patch(
-        "relmote.agent_access_service.serve_status",
+        "relmote.agent_access_service.direct_transport_status",
         return_value={
             "available": True,
             "enabled": False,
-            "kind": "tailscale-serve",
+            "kind": "tailscale-direct",
         },
     ):
         status, value = handle(
@@ -28,14 +28,14 @@ def test_agent_access_status_endpoint_reports_transport_state():
 def test_agent_access_enable_endpoint_uses_private_transport():
     runtime = RelmoteRuntime()
     with patch(
-        "relmote.agent_access_service.enable_private_transport",
-        return_value={"enabled": True, "kind": "tailscale-serve"},
+        "relmote.agent_access_service.enable_direct_transport",
+        return_value={"enabled": True, "kind": "tailscale-direct", "bound_address": "100.64.1.2"},
     ), patch(
-        "relmote.agent_access_service.serve_status",
+        "relmote.agent_access_service.direct_transport_status",
         return_value={
             "available": True,
             "enabled": True,
-            "kind": "tailscale-serve",
+            "kind": "tailscale-direct",
         },
     ):
         status, value = handle(
