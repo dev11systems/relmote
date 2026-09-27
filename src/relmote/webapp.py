@@ -605,10 +605,11 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
-            if not authorized(self):
-                _json(self, HTTPStatus.UNAUTHORIZED, {"error": "temporary LAN token required"})
-                return
             path = urlparse(self.path).path
+
+            # Static browser resources contain no authority or target data.
+            # A controller token may arrive only on the top-level page URL;
+            # subresource requests do not inherit that query parameter.
             if path == "/relmote-agent.js":
                 body = agent_access_javascript().encode()
                 self.send_response(HTTPStatus.OK)
@@ -617,7 +618,13 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 self.send_header("Cache-Control", "no-store")
                 self.end_headers()
                 self.wfile.write(body)
-            elif path == "/":
+                return
+
+            if not authorized(self):
+                _json(self, HTTPStatus.UNAUTHORIZED, {"error": "temporary LAN token required"})
+                return
+
+            if path == "/":
                 body = INDEX.encode()
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
