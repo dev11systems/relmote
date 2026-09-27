@@ -125,12 +125,20 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
  <button onclick="requestAgentAccess()">Create agent request</button>
  </div>
  <div id="agentSessions"></div>
- <div id="agentCredential" class="card" style="display:none">
-  <strong>Temporary agent credential</strong>
-  <p class="muted">Shown after approval. Copy it to the external adapter, then keep it private.</p>
-  <input id="agentToken" readonly style="width:100%;font:ui-monospace,monospace;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
-  <button onclick="copyAgentToken()">Copy credential</button>
+ <div id="agentPairing" class="card" style="display:none">
+  <strong>Pair an agent</strong>
+  <p class="muted">Enter this one-time code on the agent host. It expires after 5 minutes.</p>
+  <div id="agentPairingCode" style="font:700 1.8rem ui-monospace,monospace;letter-spacing:.18em"></div>
+  <button onclick="copyPairingCode()">Copy pairing code</button>
  </div>
+ <details>
+  <summary>Advanced / debug credential</summary>
+  <div id="agentCredential" class="card" style="display:none">
+   <p class="muted">Direct bearer credential. Normal use should pair an agent instead.</p>
+   <input id="agentToken" readonly style="width:100%;font:ui-monospace,monospace;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
+   <button onclick="copyAgentToken()">Copy credential</button>
+  </div>
+ </details>
 </section>
 
 <section class="card">
@@ -206,6 +214,8 @@ const terminalOutputEl=document.getElementById('terminalOutput');
 const terminalInputEl=document.getElementById('terminalInput');
 const agentWorkspaceEl=document.getElementById('agentWorkspace');
 const agentSessionsEl=document.getElementById('agentSessions');
+const agentPairingEl=document.getElementById('agentPairing');
+const agentPairingCodeEl=document.getElementById('agentPairingCode');
 const agentCredentialEl=document.getElementById('agentCredential');
 const agentTokenEl=document.getElementById('agentToken');
 const capsEl=document.getElementById('caps');
@@ -389,8 +399,23 @@ async function pairAgent(id){
  try{
    const value=await requestBody('/api/v1/controller/agent/'+encodeURIComponent(id)+'/pair','POST',{});
    const code=String(value.code||'');
-   showStatus('Pairing code: '+code+' · expires in 5 minutes and works once.');
+   agentPairingCodeEl.textContent=code;
+   agentPairingEl.style.display='block';
+   showStatus('Pairing code created. It expires in 5 minutes and works once.');
  }catch(e){showStatus('Could not create pairing code: '+e.message,true)}
+}
+async function copyPairingCode(){
+ const value=agentPairingCodeEl.textContent;
+ try{
+   if(navigator.clipboard&&navigator.clipboard.writeText){
+     await navigator.clipboard.writeText(value);
+   }else{
+     throw new Error('clipboard API unavailable');
+   }
+   showStatus('Pairing code copied.');
+ }catch(e){
+   showStatus('Pairing code: '+value,true);
+ }
 }
 async function copyAgentToken(){
  try{
