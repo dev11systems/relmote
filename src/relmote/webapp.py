@@ -289,7 +289,8 @@ async function refresh(){
      actions='<button onclick="agentAction(\'approve\',\''+esc(a.session_id)+'\')">Allow agent</button>'+
              '<button class="danger" onclick="agentAction(\'revoke\',\''+esc(a.session_id)+'\')">Deny</button>';
    }else if(a.state==='active'){
-     actions='<button class="danger" onclick="agentAction(\'revoke\',\''+esc(a.session_id)+'\')">Revoke</button>';
+     actions='<button onclick="pairAgent(\''+esc(a.session_id)+'\')">Pair agent</button>'+
+             '<button class="danger" onclick="agentAction(\'revoke\',\''+esc(a.session_id)+'\')">Revoke</button>';
    }
    const scope=a.scope||{};
    const scopeLine=scope.level&&scope.level!=='normal'
@@ -373,6 +374,13 @@ async function agentAction(action,id){
    }
    await refresh();
  }catch(e){showStatus('Agent action failed: '+e.message,true)}
+}
+async function pairAgent(id){
+ try{
+   const value=await requestBody('/api/v1/controller/agent/'+encodeURIComponent(id)+'/pair','POST',{});
+   const code=String(value.code||'');
+   showStatus('Pairing code: '+code+' · expires in 5 minutes and works once.');
+ }catch(e){showStatus('Could not create pairing code: '+e.message,true)}
 }
 async function copyAgentToken(){
  try{
