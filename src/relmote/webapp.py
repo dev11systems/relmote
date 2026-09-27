@@ -100,6 +100,27 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
  </div>
 </section>
 
+<section id="agentAccess" class="card">
+ <h2>Agent access</h2>
+ <p class="muted">Create a scoped session for an external agent. The agent runs elsewhere; Relmote remains the target-side permission boundary.</p>
+ <label for="agentWorkspace">Approved workspace</label>
+ <input id="agentWorkspace" placeholder="/home/user/project" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
+ <div style="margin:.7rem 0">
+  <label><input id="agentList" type="checkbox" checked> List files</label><br>
+  <label><input id="agentRead" type="checkbox" checked> Read files</label><br>
+  <label><input id="agentExec" type="checkbox" checked> Run approved commands</label><br>
+  <label><input type="checkbox" disabled> Modify files <span class="muted">(coming after read/exec validation)</span></label>
+ </div>
+ <button onclick="requestAgentAccess()">Create agent request</button>
+ <div id="agentSessions"></div>
+ <div id="agentCredential" class="card" style="display:none">
+  <strong>Temporary agent credential</strong>
+  <p class="muted">Shown after approval. Copy it to the external adapter, then keep it private.</p>
+  <input id="agentToken" readonly style="width:100%;font:ui-monospace,monospace;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
+  <button onclick="copyAgentToken()">Copy credential</button>
+ </div>
+</section>
+
 <section class="card">
  <h2>Capabilities</h2>
  <p class="muted">What this Relmote build can inspect or control. These are status labels, not buttons.</p>
