@@ -46,3 +46,20 @@ These paths are under active real-machine validation and may change between deve
 - **Planned**: design intent exists but the capability should not be presented as available.
 
 Status is capability-specific. A broad subsystem may contain items in more than one category.
+
+## Current reference roles
+
+A useful current deployment model is:
+
+- **Controller:** iPad/browser or another human-facing interface.
+- **Agent Host:** Kaonashi today; Falkor or another capable machine can fill the same role later.
+- **Target / Node:** the authorized computer or system being observed, diagnosed, or controlled.
+- **Hub:** a future optional self-hosted multi-node orchestration layer.
+
+These are roles, not fixed products. One machine may fill multiple roles, and changing Agent Host does not itself change target authority.
+
+## Security note
+
+Connectivity does not imply authority. Remote Support, terminal sessions, Agent grants, workspace capabilities, pairing, and future screen control are separate boundaries.
+
+Relmote remains an early prototype, not a security-certified product. Use it only with systems the operator owns or is authorized to administer.
