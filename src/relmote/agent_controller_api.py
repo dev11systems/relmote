@@ -2,12 +2,21 @@ from __future__ import annotations
 
 from .agent_controller import approve, create_request, revoke
 from .runtime import RelmoteRuntime
+from .agent_access_service import AgentAccessService
 
 
 PREFIX = "/api/v1/controller/agent"
 
 
 def handle(runtime: RelmoteRuntime, path: str, payload: dict) -> tuple[int, dict]:
+    access = AgentAccessService(runtime)
+
+    if path == f"{PREFIX}/status":
+        return 200, access.status()
+    if path == f"{PREFIX}/enable":
+        return 200, access.enable_transport()
+    if path == f"{PREFIX}/disable":
+        return 200, access.disable()
     if path == f"{PREFIX}/request":
         return 201, create_request(runtime, payload)
 
