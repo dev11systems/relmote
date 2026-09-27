@@ -359,6 +359,7 @@ class RelmoteRuntime:
                 "mode": self.support_access.mode.value,
             }
             value["features"] = remote_feature_status()
+            value["home_directory"] = str(__import__("pathlib").Path.home())
             value["agent_sessions"] = [
                 grant.public() for grant in self.agent_grants.values()
             ]
