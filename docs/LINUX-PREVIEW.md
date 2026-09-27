@@ -1,73 +1,56 @@
 # Linux Software Preview
 
-Linux is the reference platform for the first real-world Relmote test.
+Linux is Relmote's current reference platform for real-machine software validation.
 
-## Current contributor/tester path
+Current feature availability is tracked in [STATUS.md](STATUS.md). This document covers Linux-specific preview operation rather than serving as the global project status page.
 
-From a checked-out Relmote repository:
+## Recommended repository preview install
+
+Use `pipx` to keep the development preview isolated from the system Python environment:
+
+```bash
+pipx install 'relmote[screen-linux] @ git+https://github.com/dev11systems/relmote.git'
+relmote
+```
+
+Update an existing repository preview with:
+
+```bash
+relmote update
+```
+
+Verify the human-readable snapshot and exact source build:
+
+```bash
+relmote version
+```
+
+See [INSTALL-FROM-REPO.md](INSTALL-FROM-REPO.md), [UPDATES.md](UPDATES.md), and [VERSIONING.md](VERSIONING.md).
+
+## Exposure model
+
+Relmote should remain loopback-only unless the user explicitly chooses another exposure path.
+
+For private remote access, the current preferred direction is to keep the underlying service on localhost and use an explicit private transport such as Tailscale Serve. Public Funnel-style exposure is not the default Agent/remote-support model.
+
+The browser controller may use temporary controller authentication while pairing/session UX continues to mature.
+
+## Contributor launcher
+
+A repository checkout may still use the development launcher where useful:
 
 ```text
 ./scripts/preview-linux.sh
 ```
 
-The launcher:
+This is a contributor/testing path, not the primary end-user preview installation.
 
-1. checks for Python 3;
-2. creates an isolated `.relmote-preview-venv` inside the repo;
-3. installs Relmote there;
-4. starts the browser preview;
-5. does **not** install an OS service.
+## Packaging direction
 
-For trusted-LAN preview:
+The current repository preview is not a stable distro-native release. Future packaging may include standalone artifacts and OS-native packages/services after update, provenance, compatibility, and uninstall behavior are validated.
 
-```text
-./scripts/preview-linux.sh --lan
-```
-
-For Tailscale, prefer keeping Relmote on localhost and exposing it through the user's existing Tailscale configuration/Serve.
-
-## Current limitation
-
-This still requires obtaining the repository.
-
-The next packaging step is a downloadable Linux artifact that removes Git/source checkout from the tester workflow.
-
-## Desired downloadable preview
-
-```text
-Download Relmote
-→ mark/run package if required
-→ Relmote opens
-```
-
-Candidates to evaluate:
-
-- self-contained Python zip/app bundle;
-- PyInstaller-style binary;
-- AppImage;
-- distro packages later.
-
-Do not choose a packaging technology merely because it is fashionable; test:
-
-- launch reliability;
-- size;
-- update story;
-- reproducibility;
-- signature/provenance;
-- compatibility across target distributions;
-- accessibility of logs/uninstall.
+Do not require systemd for core Linux compatibility.
 
 ## Persistent installation
 
-Not part of the first preview.
-
-Later:
-
-```text
-Install Relmote Agent
-→ systemd/OpenRC/etc. integration as appropriate
-→ stable node identity
-→ support normally dormant/on-demand
-```
-
-Do not require systemd for core Linux compatibility.
+A mature persistent service remains future work. It should provide stable identity, conservative updates, dormant/on-demand support behavior, and the same capability/session model as the ephemeral preview.
