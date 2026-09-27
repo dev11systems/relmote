@@ -140,8 +140,6 @@ class HubInventory:
             for item in targets:
                 current = item.get("current") or {}
                 health = current.get("health")
-                if health == "active":
-                    summary["active"] += 1
                 if current.get("needs_attention"):
                     summary["attention"] += 1
                 if health in summary:
