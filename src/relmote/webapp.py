@@ -14,6 +14,8 @@ from .presentation import capability_label
 from .help import render_help
 from .project_info import PROJECT_URL, ISSUES_URL, CHANGELOG_URL, bundled_changelog
 from .version import build_info
+from .agent_server import serve_agent_api
+from threading import Thread
 from .agent_controller_api import handle as agent_controller_handle
 import tempfile
 import socket
@@ -761,6 +763,13 @@ def serve_local(
 
     runtime = runtime or RelmoteRuntime()
     node = runtime.node
+    agent_thread = Thread(
+        target=serve_agent_api,
+        args=(runtime, "127.0.0.1", 8788),
+        daemon=True,
+        name="relmote-agent-api",
+    )
+    agent_thread.start()
     server = ThreadingHTTPServer(
         (host, port),
         make_handler(node, access, runtime),
