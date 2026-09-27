@@ -1,218 +1,154 @@
 # Relmote
 
-**Portable, user-controlled intelligent interface node for connecting people and agents to computing systems across whatever authorized transports are available.**
+**A user-controlled interface layer for safely connecting people and agents to computing systems.**
 
-Relmote is an experimental open platform for creating authorized, capability-aware interfaces between controllers and computing systems. A Relmote node may be physical hardware, installed or ephemeral software, a VM/container, a recovery environment, embedded firmware, or a hybrid of these. It is transport-agnostic by design: a controller might reach Relmote over BLE, Wi-Fi, Ethernet, the Internet, cellular, or a constrained mesh; Relmote might reach the target over USB HID, serial, SSH, USB networking, KVM, Redfish, or another adapter.
+Relmote is an experimental open platform for authorized remote support, diagnostics, agent access, and physical/digital computer interfaces. A Relmote node can be software running on a computer, dedicated hardware attached to one, or a hybrid of both.
 
-The durable abstraction is not “an AI keyboard” or even one physical gadget. It is an **authorized interface layer for computing systems**. Relmote Pocket is one portable hardware implementation.
+The shared idea is simple: **connectivity is not authority**. Relmote keeps target identity, capabilities, approvals, active sessions, revocation, and evidence visible regardless of how a controller reaches a machine.
 
-## Core model
+## What can Relmote do today?
 
-```text
-controller / agent
-        │
- controller transport
-        │
-   ┌────▼─────┐
-   │ Relmote  │
-   │ identity │
-   │ policy   │
-   │ routing  │
-   │ logging  │
-   └────┬─────┘
-        │
-  system transport
-        │
- target computing system
-```
+The Linux-first software preview currently supports passive diagnostics, a CLI/TUI and private browser controller, explicit Remote Support availability, a normal-user browser terminal, and scoped Agent sessions for listing/reading approved workspaces and running allowlisted commands.
 
-Controller transports and system transports are independent. A phone can control Relmote over BLE while Relmote types over USB HID; a remote user can reach it over a constrained mesh while Relmote talks to a router over serial; a local tablet can supervise a session while Relmote uses SSH.
+Agent Access is actively being developed around private transport, one-time pairing, and independent Agent Hosts. Wayland screen observation is also under active development: Relmote can discover relevant portal/provider capabilities, but browser screen streaming and graphical control are **not yet complete**.
 
-## Principles
+See **[Current status](docs/STATUS.md)** for the canonical implemented / experimental / planned matrix.
 
-- **Human authority first.** Connectivity does not imply permission.
-- **Visible operation.** No stealth mode; actions, target identity, permissions, and active sessions should be inspectable.
-- **Graceful degradation.** Prefer rich structured interfaces, but fall back to simpler paths when necessary.
-- **Transport independence.** Tasks and approvals should survive changes in bearer or interface.
-- **Least-invasive useful path.** If an authorized SSH session exists, do not pretend to be a keyboard.
-- **Fail closed.** Unknown actions, lost authorization, or ambiguous target identity stop execution.
-- **Local-first where practical.** Cloud AI is optional, not a hardware requirement.
-- **No silent privilege escalation.** Elevated actions require explicit capability grants.
+## The four roles
 
-## Transport families
-
-**Controller transports** connect a person, companion app, or agent to Relmote: BLE, Wi-Fi, Ethernet, Internet/cellular, USB, LoRa/mesh, and future Uniline/Unilink integration.
-
-**System transports** connect Relmote to the target: USB/Bluetooth HID, USB CDC serial, physical serial, USB networking, SSH, KVM, Redfish/AMT, and future adapters.
-
-See:
-
-- [Platform model](docs/PLATFORM-MODEL.md)
-- [Architecture decisions](docs/DECISIONS.md)
-- [UX principles](docs/UX-PRINCIPLES.md)
-- [Preview UX checklist](docs/PREVIEW-UX-CHECKLIST.md)
-- [MVP / build sequence](docs/MVP.md)
-- [Linux Software Preview](docs/LINUX-PREVIEW.md)
-- [CLI installation](docs/CLI-INSTALL.md)
-- [Platform support](docs/PLATFORM-SUPPORT.md)
-- [Identity & ownership](docs/IDENTITY.md)
-- [Recovery](docs/RECOVERY.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Software architecture](software/README.md)
-- [Transport model](docs/TRANSPORTS.md)
-- [Capabilities](docs/CAPABILITIES.md)
-- [Capability map](docs/CAPABILITY-MAP.md)
-- [Feature placement](docs/FEATURE-PLACEMENT.md)
-- [Scenario matrix](docs/SCENARIO-MATRIX.md)
-- [Sessions](docs/SESSIONS.md)
-- [Trust and permissions](docs/TRUST.md)
-- [Protocol](docs/PROTOCOL.md)
-- [Scenarios](docs/SCENARIOS.md)
-- [Use-case atlas](docs/USE-CASES.md)
-- [Hardware strategy](docs/HARDWARE.md)
-- [Hardware architecture](hardware/architecture/README.md)
-- [Modularity](docs/MODULARITY.md)
-- [Power architecture](docs/POWER.md)
-- [Compute architecture](docs/COMPUTE.md)
-- [Hardware concepts](hardware/concepts/README.md)
-- [Reference modules](hardware/modules/README.md)
-- [Industrial design](hardware/industrial-design/README.md)
-- [Component studies](hardware/component-studies/README.md)
-- [Open specifications](spec/README.md)
-- [USB HID transport](docs/HID-TRANSPORT.md)
-- [Safety interlock](docs/SAFETY-INTERLOCK.md)
-- [Roadmap](docs/ROADMAP.md)
-
-## One platform, software and hardware
-
-Relmote is both a **software system** and a **hardware platform**. Neither form is secondary.
-
-A software-only Relmote can be installed on an existing computer, launched temporarily in a recovery environment, run in a VM/container, or exposed through an authorized private network. It can provide diagnostics, terminal access, files/workspaces, screen support, planners, and other capabilities without requiring a separate physical device.
-
-A hardware Relmote carries the same authority/session/capability model outside the target computer. Hardware can add pre-boot access, USB HID, serial, KVM/video, isolated safety controls, portable networking, battery power, modular I/O, and access to systems where installing software is undesirable or impossible.
-
-Hybrid use is first-class: software and hardware nodes can cooperate rather than compete.
+Relmote separates roles that are often collapsed into one machine:
 
 ```text
-                     RELMOTE PLATFORM
-                            │
-              ┌─────────────┴─────────────┐
-              │                           │
-       RELMOTE SOFTWARE            RELMOTE HARDWARE
-              │                           │
-      installed / temporary       Pocket / All-in-One
-      recovery / VM / agent       Mini / modular / DIY
-              │                           │
-              └─────────────┬─────────────┘
-                            │
-                shared identity / policy
-               sessions / capabilities
-                 transports / evidence
+       Controller
+   (browser / iPad / CLI)
+            │
+            ▼
+     optional Relmote Hub
+            │
+       Agent Host
+ (Kaonashi, Falkor, server)
+            │
+            ▼
+       Relmote Target
+   (software or hardware node)
 ```
 
-See [Software architecture](software/README.md) and [Hardware architecture](hardware/architecture/README.md).
+- **Controller** — the human-facing interface used to inspect, approve, revoke, and direct work.
+- **Target / Node** — the computer or device being supported. It remains the authority boundary for its capabilities.
+- **Agent Host** — optional compute that runs Codex or another agent elsewhere while using only the capabilities the target granted.
+- **Hub** — a planned optional self-hosted multi-node console. It coordinates; it does not become the root of trust.
 
-## Platform forms
+These roles can be on different devices. For example: an iPad can be the controller, an always-on home server the Agent Host, and a family member's computer the target.
 
-Relmote is intentionally not one fixed enclosure or deployment form.
+## Software and hardware are one platform
 
-Reference forms currently include:
+Relmote is both software and hardware; neither is a secondary edition.
 
-- **Mini** — minimal MCU-class node;
-- **Pocket** — phone-sized everyday-carry reference design;
-- **All-in-One** — power-bank-sized integrated field design;
-- **DIY/custom** — any compatible implementation that follows the protocol and authorization model.
+**Software Relmote** can run on an existing machine, VM, recovery environment, or other supported host. It can provide diagnostics, terminal/workspace access, agent sessions, and OS-native interaction paths.
 
-The optional snap-module system is designed around an open magnetic/keyed attachment with a service/contact layer for ordinary modules and a separate optional high-speed layer for demanding modules. USB-C remains a first-class universal expansion path; the snap ecosystem is never mandatory.
+**Hardware Relmote** carries the same identity/session/capability model outside the target OS. Hardware can eventually add USB HID, serial, KVM/video, pre-boot/recovery access, portable networking, physical authorization/STOP controls, and modular I/O.
 
-Module descriptors are machine-readable and publish hardware/resource capabilities, power requirements, links, and pass-through behavior. Module capabilities do **not** become authorization grants automatically.
+Hybrid use is first-class: software and hardware nodes may cooperate.
 
-## Current prototype
+## Authority model
 
-The repository now contains:
+Relmote is designed around a few durable rules:
 
-- bounded target-specific grants;
-- Observe / Teach / Assist / Operate modes;
-- explicit capability checking;
-- expiring and revocable sessions;
-- exact-action approval in Assist mode;
-- one-time action IDs to reject replay;
-- privacy-conscious audit metadata;
-- a no-side-effect dry-run transport;
-- a narrow Linux USB HID text transport with no raw-report interface;
-- Raspberry Pi Zero-class USB gadget setup/teardown scripts.
+- **Human authority first.** A reachable machine is not automatically an authorized machine.
+- **Explicit capabilities.** Observe, terminal, workspace read/write, screen view/control, and other powers are separate grants.
+- **Revocation matters.** Stopping support or revoking a session should invalidate its authority immediately.
+- **Visible operation.** Active sessions, target identity, requested capabilities, and meaningful actions should be inspectable.
+- **Least-invasive useful path.** Prefer a structured/native interface over emulating a keyboard when an authorized richer path exists.
+- **No silent privilege escalation.** Administrative/elevated authority must be explicit.
+- **Local/private operation where practical.** Cloud services are optional rather than fundamental to the architecture.
 
-Try the safe simulation after installing locally:
+See [Trust and permissions](docs/TRUST.md), [Capabilities](docs/CAPABILITIES.md), and [Sessions](docs/SESSIONS.md).
 
-```bash
-python -m pip install -e ".[test]"
-relmote demo --mode assist --approve --text "hello from Relmote"
-pytest -q
-```
+## Try the Linux development preview
 
-The real HID transport exists in software but has **not yet been validated on physical target hardware**.
-
-## Initial implementation path
-
-1. Policy/session engine + dry-run transport. **complete**
-2. USB HID software transport + Pi gadget configuration. **implemented; physical validation next**
-3. Physical AUTHORIZE/STOP controls and sacrificial-target test.
-4. Bidirectional text feedback over USB serial.
-5. BLE companion/control path and Bluetooth HID.
-6. USB networking + local API/web UI.
-7. SSH transport + capability-based path selection.
-8. Physical serial console module.
-9. KVM/video module.
-10. Constrained mesh/store-and-forward operation.
-
-## Try the Linux preview
-
-During active development, the easiest repository install is with `pipx`:
+The easiest current repository install uses `pipx`:
 
 ```bash
-pipx install 'git+https://github.com/dev11systems/relmote.git'
+pipx install 'relmote[screen-linux] @ git+https://github.com/dev11systems/relmote.git'
 relmote
 ```
 
-Upgrade the development preview:
+Update the preview:
 
 ```bash
 relmote update
 ```
 
-Or refresh it directly with pipx:
+Check exactly what is installed:
 
 ```bash
-pipx install --force 'git+https://github.com/dev11systems/relmote.git'
+relmote version
 ```
 
-Uninstall:
+Relmote development snapshots use a human-readable revision such as `0.1.0-dev.11` plus an exact source build hash.
 
-```bash
-pipx uninstall relmote
+See [Install from repository](docs/INSTALL-FROM-REPO.md) and [Updates](docs/UPDATES.md) for details.
+
+## Agent Access preview
+
+Relmote's Agent Bridge is designed so an agent does **not** need to be installed on the target computer.
+
+```text
+iPad / browser
+   Controller
+       │
+       ▼
+Kaonashi / Falkor
+   Agent Host
+       │ scoped Relmote grant
+       ▼
+    Target PC
 ```
 
-See [Install from the repository](docs/INSTALL-FROM-REPO.md) for distro setup, pinning a commit/tag, and contributor options.
+The target chooses an approved workspace and capabilities. Pairing uses a short-lived one-time code; the Agent Host receives only the authority contained in that target grant. Revocation remains target-controlled.
 
-## Status
+See [Agent Bridge](docs/AGENT-BRIDGE.md) and [Agent Host](docs/AGENT-HOST.md).
 
-**Active early prototype — software-first validation, hardware track retained.**
+## Screen access
 
-The Linux software preview is now usable for real-machine testing and includes repository install/update, passive diagnostics, a TUI and private Tailscale web controller, explicit remote-support availability, a working normal-user browser PTY/terminal path, and graphical-session/Wayland discovery. Screen streaming, controller pairing, richer files/workspaces, planner bridges, and cross-platform adapters remain in development.
+Screen access is modeled as a capability with interchangeable providers rather than one hard-coded implementation. Potential providers include Wayland portal/PipeWire, GNOME Remote Desktop/RDP, VNC, X11-native paths, VM consoles, and future hardware KVM.
 
-The hardware track remains first-class. Existing Pi Zero, HID, modularity, power, compute, enclosure, module, and safety-plane work is retained. Hardware validation should reuse the same session/capability/authorization semantics proven in software rather than becoming a separate product.
+`screen.observe` and `screen.control` are separate authorities. Observation should not silently alter the target's physical display topology.
 
-Near-term development therefore proceeds on two linked tracks:
+See [Screen providers](docs/SCREEN-PROVIDERS.md).
 
-1. **Software:** mature remote support (terminal → screen observe → files → pairing → controlled input), diagnostics, packaging, and Linux-first real-world testing.
-2. **Hardware:** validate USB HID and physical AUTHORIZE/STOP, then add serial, USB networking, KVM/video, modular I/O, portable power, and integrated Pocket/All-in-One prototypes.
+## Hardware direction
 
-A capability should live in the shared core whenever possible; software/hardware-specific code belongs in adapters, transports, drivers, and physical modules.
+Hardware concepts include Mini, Pocket, All-in-One, modular/DIY forms, USB HID/serial/networking, KVM/video, portable power, and physical safety controls. These are retained as a first-class track, but hardware maturity varies by component and should not be inferred from the software preview's status.
+
+See [Hardware strategy](docs/HARDWARE.md) and [Hardware architecture](hardware/architecture/README.md).
+
+## Project status
+
+Relmote is an **active early prototype**. Some software paths are already useful for real-machine testing; Agent Host pairing, screen support, broader file/workspace operations, cross-platform adapters, the Hub, and physical hardware validation remain active work.
+
+Do not infer availability from an architecture document alone. Use [Current status](docs/STATUS.md) for the current implementation snapshot.
+
+## Documentation
+
+Start with the **[documentation map](docs/README.md)** rather than an undifferentiated list of every design note.
+
+Key documents:
+
+- [Current status](docs/STATUS.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Platform model](docs/PLATFORM-MODEL.md)
+- [Agent Bridge](docs/AGENT-BRIDGE.md)
+- [Agent Host](docs/AGENT-HOST.md)
+- [Remote-support UX](docs/REMOTE-SUPPORT-UX.md)
+- [Screen providers](docs/SCREEN-PROVIDERS.md)
+- [Hardware strategy](docs/HARDWARE.md)
 
 ## Name
 
 **Relmote** combines *relay*, *remote*, and *mote* (a small networked node).
 
-## Safety and intended use
+## Intended use
 
-Relmote is intended for systems the operator owns or is authorized to administer. The project explicitly avoids stealth operation, silent privilege escalation, and hidden persistence.
+Relmote is intended for systems the operator owns or is authorized to administer. The project explicitly avoids stealth operation, hidden persistence, and silent privilege escalation.
