@@ -4,7 +4,11 @@ import pytest
 
 pytest.importorskip("mcp")
 
-from relmote.mcp_server import RelmoteMCPTools, build_mcp_server
+from relmote.mcp_server import (
+    RELMOTE_MCP_INSTRUCTIONS,
+    RelmoteMCPTools,
+    build_mcp_server,
+)
 
 
 class FakeService:
@@ -43,10 +47,24 @@ def test_mcp_tools_reuse_paired_target_service_boundary():
     service = FakeService()
     tools = RelmoteMCPTools(service)
 
-    assert tools.targets()[0]["name"] == "target-a"
-    assert tools.status("target-a")["state"] == "active"
-    assert tools.list("target-a", "src")[0]["name"] == "README.md"
-    assert tools.read("target-a", "README.md") == "hello\n"
+    targets = tools.targets()
+    assert targets["context"]["this_process_role"] == "agent_host"
+    assert targets["targets"][0]["name"] == "target-a"
+    assert targets["targets"][0]["role"] == "paired_target"
+    assert targets["targets"][0]["workspace_location"] == "target"
+
+    status = tools.status("target-a")
+    assert status["context"]["target_role"] == "paired_target"
+    assert status["context"]["execution_location"] == "target"
+    assert status["target_status"]["state"] == "active"
+
+    listed = tools.list("target-a", "src")
+    assert listed["context"]["path_location"] == "target_workspace"
+    assert listed["entries"][0]["name"] == "README.md"
+
+    read = tools.read("target-a", "README.md")
+    assert read["context"]["path_location"] == "target_workspace"
+    assert read["text"] == "hello\n"
 
     assert service.calls == [
         ("targets",),
@@ -60,9 +78,14 @@ def test_mcp_exec_maps_named_operations_not_arbitrary_git_arguments():
     service = FakeService()
     tools = RelmoteMCPTools(service)
 
-    tools.exec("target-a", "git_status")
-    tools.exec("target-a", "git_diff", cwd="src", timeout=12)
-    tools.exec("target-a", "pytest", args=["-q"])
+    status_result = tools.exec("target-a", "git_status")
+    diff_result = tools.exec("target-a", "git_diff", cwd="src", timeout=12)
+    pytest_result = tools.exec("target-a", "pytest", args=["-q"])
+
+    for value in (status_result, diff_result, pytest_result):
+        assert value["context"]["execution_location"] == "target"
+        assert value["context"]["cwd_location"] == "target_workspace"
+        assert value["result"]["returncode"] == 0
 
     assert service.calls == [
         ("exec", "target-a", ["git", "status"], ".", 30),
@@ -81,9 +104,30 @@ def test_mcp_server_exposes_only_initial_agent_host_tools():
     names = {tool.name for tool in tool_list}
 
     assert names == {
+        "relmote_context",
         "relmote_targets",
         "relmote_target_status",
         "relmote_list",
         "relmote_read",
         "relmote_exec",
     }
+
+
+def test_mcp_server_declares_host_target_role_instructions():
+    server = build_mcp_server(FakeService())
+
+    assert server.instructions == RELMOTE_MCP_INSTRUCTIONS
+    assert "Agent Host" in server.instructions
+    assert "paired Relmote Target" in server.instructions
+    assert "not to the Agent Host filesystem" in server.instructions
+    assert "do not bypass" in server.instructions.lower()
+
+
+def test_context_tool_makes_execution_location_explicit():
+    value = RelmoteMCPTools.context()
+
+    assert value["this_process_role"] == "agent_host"
+    assert value["target_argument_role"] == "paired_target"
+    assert value["target_paths_belong_to"] == "target_workspace"
+    assert value["target_execution_location"] == "target"
+    assert value["agent_host_filesystem_exposed_as_target"] is False
