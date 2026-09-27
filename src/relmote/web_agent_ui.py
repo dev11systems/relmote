@@ -44,4 +44,6 @@ async function disableAgentAccess(){
     showStatus('Could not disable Agent Access: '+e.message,true);
   }
 }
+
+refreshAgentAccess().catch(()=>{});
 """
