@@ -18,7 +18,8 @@ from .workspace import WorkspacePolicy
 from .agent_transport import tailscale_transport
 from .agent_access import enable_private_transport, disable_private_transport, serve_status
 from .agent_scope import classify_scope
-from .agent_client import RelmoteAgentClient
+from .agent_client import RelmoteAgentClient, pair as pair_agent
+from .agent_profiles import save_profile, load_profile, profile_directory
 from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
@@ -338,6 +339,66 @@ def build_parser() -> argparse.ArgumentParser:
                 "do not pass the bearer token on the command line."
             )
         return RelmoteAgentClient(args.url, token)
+
+    agent_pair_cmd = agent_sub.add_parser(
+        "pair",
+        help="pair this controller/agent host with a Relmote target",
+    )
+    agent_pair_cmd.add_argument(
+        "url",
+        help="private Relmote Agent API URL, typically provided by the target",
+    )
+    agent_pair_cmd.add_argument(
+        "--name",
+        help="local name for this target profile",
+    )
+    def run_agent_pair(args):
+        import getpass
+        code = getpass.getpass("8-digit pairing code: ")
+        value = pair_agent(args.url, code)
+        session = value["session"]
+        target_name = args.name or session.get("controller") or session["session_id"][:8]
+        path = save_profile(
+            name=target_name,
+            base_url=args.url,
+            token=value["token"],
+            session=session,
+        )
+        print(f"Paired with {target_name}.")
+        print(f"Workspace: {session.get('workspace')}")
+        print("Capabilities:")
+        for capability in session.get("capabilities", []):
+            print(f"  - {capability}")
+        print(f"Connection profile: {path}")
+        return 0
+    agent_pair_cmd.set_defaults(func=run_agent_pair)
+
+    agent_targets = agent_sub.add_parser(
+        "targets",
+        help="list locally paired Relmote targets",
+    )
+    def run_agent_targets(args):
+        directory = profile_directory()
+        if not directory.exists():
+            print("No paired Relmote targets.")
+            return 0
+        profiles = sorted(directory.glob("*.json"))
+        if not profiles:
+            print("No paired Relmote targets.")
+            return 0
+        for path in profiles:
+            try:
+                value = __import__("json").loads(path.read_text())
+                session = value.get("session", {})
+                print(
+                    f"{value.get('name', path.stem)}  "
+                    f"{session.get('workspace', '?')}  "
+                    f"{session.get('state', '?')}"
+                )
+            except Exception:
+                print(f"{path.stem}  unreadable profile")
+        return 0
+    agent_targets.set_defaults(func=run_agent_targets)
 
     agent_remote = agent_sub.add_parser(
         "remote",
