@@ -21,4 +21,5 @@ def test_repo_update_uses_pipx_force_install(which, run):
     assert result == 0
     argv = run.call_args.args[0]
     assert argv[:3] == ["pipx", "install", "--force"]
-    assert argv[-1].startswith("git+https://github.com/dev11systems/relmote")
+    assert "git+https://github.com/dev11systems/relmote" in argv[-1]
+    assert "screen-linux" in argv[-1]
