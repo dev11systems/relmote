@@ -24,6 +24,7 @@ from .help import print_help_topic, topic_names
 from .wayland_portal import portal_environment, portal_screen_cast_available
 from .portal_dbus import request_monitor_share, diagnose
 from .screen_backend import detect_linux_screen_backend
+from .screen_providers import discover_screen_providers, preferred_observe_provider
 from .project_info import (
     PROJECT_URL,
     ISSUES_URL,
@@ -205,6 +206,35 @@ def build_parser() -> argparse.ArgumentParser:
             return 0 if ok else 1
         return 0 if screen.session_type == "x11" else 1
     screen_probe.set_defaults(func=run_screen_probe)
+
+    screen_providers = screen_sub.add_parser(
+        "providers",
+        help="show available screen observation/control backends",
+    )
+    def run_screen_providers(args):
+        print("RELMOTE SCREEN PROVIDERS\n")
+        preferred = preferred_observe_provider()
+        for item in discover_screen_providers():
+            mark = "*" if preferred and item.provider_id == preferred.provider_id else " "
+            state = "available" if item.available else "unavailable"
+            abilities = []
+            if item.observe:
+                abilities.append("observe")
+            if item.control:
+                abilities.append("control")
+            print(
+                f"{mark} {item.provider_id:16} {state:11} "
+                f"{'/'.join(abilities) or '-'}"
+            )
+            print(f"    {item.label} · consent: {item.consent}")
+            print(f"    {item.note}")
+        if preferred:
+            print(f"\nPreferred observe provider: {preferred.provider_id}")
+        else:
+            print("\nNo screen-observe provider is currently available.")
+        return 0
+    screen_providers.set_defaults(func=run_screen_providers)
+
 
     screen_request = screen_sub.add_parser(
         "request",
