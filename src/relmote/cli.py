@@ -16,6 +16,7 @@ from .ssh_target import SSHTarget
 from .ssh_workspace import SSHWorkspace
 from .workspace import WorkspacePolicy
 from .agent_transport import tailscale_transport
+from .agent_access import enable_private_transport, disable_private_transport, serve_status
 from .agent_scope import classify_scope
 from .agent_client import RelmoteAgentClient
 from .app import run_app
@@ -376,6 +377,39 @@ def build_parser() -> argparse.ArgumentParser:
 
     for remote_parser in (remote_session, remote_list, remote_read, remote_exec):
         remote_parser.set_defaults(func=run_agent_remote)
+
+    agent_enable = agent_sub.add_parser(
+        "enable",
+        help="enable private Agent API access through the detected transport",
+    )
+    def run_agent_enable(args):
+        print("Enabling private Relmote Agent access...")
+        result = enable_private_transport()
+        print(result.get("detail") or "Agent access enabled.")
+        return 0
+    agent_enable.set_defaults(func=run_agent_enable)
+
+    agent_status_cmd = agent_sub.add_parser(
+        "status",
+        help="show Agent API private transport status",
+    )
+    def run_agent_status(args):
+        info = serve_status()
+        print("RELMOTE AGENT ACCESS")
+        print(f"Tailscale: {'available' if info.get('available') else 'unavailable'}")
+        print(f"Private transport: {'ON' if info.get('enabled') else 'OFF'}")
+        return 0
+    agent_status_cmd.set_defaults(func=run_agent_status)
+
+    agent_disable = agent_sub.add_parser(
+        "disable",
+        help="disable Relmote's private Agent API transport",
+    )
+    def run_agent_disable(args):
+        disable_private_transport()
+        print("Relmote Agent private transport disabled.")
+        return 0
+    agent_disable.set_defaults(func=run_agent_disable)
 
     agent_transport_cmd = agent_sub.add_parser(
         "transport",
