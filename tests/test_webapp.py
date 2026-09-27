@@ -29,3 +29,11 @@ def test_terminal_routes_have_one_consistent_shape():
 
     assert _parse_terminal_path("/api/v1/terminal/request-local") is None
     assert _parse_terminal_path("/api/v1/terminal/abc-123") is None
+
+
+def test_rendered_web_ui_has_no_literal_source_newline_escape():
+    assert "</button>\\n <div id=\"screenSessions\"" not in INDEX
+    assert (
+        "terminalSessions');\\nconst screenSessionsEl"
+        not in INDEX
+    )
