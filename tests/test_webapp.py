@@ -37,3 +37,11 @@ def test_rendered_web_ui_has_no_literal_source_newline_escape():
         "terminalSessions');\\nconst screenSessionsEl"
         not in INDEX
     )
+
+
+def test_agent_access_functions_are_rendered_as_real_javascript():
+    assert "async function refreshAgentAccess()" in INDEX
+    assert "async function enableAgentAccess()" in INDEX
+    assert "async function disableAgentAccess()" in INDEX
+    # The Python interpolation expression itself must never reach the browser.
+    assert "{agent_access_javascript()}" not in INDEX
