@@ -5,7 +5,20 @@ PROJECT_URL = "https://github.com/dev11systems/relmote"
 ISSUES_URL = "https://github.com/dev11systems/relmote/issues"
 CHANGELOG_URL = "https://github.com/dev11systems/relmote/blob/main/CHANGELOG.md"
 
-SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.9
+SNAPSHOT_CHANGELOG = """Relmote 0.1.0-dev.10
+
+Browser repair
+- Agent Access JavaScript is served as a separate browser resource.
+- Fixed the dev.9 startup parse failure that left runtime cards on Loading.
+- Agent Access initializes only after its script has loaded.
+- Added regression coverage for the rendered external Agent resource.
+
+Agent Access
+- One-button private transport lifecycle and pairing-first UX continue from dev.9.
+
+Previous snapshot: 0.1.0-dev.9
+
+Relmote 0.1.0-dev.9
 
 Pairing-first Agent Access
 - One-button private Agent Access lifecycle foundation.
