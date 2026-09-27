@@ -106,3 +106,26 @@ However, any autonomous continuation must be explicitly authorized in advance an
 ## Uncertainty
 
 When target identity, current state, or action consequences are ambiguous, the safe state is **do not execute**.
+
+
+## External metadata disclosure
+
+A transport can create privacy side effects even when the payload itself remains private.
+
+Relmote must not silently enable a transport feature that publishes externally visible identifiers or other durable metadata as a side effect. Examples include:
+
+- requesting a publicly logged TLS certificate;
+- publishing a DNS name outside the user's private namespace;
+- registering a device with a cloud relay/control service;
+- creating a public ingress or forwarding rule;
+- exposing a device or owner identifier to a third-party directory.
+
+When such a feature is useful, Relmote should:
+
+1. explain what metadata leaves the local/private environment;
+2. identify whether the disclosure is public, third-party-visible, or merely tailnet-private;
+3. require explicit human approval before activation;
+4. offer a lower-disclosure transport when one exists;
+5. avoid treating refusal as an error when another private path is available.
+
+For Tailscale specifically, direct binding to the target's Tailscale address does not require public TLS certificate issuance. Tailscale Serve/HTTPS may provision a public-CA certificate whose fully qualified device name is recorded in Certificate Transparency logs. Relmote therefore treats Serve/HTTPS as optional, explicit convenience rather than an automatic prerequisite.

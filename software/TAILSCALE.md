@@ -44,7 +44,12 @@ Controller authentication and Agent authentication are separate. A Controller to
 
 ## Tailscale Serve is optional
 
-Tailscale Serve can still be useful as an optional HTTPS convenience layer:
+Tailscale Serve can still be useful as an optional HTTPS convenience layer, but enabling Tailscale HTTPS has a privacy side effect that Relmote must not hide: public-CA TLS certificates are recorded in Certificate Transparency logs, including the device's fully qualified `*.ts.net` name. Tailscale itself requires an acknowledgment before enabling HTTPS and warns against using sensitive machine names.
+
+Relmote must therefore never auto-enable Tailscale HTTPS, auto-accept that consent, or treat refusing it as a failure when direct private reachability is available.
+
+Tailscale Serve can be selected deliberately when the operator understands and accepts that metadata disclosure:
+
 
 ```text
 Agent Host
@@ -61,6 +66,8 @@ loopback Relmote service
 However, Serve can require tailnet-level feature enablement, HTTPS certificate setup, or administrative rights that the local target operator may not possess. Relmote therefore must not make Serve a prerequisite for Agent Access.
 
 Relmote should surface Serve as an optional transport/provider when it is already configured or deliberately selected.
+
+Reference: Tailscale's HTTPS documentation explains that machine names and the tailnet DNS name used in issued certificates are recorded in the public Certificate Transparency ledger.
 
 ## Why exact-interface binding matters
 
