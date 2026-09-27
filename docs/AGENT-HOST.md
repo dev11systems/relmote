@@ -4,7 +4,7 @@ An Agent Host supplies compute and agent tooling for one or more authorized Relm
 
 Controller, Agent Host, and Target are independent roles.
 
-Example deployment: Controller = iPad web UI; Agent Host = Kaonashi; Target = russ-pc. A later deployment may use Falkor without changing target-side authorization.
+Example deployment: a browser on a phone, tablet, or computer serves as the Controller; a workstation, server, or VM serves as the Agent Host; and an authorized computer serves as the Target. Moving the Agent Host to another machine does not change target-side authorization.
 
 ## Responsibilities
 
@@ -28,7 +28,7 @@ Adapters must not broaden target capabilities. A read-only target grant cannot b
 
 ## Host selection
 
-The future Relmote Hub may choose among Agent Hosts such as Kaonashi and Falkor based on online state, installed tools, compute capacity, locality/latency, privacy policy, workload, and user preference. Automatic selection must remain visible and overridable.
+The future Relmote Hub may choose among authorized Agent Hosts based on online state, installed tools, compute capacity, locality/latency, privacy policy, workload, and user preference. Automatic selection must remain visible and overridable.
 
 ## Credential storage
 

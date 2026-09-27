@@ -77,3 +77,11 @@ Documents such as `docs/MVP.md`, `docs/FIRST-TEST.md`, `docs/SOFTWARE-PREVIEW-TE
 ## Documentation rule
 
 When two documents disagree about whether a feature currently works, `docs/STATUS.md` is authoritative. Architecture/design documents may intentionally describe intended future behavior.
+
+## Public documentation and privacy
+
+Write public documentation for any operator, not around a maintainer's personal deployment. Describe roles such as Controller, Agent Host, and Target, with generic device classes and clearly fictional example names.
+
+Do not copy personal machine names, usernames, home paths, private network addresses, tailnet domains, credentials, screenshots containing personal data, or other personal deployment details from conversations or test output into public docs, issues, or pull requests. Use placeholders such as `<agent-host>`, `<target>`, and `<workspace>` instead.
+
+Real-world validation notes may describe relevant operating systems, device classes, versions, steps, and observed results after redaction. Product names may appear where compatibility or reproduction requires them, but must not imply that one person's hardware is required. Keep private deployment inventories and raw logs outside the public repository, and distinguish planned validation from completed tests.

@@ -51,8 +51,8 @@ Status is capability-specific. A broad subsystem may contain items in more than 
 
 A useful current deployment model is:
 
-- **Controller:** iPad/browser or another human-facing interface.
-- **Agent Host:** Kaonashi today; Falkor or another capable machine can fill the same role later.
+- **Controller:** a browser, CLI, or other human-facing interface on a phone, tablet, or computer.
+- **Agent Host:** a laptop, workstation, server, or VM providing agent compute and adapters.
 - **Target / Node:** the authorized computer or system being observed, diagnosed, or controlled.
 - **Hub:** a future optional self-hosted multi-node orchestration layer.
 
