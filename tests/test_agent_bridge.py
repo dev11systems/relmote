@@ -50,3 +50,12 @@ def test_revoked_agent_session_cannot_read(tmp_path):
     session.revoke()
     with pytest.raises(PermissionError):
         read_text(session, "hello.txt")
+
+
+def test_agent_cannot_escape_workspace_through_symlink(tmp_path):
+    outside = tmp_path.parent / "outside-secret.txt"
+    outside.write_text("secret")
+    (tmp_path / "link").symlink_to(outside)
+    session = session_for(tmp_path, AgentCapability.READ)
+    with pytest.raises(ValueError):
+        read_text(session, "link")
