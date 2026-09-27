@@ -22,6 +22,7 @@ from .agent_client import RelmoteAgentClient, pair as pair_agent
 from .agent_profiles import save_profile
 from .agent_host import detect_agent_host
 from .paired_targets import PairedTargetService
+from .hub_inventory import HubInventory
 from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
@@ -679,6 +680,88 @@ def build_parser() -> argparse.ArgumentParser:
         workspace_command_parser.set_defaults(func=run_workspace)
     workspace_sub.choices["git-status"].set_defaults(func=run_workspace)
     workspace_sub.choices["git-diff"].set_defaults(func=run_workspace)
+
+    hub_parser = sub.add_parser(
+        "hub",
+        help="preview the optional self-hosted Hub role",
+    )
+    hub_sub = hub_parser.add_subparsers(dest="hub_command", required=True)
+
+    hub_inventory = hub_sub.add_parser(
+        "inventory",
+        help="show credential-blind local Agent Host and paired-target inventory",
+    )
+    hub_inventory.add_argument(
+        "--live",
+        action="store_true",
+        help="probe paired Targets for current reachability/authority state",
+    )
+    hub_inventory.add_argument(
+        "--json",
+        action="store_true",
+        help="emit the complete structured inventory snapshot",
+    )
+
+    def run_hub_inventory(args):
+        snapshot = HubInventory().snapshot(live=args.live)
+        if args.json:
+            print(json.dumps(snapshot, indent=2))
+            return 0
+
+        hub = snapshot["hub"]
+        host = snapshot["agent_host"]
+        build = host["relmote"]
+
+        print("RELMOTE HUB INVENTORY")
+        print(f"Mode: {hub['mode']} · authority: {hub['authority']}")
+        print()
+        print("AGENT HOST")
+        print(f"Name: {host['name']}")
+        print(f"Platform: {host['platform']} / {host['architecture']}")
+        print(
+            f"Relmote: {build['display_version']} "
+            f"(build {build['short_commit']})"
+        )
+        print("Capabilities:")
+        for capability in host.get("capabilities", []):
+            print(f"  - {capability}")
+        print("Tools:")
+        for tool in host.get("tools", []):
+            print(f"  - {tool}")
+
+        print()
+        print("PAIRED TARGETS")
+        targets = snapshot["paired_targets"]
+        if not targets:
+            print("No paired Relmote targets.")
+            return 0
+
+        for target in targets:
+            print(f"- {target['name']}")
+            print(f"  workspace: {target.get('workspace') or '?'}")
+            print(f"  stored state: {target.get('state') or '?'}")
+            capabilities = target.get("capabilities") or []
+            print(
+                "  stored capabilities: "
+                + (", ".join(capabilities) if capabilities else "none")
+            )
+            if args.live:
+                live = target.get("live") or {}
+                reachable = live.get("reachable")
+                if reachable is True:
+                    reachability = "reachable"
+                elif reachable is False:
+                    reachability = "unreachable"
+                else:
+                    reachability = "unknown"
+                print(f"  live: {reachability} · {live.get('authority') or 'unknown'}")
+                if live.get("state"):
+                    print(f"  live state: {live['state']}")
+                if live.get("detail"):
+                    print(f"  detail: {live['detail']}")
+        return 0
+
+    hub_inventory.set_defaults(func=run_hub_inventory)
 
     status_parser = sub.add_parser(
         "status",

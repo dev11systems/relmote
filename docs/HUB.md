@@ -116,6 +116,27 @@ When an operation requires target authority, the Agent Host or another explicitl
 
 Longer term, credentials should move into OS keyrings or another local secret store with process-scoped access.
 
+## Current first slice
+
+The first implemented Hub slice is intentionally read-only and runs locally on the Agent Host:
+
+```bash
+relmote hub inventory
+relmote hub inventory --live
+relmote hub inventory --json
+```
+
+It reports:
+
+- the co-located Agent Host identity/platform/capabilities/tools;
+- the exact local Relmote version/build;
+- credential-blind paired-target summaries;
+- optionally, live Target reachability and authority state.
+
+The live probe distinguishes a reachable-but-revoked Target from an unreachable Target. The snapshot does not expose paired-target bearer credentials or stored endpoint URLs.
+
+This is inventory only. It cannot create grants, execute Target operations, update nodes, or act as a relay.
+
 ## Initial Hub MVP
 
 The first useful Hub does not need to be a full RMM platform.
