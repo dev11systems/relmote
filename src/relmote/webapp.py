@@ -537,7 +537,7 @@ request('/api/v1/project').then(p=>{
  aboutInfoEl.textContent=p.build.display_version+' · build '+p.build.short_commit;
  changelogTextEl.textContent=p.changelog;
 }).catch(()=>{});
-{agent_access_javascript()}
+__RELMOTE_AGENT_ACCESS_JS__
 refreshAgentAccess().catch(()=>{});
 refresh().catch(e=>{
  startupErrorEl.style.display='block';
@@ -546,6 +546,12 @@ refresh().catch(e=>{
 </script>
 </body></html>
 """
+
+
+INDEX = INDEX.replace(
+    "__RELMOTE_AGENT_ACCESS_JS__",
+    agent_access_javascript(),
+)
 
 
 def _json(handler: BaseHTTPRequestHandler, status: HTTPStatus, value: dict) -> None:
