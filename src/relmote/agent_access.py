@@ -35,10 +35,25 @@ def serve_status() -> dict:
         value = {}
     text = completed.stdout
     enabled = f"127.0.0.1:{AGENT_PORT}" in text or f"localhost:{AGENT_PORT}" in text
+
+    urls: list[str] = []
+    def collect_urls(item):
+        if isinstance(item, dict):
+            for key, child in item.items():
+                if isinstance(key, str) and key.startswith("https://"):
+                    urls.append(key.rstrip("/"))
+                collect_urls(child)
+        elif isinstance(item, list):
+            for child in item:
+                collect_urls(child)
+        elif isinstance(item, str) and item.startswith("https://"):
+            urls.append(item.rstrip("/"))
+    collect_urls(value)
+
     return {
         "available": True,
         "enabled": enabled,
-        "url": None,
+        "url": urls[0] if urls else None,
         "raw": value,
     }
 
