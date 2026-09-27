@@ -328,6 +328,55 @@ def build_parser() -> argparse.ArgumentParser:
             print(result["stderr"], end="", file=sys.stderr)
         return result["returncode"]
     agent_exec.set_defaults(func=run_agent_exec)
+    def _agent_remote_client(args):
+        import os
+        token = os.environ.get("RELMOTE_AGENT_TOKEN", "")
+        if not token:
+            raise RuntimeError(
+                "Set RELMOTE_AGENT_TOKEN in the environment; "
+                "do not pass the bearer token on the command line."
+            )
+        return RelmoteAgentClient(args.url, token)
+
+    agent_remote = agent_sub.add_parser(
+        "remote",
+        help="test an approved Agent API from another machine",
+    )
+    agent_remote.add_argument("--url", required=True)
+    remote_sub = agent_remote.add_subparsers(dest="remote_command", required=True)
+
+    remote_session = remote_sub.add_parser("session")
+    remote_list = remote_sub.add_parser("list")
+    remote_list.add_argument("path", nargs="?", default=".")
+    remote_read = remote_sub.add_parser("read")
+    remote_read.add_argument("path")
+    remote_exec = remote_sub.add_parser("exec")
+    remote_exec.add_argument("tool", choices=("git", "pytest"))
+    remote_exec.add_argument("tool_args", nargs="*")
+
+    def run_agent_remote(args):
+        client = _agent_remote_client(args)
+        if args.remote_command == "session":
+            print(__import__("json").dumps(client.session(), indent=2))
+            return 0
+        if args.remote_command == "list":
+            print(__import__("json").dumps(client.list(args.path), indent=2))
+            return 0
+        if args.remote_command == "read":
+            print(client.read(args.path), end="")
+            return 0
+        if args.remote_command == "exec":
+            result = client.exec([args.tool, *args.tool_args])
+            if result.get("stdout"):
+                print(result["stdout"], end="")
+            if result.get("stderr"):
+                print(result["stderr"], end="", file=__import__("sys").stderr)
+            return int(result.get("returncode", 1))
+        raise ValueError("unknown remote agent command")
+
+    for parser in (remote_session, remote_list, remote_read, remote_exec):
+        parser.set_defaults(func=run_agent_remote)
+
     agent_transport_cmd = agent_sub.add_parser(
         "transport",
         help="show an explicit private transport for the Agent API",
