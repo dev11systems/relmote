@@ -48,7 +48,23 @@ relmote-mcp
 
 It uses stdio by default. Stdout is reserved for the MCP protocol.
 
+## Role semantics
+
+The MCP server sends explicit server-level instructions to the MCP host:
+
+- Codex is running on the **Agent Host**.
+- A `target` argument names a separately paired **Target**.
+- Target workspace paths are not Agent Host filesystem paths.
+- `relmote_list`, `relmote_read`, and `relmote_exec` operate on the named Target.
+- A Relmote denial must not be treated as permission to bypass Relmote using local shell, SSH, Tailscale, or another path.
+
+Every Target operation also returns structured context naming the Target role and execution/path location. The adapter does not depend on the model remembering a single prose instruction.
+
 ## Initial tools
+
+### `relmote_context`
+
+Returns the Agent Host vs Target role model and authority/bypass rules without exposing credentials or local filesystem contents.
 
 ### `relmote_targets`
 
@@ -100,18 +116,21 @@ Verify the configured servers with:
 codex mcp list
 ```
 
-The exact Codex CLI syntax should follow the installed Codex version. The validation goal is that Codex discovers only the five Relmote MCP tools above.
+The exact Codex CLI syntax should follow the installed Codex version. The validation goal is that Codex discovers the six Relmote MCP tools above and receives the Agent Host/Target role instructions before operating on a Target.
 
 ## Authority validation
 
 The first real Codex test should repeat the already-validated CLI boundary:
 
-1. Codex discovers the paired target.
-2. With a read-only target grant, Codex can list/read only the approved workspace.
-3. Codex cannot execute when `terminal.exec` is absent.
-4. With a fresh explicit exec grant, `git_status` succeeds.
-5. Revoke the target grant.
-6. A subsequent Codex tool call fails.
-7. Disabling Agent Access removes target reachability.
+1. Codex reads `relmote_context` and correctly describes itself as running on an Agent Host while the paired machine is a separate Target.
+2. Codex discovers the paired target.
+3. With a read-only target grant, Codex can list/read only the approved workspace.
+4. Codex reports those paths as Target paths rather than Agent Host paths.
+5. Codex cannot execute when `terminal.exec` is absent.
+6. Codex does not attempt to bypass that denial using another transport.
+7. With a fresh explicit exec grant, `git_status` succeeds on the Target.
+8. Revoke the target grant.
+9. A subsequent Codex tool call fails.
+10. Disabling Agent Access removes target reachability.
 
 Do not promote the MCP/Codex adapter to exercised status until this is observed on a real Agent Host.
