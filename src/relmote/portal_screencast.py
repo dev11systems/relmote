@@ -4,14 +4,15 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from dataclasses import dataclass
 from uuid import uuid4
 
 
 @dataclass(frozen=True)
-class PortalRequest:
-    token: str
-    request_path: str
+class PortalResponse:
+    code: int
+    results_text: str
 
 
 def _portal_env() -> dict[str, str]:
@@ -33,91 +34,98 @@ def _gdbus() -> str:
     return command
 
 
-def _call(method: str, *args: str) -> str:
-    completed = subprocess.run(
+def _request_path(token: str) -> str:
+    # The portal returns this path from the method call, but listening to the
+    # desktop portal before the call avoids losing a fast Response signal.
+    return token
+
+
+def _portal_request(
+    method: str,
+    method_args: tuple[str, ...],
+    options: dict[str, str],
+    *,
+    timeout_seconds: int = 30,
+) -> PortalResponse:
+    token = "relmote_" + uuid4().hex
+    options = dict(options)
+    options["handle_token"] = "<'%s'>" % token
+
+    monitor = subprocess.Popen(
         [
             _gdbus(),
-            "call",
+            "monitor",
             "--session",
             "--dest", "org.freedesktop.portal.Desktop",
-            "--object-path", "/org/freedesktop/portal/desktop",
-            "--method", f"org.freedesktop.portal.ScreenCast.{method}",
-            *args,
         ],
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
-        timeout=8,
-        check=False,
         env=_portal_env(),
     )
-    if completed.returncode != 0:
-        raise RuntimeError(
-            completed.stderr.strip() or f"ScreenCast {method} failed"
-        )
-    return completed.stdout.strip()
-
-
-def create_session_request() -> PortalRequest:
-    token = "relmote_" + uuid4().hex
-    output = _call(
-        "CreateSession",
-        "{'handle_token': <'%s'>, 'session_handle_token': <'%s_session'>}"
-        % (token, token),
-    )
-    match = re.search(r"'(/org/freedesktop/portal/desktop/request/[^']+)'", output)
-    if not match:
-        raise RuntimeError(f"could not parse portal request path: {output}")
-    return PortalRequest(token=token, request_path=match.group(1))
-
-
-@dataclass(frozen=True)
-class PortalResponse:
-    code: int
-    results_text: str
-
-
-def wait_for_response(request_path: str, timeout_seconds: int = 30) -> PortalResponse:
-    command = [
-        _gdbus(),
-        "monitor",
-        "--session",
-        "--dest", "org.freedesktop.portal.Desktop",
-        "--object-path", request_path,
-    ]
     try:
+        time.sleep(0.08)
+        options_text = "{" + ", ".join(
+            "'%s': %s" % (key, value) for key, value in options.items()
+        ) + "}"
         completed = subprocess.run(
-            command,
+            [
+                _gdbus(),
+                "call",
+                "--session",
+                "--dest", "org.freedesktop.portal.Desktop",
+                "--object-path", "/org/freedesktop/portal/desktop",
+                "--method", f"org.freedesktop.portal.ScreenCast.{method}",
+                *method_args,
+                options_text,
+            ],
             capture_output=True,
             text=True,
-            timeout=timeout_seconds,
+            timeout=8,
             check=False,
             env=_portal_env(),
         )
-    except subprocess.TimeoutExpired as exc:
-        output = (exc.stdout or "")
-        if isinstance(output, bytes):
-            output = output.decode(errors="replace")
-    else:
-        output = completed.stdout
+        if completed.returncode != 0:
+            raise RuntimeError(
+                completed.stderr.strip() or f"ScreenCast {method} failed"
+            )
 
-    response_lines = [
-        line.strip()
-        for line in output.splitlines()
-        if "Response" in line or "uint32" in line
-    ]
-    joined = " ".join(response_lines)
-    code_match = re.search(r"uint32\s+(\d+)", joined)
-    if not code_match:
-        raise RuntimeError("portal response was not received before timeout")
-    return PortalResponse(
-        code=int(code_match.group(1)),
-        results_text=joined,
-    )
+        deadline = time.monotonic() + timeout_seconds
+        captured: list[str] = []
+        assert monitor.stdout is not None
+        while time.monotonic() < deadline:
+            line = monitor.stdout.readline()
+            if not line:
+                time.sleep(0.05)
+                continue
+            captured.append(line.strip())
+            joined = " ".join(captured[-12:])
+            if "Response" not in joined:
+                continue
+            code_match = re.search(r"uint32\s+(\d+)", joined)
+            if code_match:
+                return PortalResponse(
+                    code=int(code_match.group(1)),
+                    results_text=joined,
+                )
+        raise RuntimeError(
+            f"{method} portal response was not received before timeout"
+        )
+    finally:
+        monitor.terminate()
+        try:
+            monitor.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            monitor.kill()
 
 
 def create_session() -> str:
-    request = create_session_request()
-    response = wait_for_response(request.request_path)
+    token = "relmote_session_" + uuid4().hex
+    response = _portal_request(
+        "CreateSession",
+        (),
+        {"session_handle_token": "<'%s'>" % token},
+    )
     if response.code != 0:
         raise PermissionError(
             f"ScreenCast session was declined or cancelled (response {response.code})"
@@ -128,28 +136,21 @@ def create_session() -> str:
     )
     if not match:
         raise RuntimeError(
-            "ScreenCast portal approved CreateSession but no session handle was returned"
+            "ScreenCast CreateSession succeeded but no session handle was returned"
         )
     return match.group(1)
 
 
-def _request_method(method: str, *args: str) -> PortalRequest:
-    token = "relmote_" + uuid4().hex
-    options = "{'handle_token': <'%s'>}" % token
-    output = _call(method, *args, options)
-    match = re.search(r"'(/org/freedesktop/portal/desktop/request/[^']+)'", output)
-    if not match:
-        raise RuntimeError(f"could not parse {method} request path: {output}")
-    return PortalRequest(token=token, request_path=match.group(1))
-
-
 def select_monitor(session_handle: str) -> None:
-    request = _request_method(
+    response = _portal_request(
         "SelectSources",
-        session_handle,
-        "{'types': <uint32 1>, 'multiple': <false>, 'cursor_mode': <uint32 2>}",
+        (session_handle,),
+        {
+            "types": "<uint32 1>",
+            "multiple": "<false>",
+            "cursor_mode": "<uint32 2>",
+        },
     )
-    response = wait_for_response(request.request_path)
     if response.code != 0:
         raise PermissionError(
             f"screen source selection was declined or cancelled (response {response.code})"
@@ -157,8 +158,12 @@ def select_monitor(session_handle: str) -> None:
 
 
 def start_screen_cast(session_handle: str) -> PortalResponse:
-    request = _request_method("Start", session_handle, "")
-    response = wait_for_response(request.request_path, timeout_seconds=120)
+    response = _portal_request(
+        "Start",
+        (session_handle, "''"),
+        {},
+        timeout_seconds=120,
+    )
     if response.code != 0:
         raise PermissionError(
             f"screen sharing was declined or cancelled (response {response.code})"
