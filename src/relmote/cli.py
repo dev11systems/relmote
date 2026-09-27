@@ -23,6 +23,7 @@ from .agent_profiles import save_profile
 from .agent_host import detect_agent_host
 from .paired_targets import PairedTargetService
 from .hub_inventory import HubInventory
+from .hub_web import serve_hub
 from .app import run_app
 from .version import build_info
 from .updater import update_repo_preview
@@ -774,6 +775,41 @@ def build_parser() -> argparse.ArgumentParser:
         return 0
 
     hub_inventory.set_defaults(func=run_hub_inventory)
+
+    hub_serve = hub_sub.add_parser(
+        "serve",
+        help="run the read-only Hub web dashboard",
+    )
+    hub_serve.add_argument(
+        "--port",
+        type=int,
+        default=8790,
+        help="Hub web port (default: 8790)",
+    )
+    hub_serve.add_argument(
+        "--tailscale",
+        action="store_true",
+        help=(
+            "bind only to the detected Tailscale IPv4 address and require "
+            "a temporary browser token"
+        ),
+    )
+    hub_serve.add_argument(
+        "--lifetime-minutes",
+        type=int,
+        default=60,
+        help="temporary Tailscale browser-token lifetime (default: 60)",
+    )
+    hub_serve.set_defaults(
+        func=lambda args: (
+            serve_hub(
+                port=args.port,
+                tailscale=args.tailscale,
+                lifetime_minutes=args.lifetime_minutes,
+            )
+            or 0
+        )
+    )
 
     status_parser = sub.add_parser(
         "status",
