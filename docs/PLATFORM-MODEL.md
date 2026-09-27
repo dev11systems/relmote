@@ -45,6 +45,22 @@ laptop
 └─ relmoted software node
 ```
 
+
+
+## Agent Host
+
+An **Agent Host** is optional compute that runs an agent or agent adapter away from the target while using only capabilities granted by the target Relmote node.
+
+Controller and Agent Host are separate roles. An iPad/browser may supervise a session while Kaonashi, Falkor, or another server performs agent compute.
+
+The Agent Host cannot manufacture target authority; it consumes scoped grants issued by the target/controller model.
+
+## Hub
+
+A future **Relmote Hub** is an optional self-hosted multi-node controller/orchestration layer.
+
+The Hub may organize targets, Agent Hosts, sessions, diagnostics, and permission requests, but it is not the root of trust. Nodes remain independently usable and enforce their own grants.
+
 ## Planner
 
 A planner is optional: human, deterministic automation, local AI, phone AI, self-hosted AI, or cloud AI.
