@@ -484,7 +484,15 @@ def make_handler(node: SoftwareNode, lan_access: TemporaryLANAccess | None = Non
                 return
             path = urlparse(self.path).path
             try:
-                if path == "/api/v1/terminal/request-local":
+                if path == "/api/v1/screen/request":
+                    if not runtime:
+                        raise ValueError("screen lifecycle requires shared runtime")
+                    session = runtime.request_screen(controller="web-controller")
+                    _json(self, HTTPStatus.CREATED, {
+                        "session_id": session.session_id,
+                        "state": session.state.value,
+                    })
+                elif path == "/api/v1/terminal/request-local":
                     if not runtime:
                         raise ValueError("terminal lifecycle requires shared runtime")
                     session = runtime.request_terminal(
