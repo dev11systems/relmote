@@ -104,7 +104,15 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
 
 <section id="agentAccess" class="card">
  <h2>Agent access</h2>
- <p class="muted">Create a scoped session for an external agent. The agent runs elsewhere; Relmote remains the target-side permission boundary.</p>
+ <p class="muted">Let an external agent connect privately while Relmote remains the target-side permission boundary.</p>
+ <div id="agentAccessState"><strong>Status:</strong> checking…</div>
+ <div style="margin:.7rem 0">
+  <button id="agentEnableButton" onclick="enableAgentAccess()">Enable Agent Access</button>
+  <button id="agentDisableButton" class="danger" onclick="disableAgentAccess()" style="display:none">Disable Agent Access</button>
+ </div>
+ <div id="agentGrantSetup">
+ <hr>
+ <strong>Grant a workspace</strong><br><br>
  <label for="agentWorkspace">Approved workspace</label>
  <input id="agentWorkspace" placeholder="/home/user/project" style="width:100%;font:inherit;padding:.65rem;background:#111;color:#fff;border:1px solid #777;border-radius:8px">
  <div style="margin:.7rem 0">
@@ -114,6 +122,7 @@ pre.raw{max-height:320px;overflow:auto;overscroll-behavior:contain;touch-action:
   <label><input type="checkbox" disabled> Modify files <span class="muted">(coming after read/exec validation)</span></label>
  </div>
  <button onclick="requestAgentAccess()">Create agent request</button>
+ </div>
  <div id="agentSessions"></div>
  <div id="agentCredential" class="card" style="display:none">
   <strong>Temporary agent credential</strong>
