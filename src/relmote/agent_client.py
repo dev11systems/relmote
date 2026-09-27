@@ -58,3 +58,22 @@ class RelmoteAgentClient:
             "/api/v1/agent/exec",
             {"argv": argv, "cwd": cwd, "timeout": timeout},
         )
+
+
+def pair(base_url: str, code: str, *, timeout: int = 15) -> dict:
+    data = json.dumps({"code": code}).encode()
+    request = urllib.request.Request(
+        base_url.rstrip("/") + "/api/v1/agent/pair",
+        data=data,
+        method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return json.loads(response.read())
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = json.loads(exc.read()).get("error", exc.reason)
+        except Exception:
+            detail = exc.reason
+        raise PermissionError(f"Relmote pairing failed: {detail}") from exc
