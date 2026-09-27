@@ -18,6 +18,7 @@ This document is the canonical high-level implementation-status snapshot. Detail
 - Cross-machine Agent Host pairing and paired-target status/list/read/allowlisted-exec operations.
 - Target-side Agent revocation invalidating already-paired Agent Host credentials.
 - Agent Host capability discovery.
+- Local stdio MCP/Codex Agent Host adapter with explicit Agent Host/Target role semantics, read-only target access, constrained execution, structured denial reasons, and target-side revocation enforcement exercised through a real Codex client.
 - Target-home workspace defaults, scope warnings, and home-confined path suggestions.
 
 ## Implemented, actively experimental
@@ -26,7 +27,6 @@ This document is the canonical high-level implementation-status snapshot. Detail
 - Wayland ScreenCast portal integration.
 - Screen-provider discovery/selection architecture.
 - Browser Agent Access UI and modular JavaScript migration.
-- Local stdio MCP/Codex Agent Host adapter exposing paired-target status/list/read and constrained exec operations; real Codex validation is pending.
 
 These paths are under active real-machine validation and may change between development snapshots.
 

@@ -163,8 +163,8 @@ The repository-wide documentation reconciliation has landed. The next gate is re
 - [x] Update current-status claims from observed validation evidence.
 - [x] Cut the next coherent development snapshot if warranted.
 - [x] Implement the first MCP/Codex adapter on top of the paired-target service.
-- [ ] Connect a real Codex instance to the local MCP adapter.
-- [ ] Re-run read/exec/revocation boundaries through Codex itself.
+- [x] Connect a real Codex instance to the local MCP adapter.
+- [x] Re-run read/exec/revocation boundaries through Codex itself.
 
 The MCP adapter should not precede the baseline authority/revocation validation. It must not broaden target capabilities or expose profile bearer material.
 

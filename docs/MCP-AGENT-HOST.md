@@ -144,4 +144,4 @@ The first real Codex test should repeat the already-validated CLI boundary:
 9. A subsequent Codex tool call fails.
 10. Disabling Agent Access removes target reachability.
 
-Do not promote the MCP/Codex adapter to exercised status until this is observed on a real Agent Host.
+A redacted real-machine PASS is recorded in [validation/MCP-CODEX-BASELINE-2026-09-27.md](validation/MCP-CODEX-BASELINE-2026-09-27.md).
