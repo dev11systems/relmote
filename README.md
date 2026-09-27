@@ -1,154 +1,173 @@
 # Relmote
 
-**A user-controlled interface layer for safely connecting people and agents to computing systems.**
+**A user-controlled interface layer for observing, supporting, and operating authorized computing systems.**
 
-Relmote is an experimental open platform for authorized remote support, diagnostics, agent access, and physical/digital computer interfaces. A Relmote node can be software running on a computer, dedicated hardware attached to one, or a hybrid of both.
+Relmote is an experimental open platform spanning software and hardware. It provides a common model for identity, capabilities, sessions, approvals, evidence, and transports so a person or authorized agent can work with a computer without treating connectivity as blanket permission.
 
-The shared idea is simple: **connectivity is not authority**. Relmote keeps target identity, capabilities, approvals, active sessions, revocation, and evidence visible regardless of how a controller reaches a machine.
+Relmote can exist as software on the target, as separate hardware, or as a hybrid of both. The durable idea is the authority-aware interface layer—not one particular remote-desktop protocol, AI agent, transport, or enclosure.
 
-## What can Relmote do today?
+## What works today
 
-The Linux-first software preview currently supports passive diagnostics, a CLI/TUI and private browser controller, explicit Remote Support availability, a normal-user browser terminal, and scoped Agent sessions for listing/reading approved workspaces and running allowlisted commands.
+The active preview is Linux-first and software-first. Current exercised capabilities include:
 
-Agent Access is actively being developed around private transport, one-time pairing, and independent Agent Hosts. Wayland screen observation is also under active development: Relmote can discover relevant portal/provider capabilities, but browser screen streaming and graphical control are **not yet complete**.
+- local diagnostics, observations, and support reports;
+- CLI/TUI and a private browser controller;
+- explicit Remote Support enable/disable state;
+- normal-user browser terminal sessions with request/approval/revocation;
+- scoped Agent sessions with list/read/allowlisted-exec capabilities;
+- workspace confinement, scope warnings, revocation, and single-use pairing codes;
+- repository install/update previews;
+- Wayland/portal and screen-provider discovery foundations.
 
-See **[Current status](docs/STATUS.md)** for the canonical implemented / experimental / planned matrix.
+Screen streaming/control, cross-machine Agent Host workflows, Codex/MCP integration, richer file operations, the self-hosted Hub, cross-platform parity, and hardware validation are still in progress.
 
-## The four roles
+See **[Current status](docs/STATUS.md)** for the authoritative implemented / experimental / planned matrix.
 
-Relmote separates roles that are often collapsed into one machine:
+## Core roles
+
+Relmote separates roles that are often collapsed into one remote-access application:
 
 ```text
-       Controller
-   (browser / iPad / CLI)
-            │
-            ▼
-     optional Relmote Hub
-            │
-       Agent Host
- (Kaonashi, Falkor, server)
-            │
-            ▼
-       Relmote Target
-   (software or hardware node)
+             Controller
+          human-facing UI
+        (iPad / browser / CLI)
+                 │
+                 ▼
+          optional Agent Host
+       agent compute / adapters
+       (Kaonashi, Falkor, etc.)
+                 │
+                 ▼
+          Relmote Target / Node
+       authority + capabilities
+                 │
+                 ▼
+        authorized computing system
 ```
 
-- **Controller** — the human-facing interface used to inspect, approve, revoke, and direct work.
-- **Target / Node** — the computer or device being supported. It remains the authority boundary for its capabilities.
-- **Agent Host** — optional compute that runs Codex or another agent elsewhere while using only the capabilities the target granted.
-- **Hub** — a planned optional self-hosted multi-node console. It coordinates; it does not become the root of trust.
+- **Controller** — where a person observes state, grants/revokes authority, and initiates work.
+- **Agent Host** — optional compute host for Codex or another agent; it receives only capabilities granted by the target.
+- **Target / Node** — the Relmote authority boundary associated with the system being supported.
+- **Hub** — planned optional self-hosted orchestration for many nodes and Agent Hosts; not the root of trust.
 
-These roles can be on different devices. For example: an iPad can be the controller, an always-on home server the Agent Host, and a family member's computer the target.
-
-## Software and hardware are one platform
-
-Relmote is both software and hardware; neither is a secondary edition.
-
-**Software Relmote** can run on an existing machine, VM, recovery environment, or other supported host. It can provide diagnostics, terminal/workspace access, agent sessions, and OS-native interaction paths.
-
-**Hardware Relmote** carries the same identity/session/capability model outside the target OS. Hardware can eventually add USB HID, serial, KVM/video, pre-boot/recovery access, portable networking, physical authorization/STOP controls, and modular I/O.
-
-Hybrid use is first-class: software and hardware nodes may cooperate.
+These are roles, not fixed devices. One machine may fill several roles, and an Agent Host can move from one machine to another without silently changing target authority.
 
 ## Authority model
 
 Relmote is designed around a few durable rules:
 
-- **Human authority first.** A reachable machine is not automatically an authorized machine.
-- **Explicit capabilities.** Observe, terminal, workspace read/write, screen view/control, and other powers are separate grants.
-- **Revocation matters.** Stopping support or revoking a session should invalidate its authority immediately.
-- **Visible operation.** Active sessions, target identity, requested capabilities, and meaningful actions should be inspectable.
-- **Least-invasive useful path.** Prefer a structured/native interface over emulating a keyboard when an authorized richer path exists.
-- **No silent privilege escalation.** Administrative/elevated authority must be explicit.
-- **Local/private operation where practical.** Cloud services are optional rather than fundamental to the architecture.
+- **Connectivity does not imply permission.**
+- **Human authority first.** Sensitive capabilities are explicit and revocable.
+- **Observe and control are separate.** Viewing a screen must not automatically grant input control.
+- **No silent privilege escalation.** Elevated actions require an appropriate grant.
+- **Visible operation.** Active sessions, target identity, capabilities, and important actions should be inspectable.
+- **Fail closed.** Ambiguous identity, lost authorization, or unknown actions should stop rather than guess.
+- **Least-invasive useful path.** Prefer an authorized structured interface over pretending to be a keyboard or bypassing platform security.
+- **Local-first where practical.** Cloud services and AI are optional components, not foundational authority.
 
-See [Trust and permissions](docs/TRUST.md), [Capabilities](docs/CAPABILITIES.md), and [Sessions](docs/SESSIONS.md).
+## Software and hardware are peers
 
-## Try the Linux development preview
+```text
+                    RELMOTE
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+     SOFTWARE NODE             HARDWARE NODE
+ installed / temporary      Pocket / modular / KVM
+ recovery / VM / target     HID / serial / pre-boot
+          │                         │
+          └────────────┬────────────┘
+                       │
+          shared identity / policy
+          sessions / capabilities
+             transports / evidence
+```
 
-The easiest current repository install uses `pipx`:
+A software node can provide diagnostics, terminal/workspace access, Agent Bridge capabilities, and eventually screen support without separate hardware.
+
+Hardware extends the same model to cases software cannot cover well: firmware/boot access, USB HID, serial, isolated physical controls, video/KVM, portable networking, and systems where installing software is impossible or undesirable.
+
+## Quick start: Linux development preview
+
+Relmote is changing rapidly. `pipx` is the recommended repository-preview install path:
 
 ```bash
 pipx install 'relmote[screen-linux] @ git+https://github.com/dev11systems/relmote.git'
 relmote
 ```
 
-Update the preview:
+Update the installed preview:
 
 ```bash
 relmote update
-```
-
-Check exactly what is installed:
-
-```bash
 relmote version
 ```
 
-Relmote development snapshots use a human-readable revision such as `0.1.0-dev.11` plus an exact source build hash.
+The browser URL printed by Relmote is the human controller. Remote/private exposure is explicit; Relmote should not silently publish a controller or Agent API to the public Internet.
 
-See [Install from repository](docs/INSTALL-FROM-REPO.md) and [Updates](docs/UPDATES.md) for details.
+See [Install from the repository](docs/INSTALL-FROM-REPO.md) and [Linux preview](docs/LINUX-PREVIEW.md) for details.
 
-## Agent Access preview
+## Agent access
 
-Relmote's Agent Bridge is designed so an agent does **not** need to be installed on the target computer.
+Relmote's Agent Bridge lets an agent running elsewhere work against a narrowly approved target scope without installing the agent runtime or its credentials on the target.
+
+A representative deployment is:
 
 ```text
-iPad / browser
-   Controller
-       │
-       ▼
-Kaonashi / Falkor
-   Agent Host
-       │ scoped Relmote grant
-       ▼
-    Target PC
+iPad / browser          Kaonashi                 russ-pc
+   Controller   ───►    Agent Host    ───►    Relmote Target
+ approvals/revoke      Codex/MCP later         scoped authority
 ```
 
-The target chooses an approved workspace and capabilities. Pairing uses a short-lived one-time code; the Agent Host receives only the authority contained in that target grant. Revocation remains target-controlled.
+Agent workspace list/read/execute permissions are separate grants. Pairing uses short-lived, single-use codes; revocation remains target-controlled. The current cross-machine Agent Host workflow is experimental.
 
 See [Agent Bridge](docs/AGENT-BRIDGE.md) and [Agent Host](docs/AGENT-HOST.md).
 
-## Screen access
+## Screen support
 
-Screen access is modeled as a capability with interchangeable providers rather than one hard-coded implementation. Potential providers include Wayland portal/PipeWire, GNOME Remote Desktop/RDP, VNC, X11-native paths, VM consoles, and future hardware KVM.
+Relmote treats screen access as a capability with interchangeable providers rather than hardcoding one remote-desktop implementation. Current Linux work includes Wayland portal/PipeWire, GNOME remote-desktop discovery, VNC/X11 possibilities, and future hardware KVM.
 
-`screen.observe` and `screen.control` are separate authorities. Observation should not silently alter the target's physical display topology.
+`screen.observe` and `screen.control` are intentionally separate. Screen observation should not silently alter physical display topology.
 
 See [Screen providers](docs/SCREEN-PROVIDERS.md).
 
-## Hardware direction
+## Transports
 
-Hardware concepts include Mini, Pocket, All-in-One, modular/DIY forms, USB HID/serial/networking, KVM/video, portable power, and physical safety controls. These are retained as a first-class track, but hardware maturity varies by component and should not be inferred from the software preview's status.
+Controller transports and target/system transports are independent. Depending on deployment, Relmote may use private IP networking, Tailscale, SSH, RDP/VNC, serial, USB networking, HID, BLE, KVM/video, or future constrained transports.
 
-See [Hardware strategy](docs/HARDWARE.md) and [Hardware architecture](hardware/architecture/README.md).
+Transport availability does not create capability authority. See [Transport model](docs/TRANSPORTS.md).
 
-## Project status
+## Project direction
 
-Relmote is an **active early prototype**. Some software paths are already useful for real-machine testing; Agent Host pairing, screen support, broader file/workspace operations, cross-platform adapters, the Hub, and physical hardware validation remain active work.
+Near-term work centers on:
 
-Do not infer availability from an architecture document alone. Use [Current status](docs/STATUS.md) for the current implementation snapshot.
+1. hardening the Linux software preview and browser UX;
+2. completing screen observation, then separately authorized graphical control;
+3. proving multi-machine Agent Host pairing and adding a Codex/MCP adapter;
+4. richer scoped file/workspace operations;
+5. an optional self-hosted multi-node Relmote Hub;
+6. continuing physical hardware validation using the same authority/session model.
+
+See [Roadmap](docs/ROADMAP.md).
 
 ## Documentation
 
-Start with the **[documentation map](docs/README.md)** rather than an undifferentiated list of every design note.
+Start with:
 
-Key documents:
-
-- [Current status](docs/STATUS.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Platform model](docs/PLATFORM-MODEL.md)
-- [Agent Bridge](docs/AGENT-BRIDGE.md)
-- [Agent Host](docs/AGENT-HOST.md)
-- [Remote-support UX](docs/REMOTE-SUPPORT-UX.md)
-- [Screen providers](docs/SCREEN-PROVIDERS.md)
-- [Hardware strategy](docs/HARDWARE.md)
+- [Current status](docs/STATUS.md) — what is implemented, experimental, and planned.
+- [Documentation map](docs/DOCS.md) — canonical deep dives and historical/validation docs.
+- [Architecture](docs/ARCHITECTURE.md) — shared platform architecture.
+- [Trust and permissions](docs/TRUST.md) — authority model.
+- [Capabilities](docs/CAPABILITIES.md) — capability vocabulary.
+- [Hardware strategy](docs/HARDWARE.md) — hardware/software relationship.
+- [Roadmap](docs/ROADMAP.md) — where the project is going.
 
 ## Name
 
 **Relmote** combines *relay*, *remote*, and *mote* (a small networked node).
 
-## Intended use
+## Safety and intended use
 
-Relmote is intended for systems the operator owns or is authorized to administer. The project explicitly avoids stealth operation, hidden persistence, and silent privilege escalation.
+Relmote is intended only for systems the operator owns or is authorized to administer. The project explicitly rejects stealth operation, silent privilege escalation, and hidden persistence.
+
+Relmote is an early prototype. Current behavior and interfaces can change between development snapshots.
