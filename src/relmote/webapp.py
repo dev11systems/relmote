@@ -538,7 +538,6 @@ request('/api/v1/project').then(p=>{
  changelogTextEl.textContent=p.changelog;
 }).catch(()=>{});
 
-refreshAgentAccess().catch(()=>{});
 refresh().catch(e=>{
  startupErrorEl.style.display='block';
  startupErrorEl.textContent='Relmote could not load runtime data: '+e.message;
