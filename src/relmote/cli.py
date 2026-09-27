@@ -391,6 +391,45 @@ def build_parser() -> argparse.ArgumentParser:
         return 0
     agent_pair_cmd.set_defaults(func=run_agent_pair)
 
+    agent_use = agent_sub.add_parser(
+        "use",
+        help="operate on a previously paired Relmote target",
+    )
+    agent_use.add_argument("target", help="paired target profile name")
+    use_sub = agent_use.add_subparsers(dest="use_command", required=True)
+    use_sub.add_parser("status")
+    use_list = use_sub.add_parser("list")
+    use_list.add_argument("path", nargs="?", default=".")
+    use_read = use_sub.add_parser("read")
+    use_read.add_argument("path")
+    use_exec = use_sub.add_parser("exec")
+    use_exec.add_argument("tool", choices=("git", "pytest"))
+    use_exec.add_argument("tool_args", nargs="*")
+
+    def run_agent_use(args):
+        profile = load_profile(args.target)
+        client = RelmoteAgentClient(profile["base_url"], profile["token"])
+        if args.use_command == "status":
+            print(__import__("json").dumps(client.session(), indent=2))
+            return 0
+        if args.use_command == "list":
+            print(__import__("json").dumps(client.list(args.path), indent=2))
+            return 0
+        if args.use_command == "read":
+            print(client.read(args.path), end="")
+            return 0
+        if args.use_command == "exec":
+            result = client.exec([args.tool, *args.tool_args])
+            if result.get("stdout"):
+                print(result["stdout"], end="")
+            if result.get("stderr"):
+                print(result["stderr"], end="", file=__import__("sys").stderr)
+            return int(result.get("returncode", 1))
+        raise ValueError("unknown paired-target command")
+
+    for use_parser in use_sub.choices.values():
+        use_parser.set_defaults(func=run_agent_use)
+
     agent_targets = agent_sub.add_parser(
         "targets",
         help="list locally paired Relmote targets",
