@@ -3,6 +3,7 @@ from __future__ import annotations
 from .agent_controller import approve, create_request, revoke
 from .runtime import RelmoteRuntime
 from .agent_access_service import AgentAccessService
+from .path_suggest import suggest_directories
 
 
 PREFIX = "/api/v1/controller/agent"
@@ -13,6 +14,9 @@ def handle(runtime: RelmoteRuntime, path: str, payload: dict) -> tuple[int, dict
 
     if path == f"{PREFIX}/status":
         return 200, access.status()
+    if path == f"{PREFIX}/suggest":
+        query = str(payload.get("query", ""))
+        return 200, {"suggestions": suggest_directories(query)}
     if path == f"{PREFIX}/enable":
         return 200, access.enable_transport()
     if path == f"{PREFIX}/disable":
