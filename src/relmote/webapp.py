@@ -388,9 +388,9 @@ async function requestAgentAccess(){
 async function agentAction(action,id){
  try{
    const value=await requestBody('/api/v1/controller/agent/'+encodeURIComponent(id)+'/'+action,'POST',{});
-   if(action==='approve'&&value.token){
-     agentTokenEl.value=value.token;
-     agentCredentialEl.style.display='block';
+   if(action==='approve'){
+     agentCredentialEl.style.display='none';
+     agentTokenEl.value='';
    }
    await refresh();
  }catch(e){showStatus('Agent action failed: '+e.message,true)}
