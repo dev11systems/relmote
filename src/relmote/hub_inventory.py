@@ -97,6 +97,30 @@ class HubInventory:
             "recommended_action": "review live Target status",
         }
 
+    @staticmethod
+    def _build_relation(
+        local_build: dict[str, Any],
+        target_build: dict[str, Any] | None,
+    ) -> str:
+        if not isinstance(target_build, dict):
+            return "unknown"
+        local_commit = str(local_build.get("commit") or "unknown")
+        target_commit = str(target_build.get("commit") or "unknown")
+        local_version = str(local_build.get("display_version") or "")
+        target_version = str(target_build.get("display_version") or "")
+
+        if (
+            local_commit != "unknown"
+            and target_commit != "unknown"
+            and local_commit == target_commit
+        ):
+            return "same_build"
+        if local_version and target_version and local_version == target_version:
+            return "different_build_same_snapshot"
+        if local_version and target_version and local_version != target_version:
+            return "different_version"
+        return "unknown"
+
     def snapshot(self, *, live: bool = False) -> dict[str, Any]:
         host = self._host_factory()
         build = self._build_factory()
@@ -107,7 +131,7 @@ class HubInventory:
             item["role"] = "paired_target"
             if live:
                 try:
-                    status = self._paired_targets.status(str(item["name"]))
+                    info = self._paired_targets.info(str(item["name"]))
                 except (
                     PermissionError,
                     ConnectionError,
@@ -117,13 +141,19 @@ class HubInventory:
                 ) as exc:
                     item["live"] = self._live_error(exc)
                 else:
-                    state = status.get("state")
+                    session = info.get("session") or {}
+                    state = session.get("state")
+                    target_build = info.get("relmote") or {}
                     item["live"] = {
                         "reachable": True,
                         "authority": "active" if state == "active" else "inactive",
                         "state": state,
-                        "workspace": status.get("workspace"),
-                        "capabilities": list(status.get("capabilities") or []),
+                        "workspace": session.get("workspace"),
+                        "capabilities": list(session.get("capabilities") or []),
+                        "target": info.get("target") or {},
+                        "platform": info.get("platform") or {},
+                        "relmote": target_build,
+                        "build_relation": self._build_relation(build, target_build),
                     }
                 item["current"] = self._reconcile_live(item["live"])
             targets.append(item)
@@ -135,6 +165,7 @@ class HubInventory:
             "unreachable": 0,
             "revoked": 0,
             "stale_credential": 0,
+            "build_drift": 0,
         }
         if live:
             for item in targets:
@@ -144,6 +175,9 @@ class HubInventory:
                     summary["attention"] += 1
                 if health in summary:
                     summary[health] += 1
+                relation = (item.get("live") or {}).get("build_relation")
+                if relation in {"different_build_same_snapshot", "different_version"}:
+                    summary["build_drift"] += 1
 
         return {
             "hub": {

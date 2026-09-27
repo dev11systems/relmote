@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import platform
+
 from .agent_executor import list_path, read_text, run_command
 from .runtime import RelmoteRuntime
+from .version import build_info
 
 
 def bearer_token(headers) -> str:
@@ -18,6 +21,19 @@ def handle_get(runtime: RelmoteRuntime, headers, path: str) -> dict:
     grant = runtime.agent_by_token(bearer_token(headers))
     if path == "/api/v1/agent/session":
         return grant.public()
+    if path == "/api/v1/agent/info":
+        return {
+            "role": "target",
+            "target": {
+                "name": runtime.node.identity.display_name,
+            },
+            "platform": {
+                "system": platform.system().lower(),
+                "architecture": platform.machine(),
+            },
+            "relmote": build_info(),
+            "session": grant.public(),
+        }
     raise KeyError("unknown agent GET endpoint")
 
 

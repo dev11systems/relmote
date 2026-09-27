@@ -23,7 +23,7 @@ This document is the canonical high-level implementation-status snapshot. Detail
 
 ## Implemented, actively experimental
 
-- First Hub MVP slice: credential-blind local Agent Host/paired-target inventory with live reachability/authority probes, cached-vs-current state reconciliation, non-destructive attention guidance, and a read-only localhost/Tailscale web dashboard.
+- First Hub MVP slice: credential-blind local Agent Host/paired-target inventory with live reachability/authority probes, cached-vs-current state reconciliation, non-destructive attention guidance, exact live Target build metadata/build drift, and a read-only localhost/Tailscale web dashboard.
 
 - Cross-platform/private-transport portability beyond the exercised Linux direct-Tailscale path.
 - Wayland ScreenCast portal integration.

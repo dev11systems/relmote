@@ -121,6 +121,8 @@ Potential scope:
 - [x] credential-blind local Agent Host and paired-target inventory;
 - [x] optional live paired-target reachability/authority probes;
 - [x] read-only local/private Hub web dashboard;
+- [x] exact live Target version/build metadata and conservative build-drift reporting;
+- [ ] authoritative update-availability checks against the configured source/channel;
 - support a co-located Hub + Agent Host deployment as a first-class self-hosted topology;
 - discover and organize software and hardware Relmote nodes;
 - show node identity, availability, target, transport/path, and capability status;

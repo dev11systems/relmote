@@ -94,6 +94,17 @@ function targetCard(item){
     const reach=live.reachable===true?'reachable':(live.reachable===false?'unreachable':'unknown');
     html+='<p><span class="muted">Live:</span> '+esc(reach)+' · '+esc(live.authority||'unknown')+'</p>';
     if(live.state) html+='<p><span class="muted">Live state:</span> '+esc(live.state)+'</p>';
+    const targetMeta=live.target||{};
+    const platformMeta=live.platform||{};
+    const relmoteMeta=live.relmote||{};
+    if(targetMeta.name) html+='<p><span class="muted">Target node:</span> '+esc(targetMeta.name)+'</p>';
+    if(platformMeta.system||platformMeta.architecture){
+      html+='<p><span class="muted">Target platform:</span> '+esc(platformMeta.system||'?')+' / '+esc(platformMeta.architecture||'?')+'</p>';
+    }
+    if(relmoteMeta.display_version){
+      html+='<p><span class="muted">Target Relmote:</span> '+esc(relmoteMeta.display_version)+' <span class="muted">(build '+esc(relmoteMeta.short_commit||'?')+')</span></p>';
+      html+='<p><span class="muted">Build relation:</span> '+esc(live.build_relation||'unknown')+'</p>';
+    }
     if(live.detail) html+='<p><span class="muted">Detail:</span> '+esc(live.detail)+'</p>';
   }
   if(current.recommended_action){
@@ -117,7 +128,8 @@ async function refreshHub(){
       metric('need attention',s.attention||0)+
       metric('revoked',s.revoked||0)+
       metric('stale credentials',s.stale_credential||0)+
-      metric('unreachable',s.unreachable||0);
+      metric('unreachable',s.unreachable||0)+
+      metric('build drift',s.build_drift||0);
     const h=value.agent_host||{};
     const b=h.relmote||{};
     document.getElementById('host').innerHTML=

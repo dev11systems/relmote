@@ -3,10 +3,12 @@ from relmote.hub_inventory import HubInventory
 
 
 class FakePairedTargets:
-    def __init__(self, *, status_result=None, status_error=None):
+    def __init__(self, *, status_result=None, status_error=None, info_result=None):
         self.status_result = status_result
         self.status_error = status_error
+        self.info_result = info_result
         self.status_calls = []
+        self.info_calls = []
 
     def targets(self):
         return [
@@ -26,6 +28,27 @@ class FakePairedTargets:
             "state": "active",
             "workspace": "/workspace",
             "capabilities": ["workspace.list", "workspace.read"],
+        }
+
+    def info(self, target):
+        self.info_calls.append(target)
+        if self.status_error is not None:
+            raise self.status_error
+        return self.info_result or {
+            "role": "target",
+            "target": {"name": "target-node-a"},
+            "platform": {"system": "linux", "architecture": "x86_64"},
+            "relmote": {
+                "display_version": "0.1.0-dev.12",
+                "commit": "abcdef1234567890",
+                "short_commit": "abcdef12",
+                "channel": "repository",
+            },
+            "session": self.status_result or {
+                "state": "active",
+                "workspace": "/workspace",
+                "capabilities": ["workspace.list", "workspace.read"],
+            },
         }
 
 
@@ -79,7 +102,8 @@ def test_hub_live_inventory_reports_active_target():
     ).snapshot(live=True)
 
     live = snapshot["paired_targets"][0]["live"]
-    assert service.status_calls == ["target-a"]
+    assert service.info_calls == ["target-a"]
+    assert service.status_calls == []
     assert live["reachable"] is True
     assert live["authority"] == "active"
     assert live["state"] == "active"
@@ -168,3 +192,47 @@ def test_hub_summary_counts_active_and_unreachable_targets():
     assert unreachable["summary"]["unreachable"] == 1
     assert unreachable["summary"]["attention"] == 1
     assert unreachable["paired_targets"][0]["current"]["health"] == "unreachable"
+
+
+def test_hub_live_inventory_reports_target_build_and_relation():
+    same = HubInventory(
+        paired_targets=FakePairedTargets(),
+        host_factory=fake_host,
+        build_factory=fake_build,
+    ).snapshot(live=True)
+
+    live = same["paired_targets"][0]["live"]
+    assert live["target"]["name"] == "target-node-a"
+    assert live["platform"] == {"system": "linux", "architecture": "x86_64"}
+    assert live["relmote"]["short_commit"] == "abcdef12"
+    assert live["build_relation"] == "same_build"
+    assert same["summary"]["build_drift"] == 0
+
+    drift = HubInventory(
+        paired_targets=FakePairedTargets(
+            info_result={
+                "role": "target",
+                "target": {"name": "target-node-a"},
+                "platform": {"system": "linux", "architecture": "x86_64"},
+                "relmote": {
+                    "display_version": "0.1.0-dev.12",
+                    "commit": "9999999999999999",
+                    "short_commit": "99999999",
+                    "channel": "repository",
+                },
+                "session": {
+                    "state": "active",
+                    "workspace": "/workspace",
+                    "capabilities": ["workspace.list"],
+                },
+            }
+        ),
+        host_factory=fake_host,
+        build_factory=fake_build,
+    ).snapshot(live=True)
+
+    assert (
+        drift["paired_targets"][0]["live"]["build_relation"]
+        == "different_build_same_snapshot"
+    )
+    assert drift["summary"]["build_drift"] == 1
