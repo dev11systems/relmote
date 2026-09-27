@@ -268,6 +268,9 @@ async function refresh(){
    return '<div class="card"><strong>Screen · '+esc(s.state)+'</strong><br>'+
      'Controller: '+esc(s.controller)+'<br>Authority: '+esc(s.authority)+'<br>'+actions+'</div>';
  }).join('') : '';
+ if(screenItems.some(s=>s.state==='os-consent')){
+   setTimeout(()=>refresh().catch(()=>{}),1000);
+ }
  const terminalItems=d.terminal_sessions||[];
  terminalSessionsEl.innerHTML=terminalItems.length ? terminalItems.map(t=>{
    let actions='';
