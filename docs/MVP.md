@@ -1,5 +1,7 @@
 # Relmote MVP and build sequence
 
+> **Historical build-sequence note:** this document records the software-first milestone sequence that helped bootstrap the current preview. It is no longer the canonical current-status tracker. See [STATUS.md](STATUS.md) and [ROADMAP.md](ROADMAP.md) for current state and priorities.
+
 Relmote's **first deployable implementation is software-first**.
 
 The hardware track remains important, but Pocket should prove why physical Relmote is useful rather than be required before anyone can use the platform.
@@ -29,7 +31,7 @@ A user can:
 - remote-access/pairing architecture;
 - hardware/HID prototype code.
 
-## S1 — ephemeral local Agent ← CURRENT PRIMARY MILESTONE
+## S1 — ephemeral local Agent — achieved baseline
 
 Run:
 
@@ -144,8 +146,10 @@ Hardware node discovers software Agent on the target and upgrades the same task 
 - mesh/store-and-forward;
 - additional native management plugins.
 
-## Immediate milestone
+## Current relationship to the project
 
-> **S1: run Relmote temporarily on an ordinary computer and use it locally from a browser without installing target-specific remote-control software or requiring a cloud account.**
+The S1/S2 baseline has been surpassed by the active Linux preview. Current work includes remote-support sessions, Agent Access/Agent Host pairing, screen-provider integration, richer workspace operations, and continued hardware validation.
 
-Hardware work continues as a parallel track rather than the gate to first deployment.
+Hardware work continues as a parallel track rather than the gate to software deployment.
+
+See [STATUS.md](STATUS.md) for what is actually implemented now.
