@@ -77,6 +77,10 @@ This page is the navigation map for Relmote documentation. The root README is th
 - `docs/CAPABILITY-MAP.md` — capability placement/mapping.
 - `docs/FEATURE-PLACEMENT.md` — where features belong in the architecture.
 
+## Research proposals (not adopted specifications)
+
+- [Coherent Relmote vNext](proposals/COHERENT-RELMOTE-VNEXT.md) — docs-only comparison of existing modular/safety/power architecture with proposed recovery, low-tech access, satellite, and energy-adaptive profiles. **Research input for review**; implementation status and accepted decisions remain in their canonical documents.
+
 ## Historical / validation-oriented material
 
 Documents such as `docs/MVP.md`, `docs/FIRST-TEST.md`, `docs/SOFTWARE-PREVIEW-TEST.md`, and `docs/REMOTE-WORKSPACE-TEST.md` capture build/test sequences and may describe an earlier project state. They remain useful evidence and test guidance, but `README.md`, `STATUS.md`, and `ROADMAP.md` take precedence for current product/status claims.
